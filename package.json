@@ -1,0 +1,29 @@
+{
+  "name": "modbot",
+  "version": "1.0.0",
+  "description": "Discord bot for server moderation purposes",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zajrik/modbot.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "yamdbf",
+    "node",
+    "modbot"
+  ],
+  "author": "Zackary Campbell <zajrik@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zajrik/modbot/issues"
+  },
+  "homepage": "https://github.com/zajrik/modbot#readme",
+  "dependencies": {
+    "yamdbf": "^2.0.13"
+  }
+}
