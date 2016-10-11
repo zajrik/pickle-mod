@@ -1,6 +1,8 @@
 const Bot = require('yamdbf').Bot;
 const config = require('./config.json');
 const path = require('path');
+const ModActions = require('./lib/ModActions').default;
+
 const bot = new Bot({
     name: 'YAMDBF Mod',
     token: config.token,
@@ -19,3 +21,9 @@ const bot = new Bot({
 }).start();
 
 bot.setDefaultSetting('prefix', '?');
+bot.mod = new ModActions(bot);
+
+bot.on('ready', () =>
+{
+    bot.mod.updateGuilds();
+})
