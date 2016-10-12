@@ -8,7 +8,7 @@ exports.default = class Mute extends Command
 			name: 'mute',
 			aliases: [],
 			description: 'Mute a user',
-			usage: '<prefix>mute <@user>',
+			usage: '<prefix>mute <@user> <reason>',
 			extraHelp: '',
 			group: 'mod',
 			guildOnly: true,
@@ -21,8 +21,16 @@ exports.default = class Mute extends Command
 	{
 		if (!mentions[0]) return false;
 		let user = mentions[0];
-		let duration;
-		if (!isNaN(args[0])) duration = args.shift();
+		let duration, p; // eslint-disable-line
+		if (/^\d+[m|h|d]$/.test(args[0]))
+		{
+			p = args.shift().match(/^(\d+)(m|h|d)$/);
+			p[1] = parseFloat(p[1]);
+			duration = p[2] === 'm'
+				? p[1] * 1000 * 60 : p[2] === 'h'
+				? p[1] * 1000 * 60 * 60 : p[2] === 'd'
+				? p[1] * 1000 * 60 * 60 * 24 : null;
+		}
 		let reason = args.join(' ');
 		if (!reason) return message.channel.sendMessage('You must provide a reason to mute that user.');
 		if (message.guild.members.get(user.id).roles.find('name', 'Muted'))
@@ -38,7 +46,7 @@ exports.default = class Mute extends Command
 					'Mute',
 					reason,
 					message.author,
-					duration))
+					p[0]))
 			.then(() =>
 			{
 				let storage = this.bot.storage;
@@ -46,12 +54,14 @@ exports.default = class Mute extends Command
 				if (!activeMutes) activeMutes = {};
 				activeMutes[user.id] = {
 					user: user.id,
+					raw: `${user.username}#${user.discriminator}`,
 					timestamp: Date.parse(message.timestamp),
 					duration: duration,
 					guild: message.guild.id
 				};
+				while(storage.getItem('checkingMutes')) {} // eslint-disable-line
 				storage.setItem('activeMutes', activeMutes);
-				console.log(`Muted user '${user.id}'`);
+				console.log(`Muted user '${user.username}#${user.discriminator}'`);
 			})
 			.catch(console.log);
 	}

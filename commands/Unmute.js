@@ -27,7 +27,15 @@ exports.default = class Unmute extends Command
 			return;
 		}
 		this.bot.mod.unmute(user, message.guild)
-			.then(member => console.log(`Unmuted ${member.user.username}#${member.user.discriminator}`))
+			.then(member =>
+			{
+				while(storage.getItem('checkingMutes')) {} // eslint-disable-line
+				let storage = this.bot.storage;
+				let activeMutes = storage.getItem('activeMutes');
+				delete activeMutes[member.user.id];
+				storage.setItem('activeMutes', activeMutes);
+				console.log(`Unmuted ${member.user.username}#${member.user.discriminator}`);
+			})
 			.catch(console.log);
 	}
 };

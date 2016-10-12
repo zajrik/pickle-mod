@@ -8,7 +8,7 @@ exports.default = class Warn extends Command
 			name: 'warn',
 			aliases: [],
 			description: 'Give a formal warning to a user',
-			usage: '<prefix>warn <@user>',
+			usage: '<prefix>warn <@user> <reason>',
 			extraHelp: '',
 			group: 'mod',
 			guildOnly: true,
