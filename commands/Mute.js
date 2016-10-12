@@ -43,17 +43,15 @@ exports.default = class Mute extends Command
 			{
 				let storage = this.bot.storage;
 				let activeMutes = storage.getItem('activeMutes');
-				if (!activeMutes) activeMutes = new Map([['mutes', 'placeholder']]);
-				else activeMutes = new Map(activeMutes);
-				console.log(activeMutes);
-				activeMutes.set(user.id, {
+				if (!activeMutes) activeMutes = {};
+				activeMutes[user.id] = {
 					user: user.id,
 					timestamp: Date.parse(message.timestamp),
 					duration: duration,
 					guild: message.guild.id
-				});
+				};
 				storage.setItem('activeMutes', activeMutes);
-				console.log('Updated active mutes');
+				console.log(`Muted user '${user.id}'`);
 			})
 			.catch(console.log);
 	}
