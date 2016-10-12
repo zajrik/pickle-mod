@@ -19,21 +19,42 @@ exports.default = class Mute extends Command
 
 	action(message, args, mentions, original) // eslint-disable-line no-unused-vars
 	{
-		if (!mentions[0]) return;
+		if (!mentions[0]) return false;
 		let user = mentions[0];
+		let duration;
+		if (!isNaN(args[0])) duration = args.shift();
 		let reason = args.join(' ');
-		if (!reason)
-		{
-			console.log('Mute aborted, no reason given');
-			return;
-		}
+		if (!reason) return message.channel.sendMessage('You must provide a reason to mute that user.');
 		if (message.guild.members.get(user.id).roles.find('name', 'Muted'))
 		{
-			console.log(`User ${user.username}#${user.discriminator} is already muted.`);
-			return;
+			return message.channel.sendMessage(
+				`User ${user.username}#${user.discriminator} is already muted.`);
 		}
-		this.bot.mod.mute(user, message.guild)
-			.then(member => console.log(`Muted ${member.user.username}#${member.user.discriminator}: ${reason}`))
+		return this.bot.mod.mute(user, message.guild)
+			.then(member => this.bot.mod
+				.caseLog(
+					member.user,
+					message.guild,
+					'Mute',
+					reason,
+					message.author,
+					duration))
+			.then(() =>
+			{
+				let storage = this.bot.storage;
+				let activeMutes = storage.getItem('activeMutes');
+				if (!activeMutes) activeMutes = new Map([['mutes', 'placeholder']]);
+				else activeMutes = new Map(activeMutes);
+				console.log(activeMutes);
+				activeMutes.set(user.id, {
+					user: user.id,
+					timestamp: Date.parse(message.timestamp),
+					duration: duration,
+					guild: message.guild.id
+				});
+				storage.setItem('activeMutes', activeMutes);
+				console.log('Updated active mutes');
+			})
 			.catch(console.log);
 	}
 };

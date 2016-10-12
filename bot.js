@@ -22,8 +22,3 @@ const bot = new Bot({
 
 bot.setDefaultSetting('prefix', '?');
 bot.mod = new ModActions(bot);
-
-bot.on('ready', () =>
-{
-	// bot.mod.updateGuilds();
-});

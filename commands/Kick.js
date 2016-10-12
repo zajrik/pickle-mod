@@ -28,7 +28,13 @@ exports.default = class Kick extends Command
 			return;
 		}
 		this.bot.mod.kick(user, message.guild)
-			.then(member => console.log(`Kicked ${member.user.username}#${member.user.discriminator}: ${reason}`))
+		.then(member => this.bot.mod
+			.caseLog(
+				member.user,
+				message.guild,
+				'Kick',
+				reason,
+				message.author))
 			.catch(console.log);
 	}
 };
