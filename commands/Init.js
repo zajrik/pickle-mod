@@ -7,9 +7,9 @@ exports.default = class Kick extends Command
 		super(bot, {
 			name: 'init',
 			aliases: [],
-			description: 'Initialize roles and channels the bot needs',
+			description: 'Initialize roles and channels I need to operate',
 			usage: '<prefix>init',
-			extraHelp: '',
+			extraHelp: `This command can be run again at any time if roles or channel permissions get messed up, like if I wasn't paying attention when a channel was created and I didn't add \`Muted\` role permissions to it, or the \`Mod\` role was removed by mistake.`,
 			group: 'mod',
 			guildOnly: true,
 			permissions: ['MANAGE_GUILD'],
