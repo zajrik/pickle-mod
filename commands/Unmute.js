@@ -26,10 +26,10 @@ exports.default = class Unmute extends Command
 			console.log(`User ${user.username}#${user.discriminator} is not muted.`);
 			return;
 		}
+		let storage = this.bot.storage;
 		this.bot.mod.unmute(user, message.guild)
 			.then(member =>
 			{
-				let storage = this.bot.storage;
 				while(storage.getItem('checkingMutes')) {} // eslint-disable-line
 				storage.setItem('checkingMutes', true);
 				let activeMutes = storage.getItem('activeMutes');
@@ -38,6 +38,10 @@ exports.default = class Unmute extends Command
 				storage.setItem('checkingMutes', false);
 				console.log(`Unmuted ${member.user.username}#${member.user.discriminator}`);
 			})
-			.catch(console.log);
+			.catch(err =>
+			{
+				storage.setItem('checkingMutes', false);
+				console.log(err);
+			});
 	}
 };

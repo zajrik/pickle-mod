@@ -21,6 +21,24 @@ exports.default = class Mute extends Command
 	{
 		if (!mentions[0]) return false;
 		let user = mentions[0];
+		if (user.id === message.author.id)
+		{
+			return message.channel.sendMessage(`I don't think you want to mute yourself.`)
+				.then(response =>
+				{
+					message.delete(5000);
+					response.delete(5000);
+				});
+		}
+		if (message.guild.members.get(user.id).roles.find('name', 'Mod') || user.id === message.guild.ownerID || user.bot)
+		{
+			return message.channel.sendMessage(`You may not use this command on that user.`)
+				.then(response =>
+				{
+					message.delete(5000);
+					response.delete(5000);
+				});
+		}
 		let duration, p; // eslint-disable-line
 		if (/^\d+[m|h|d]$/.test(args[0]))
 		{
@@ -32,12 +50,26 @@ exports.default = class Mute extends Command
 				? p[1] * 1000 * 60 * 60 * 24 : null;
 		}
 		let reason = args.join(' ');
-		if (!reason) return message.channel.sendMessage('You must provide a reason to mute that user.');
+		if (!reason)
+		{
+			return message.channel.sendMessage('You must provide a reason to mute that user.')
+			.then(response =>
+			{
+				message.delete(5000);
+				response.delete(5000);
+			});
+		}
 		if (message.guild.members.get(user.id).roles.find('name', 'Muted'))
 		{
 			return message.channel.sendMessage(
-				`User ${user.username}#${user.discriminator} is already muted.`);
+				`User ${user.username}#${user.discriminator} is already muted.`)
+					.then(response =>
+					{
+						message.delete(5000);
+						response.delete(5000);
+					});
 		}
+		let storage = this.bot.storage;
 		return this.bot.mod.mute(user, message.guild)
 			.then(member => this.bot.mod
 				.caseLog(
@@ -49,8 +81,6 @@ exports.default = class Mute extends Command
 					p[0]))
 			.then(() =>
 			{
-				user.sendMessage(`You have been muted on ${message.guild.name}.\n\`Duration:\` ${p[0]}\n\`Reason:\` ${reason}`);
-				let storage = this.bot.storage;
 				while(storage.getItem('checkingMutes')) {} // eslint-disable-line
 				storage.setItem('checkingMutes', true);
 				let activeMutes = storage.getItem('activeMutes');
@@ -66,6 +96,10 @@ exports.default = class Mute extends Command
 				storage.setItem('checkingMutes', false);
 				console.log(`Muted user '${user.username}#${user.discriminator}'`);
 			})
-			.catch(console.log);
+			.catch(err =>
+			{
+				storage.setItem('checkingMutes', false);
+				console.log(err);
+			});
 	}
 };
