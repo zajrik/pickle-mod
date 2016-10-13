@@ -49,7 +49,10 @@ exports.default = class Mute extends Command
 					p[0]))
 			.then(() =>
 			{
+				user.sendMessage(`You have been muted on ${message.guild.name}.\n\`Duration:\` ${p[0]}\n\`Reason:\` ${reason}`);
 				let storage = this.bot.storage;
+				while(storage.getItem('checkingMutes')) {} // eslint-disable-line
+				storage.setItem('checkingMutes', true);
 				let activeMutes = storage.getItem('activeMutes');
 				if (!activeMutes) activeMutes = {};
 				activeMutes[user.id] = {
@@ -59,8 +62,8 @@ exports.default = class Mute extends Command
 					duration: duration,
 					guild: message.guild.id
 				};
-				while(storage.getItem('checkingMutes')) {} // eslint-disable-line
 				storage.setItem('activeMutes', activeMutes);
+				storage.setItem('checkingMutes', false);
 				console.log(`Muted user '${user.username}#${user.discriminator}'`);
 			})
 			.catch(console.log);
