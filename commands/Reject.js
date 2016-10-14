@@ -60,37 +60,41 @@ exports.default = class Reject extends Command
 							{
 								user.sendMessage(`Your ban appeal for ${message.guild.name} has been rejected. You may not appeal again.`);
 							});
-							while(storage.getItem('checkingBans')) {} // eslint-disable-line
-							storage.setItem('checkingBans', true);
-							let activeBans = storage.getItem('activeBans');
-							if (!activeBans) activeBans = {};
-							let bans = activeBans[id];
-							bans.forEach((ban, index) =>
+							storage.nonConcurrentAccess('activeBans', key =>
 							{
-								if (ban.guild === message.guild.id) bans.splice(index, 1);
-							});
-							if (bans.length === 0) delete activeBans[id];
-							else activeBans[id] = bans;
-							storage.setItem('activeBans', activeBans);
-							storage.setItem('checkingBans', false);
-
-							while (storage.getItem('checkingAppeals')) {} // eslint-disable-line
-							storage.setItem('checkingAppeals', true);
-							let activeAppeals = storage.getItem('activeAppeals');
-							if (!activeAppeals) activeAppeals = {};
-							message.channel.fetchMessage(activeAppeals[id])
-								.then(appealMsg => appealMsg.delete()).catch(console.log);
-							delete activeAppeals[id];
-							storage.setItem('activeAppeals', activeAppeals);
-							storage.setItem('checkingAppeals', false);
-							message.delete();
-							msg.delete();
-							message.channel.sendMessage(`Rejected appeal \`${id}\`. This user will be unable to further appeal their ban.`)
+								let activeBans = storage.getItem(key);
+								if (!activeBans) activeBans = {};
+								let bans = activeBans[id];
+								bans.forEach((ban, index) =>
+								{
+									if (ban.guild === message.guild.id) bans.splice(index, 1);
+								});
+								if (bans.length === 0) delete activeBans[id];
+								else activeBans[id] = bans;
+								storage.setItem(key, activeBans);
+							})
+							.then(() =>
+								storage.nonConcurrentAccess('activeAppeals', key =>
+								{
+									let activeAppeals = storage.getItem(key);
+									if (!activeAppeals) activeAppeals = {};
+									message.channel.fetchMessage(activeAppeals[id])
+										.then(appealMsg => appealMsg.delete()).catch(console.log); // eslint-disable-line
+									delete activeAppeals[id];
+									storage.setItem(key, activeAppeals);
+								})
+							)
+							.then(() =>
+							{
+								message.delete();
+								msg.delete();
+								message.channel.sendMessage(`Rejected appeal \`${id}\`. This user will be unable to further appeal their ban.`)
 								.then(re => re.delete(5000));
+							})
+							.catch(console.log);
 						}
 						catch (err)
 						{
-							storage.setItem('checkingAppeals', false);
 							console.log(err);
 						}
 						collector.stop('success');
@@ -98,6 +102,7 @@ exports.default = class Reject extends Command
 						return;
 					}
 					collector.stop('failure');
+					response.delete();
 				});
 
 				collector.on('end', (collection, why) =>
@@ -106,6 +111,7 @@ exports.default = class Reject extends Command
 					{
 						message.channel.sendMessage('Command timed out. Try again.').then(re =>
 						{
+							message.delete();
 							msg.delete();
 							re.delete(5 * 1000);
 						});
@@ -114,6 +120,7 @@ exports.default = class Reject extends Command
 					{
 						message.channel.sendMessage('Okay, aborting appeal rejection.').then(re =>
 						{
+							message.delete();
 							msg.delete();
 							re.delete(5 * 1000);
 						});

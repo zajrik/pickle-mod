@@ -54,7 +54,7 @@ exports.default = class Ban extends Command
 				let collector = message.channel.createCollector(m => // eslint-disable-line
 					m.author.id === message.author.id, { time: 10000 });
 
-				collector.on('message', (response) =>
+				collector.on('message', response =>
 				{
 					if (/^(?:yes|y)$/.test(response.content))
 					{
@@ -76,28 +76,23 @@ exports.default = class Ban extends Command
 											.then(re => re.delete(5000)); // eslint-disable-line
 										message.delete();
 										msg.delete();
-
-										while(storage.getItem('checkingBans')) {} // eslint-disable-line
-										storage.setItem('checkingBans', true);
-										let activeBans = storage.getItem('activeBans');
-										if (!activeBans) activeBans = {};
-										if (!activeBans[user.id]) activeBans[user.id] = [];
-										activeBans[user.id].push({
-											user: user.id,
-											raw: `${user.username}#${user.discriminator}`,
-											guild: message.guild.id,
-											reason: reason,
-											timestamp: Date.parse(message.timestamp)
+										return storage.nonConcurrentAccess('activeBans', key => // eslint-disable-line
+										{
+											let activeBans = storage.getItem(key);
+											if (!activeBans) activeBans = {};
+											if (!activeBans[user.id]) activeBans[user.id] = [];
+											activeBans[user.id].push({
+												user: user.id,
+												raw: `${user.username}#${user.discriminator}`,
+												guild: message.guild.id,
+												reason: reason,
+												timestamp: Date.parse(message.timestamp)
+											});
+											storage.setItem(key, activeBans);
+											console.log(`Banned user '${user.username}#${user.discriminator}'`);
 										});
-										storage.setItem('activeBans', activeBans);
-										storage.setItem('checkingBans', false);
-										console.log(`Banned user '${user.username}#${user.discriminator}'`);
 									})
-									.catch(err =>
-									{
-										storage.setItem('checkingBans', false);
-										console.log(err);
-									});
+									.catch(console.log);
 							});
 
 

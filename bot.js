@@ -21,7 +21,4 @@ const bot = new Bot({
 }).start();
 
 bot.setDefaultSetting('prefix', '?');
-bot.storage.setItem('checkingAppeals', false);
-bot.storage.setItem('checkingMutes', false);
-bot.storage.setItem('checkingBans', false);
 bot.mod = new ModActions(bot);

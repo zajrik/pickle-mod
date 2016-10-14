@@ -80,26 +80,28 @@ exports.default = class Mute extends Command
 					message.author,
 					p[0]))
 			.then(() =>
-			{
-				while(storage.getItem('checkingMutes')) {} // eslint-disable-line
-				storage.setItem('checkingMutes', true);
-				let activeMutes = storage.getItem('activeMutes');
-				if (!activeMutes) activeMutes = {};
-				activeMutes[user.id] = {
-					user: user.id,
-					raw: `${user.username}#${user.discriminator}`,
-					timestamp: Date.parse(message.timestamp),
-					duration: duration,
-					guild: message.guild.id
-				};
-				storage.setItem('activeMutes', activeMutes);
-				storage.setItem('checkingMutes', false);
-				console.log(`Muted user '${user.username}#${user.discriminator}'`);
+			{ // eslint-disable-line
+				return storage.nonConcurrentAccess('activeMutes', key =>
+				{
+					let activeMutes = storage.getItem(key);
+					if (!activeMutes) activeMutes = {};
+					activeMutes[user.id] = {
+						user: user.id,
+						raw: `${user.username}#${user.discriminator}`,
+						timestamp: Date.parse(message.timestamp),
+						duration: duration,
+						guild: message.guild.id
+					};
+					storage.setItem(key, activeMutes);
+					console.log(`Muted user '${user.username}#${user.discriminator}'`);
+				});
 			})
-			.catch(err =>
+			.then(() =>
 			{
-				storage.setItem('checkingMutes', false);
-				console.log(err);
-			});
+				message.delete();
+				message.channel.sendMessage(`Muted ${user.username}#${user.discriminator}`)
+					.then(response => response.delete(5000));
+			})
+			.catch(console.log);
 	}
 };

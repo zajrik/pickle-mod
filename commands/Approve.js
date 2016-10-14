@@ -55,36 +55,35 @@ exports.default = class Approve extends Command
 					{
 						user.sendMessage(`Your appeal has been approved. You have been unbanned from ${message.guild.name}. You may rejoin using this invite:\n${invite.url}`);
 					});
-				while(storage.getItem('checkingBans')) {} // eslint-disable-line
-				storage.setItem('checkingBans', true);
-				let activeBans = storage.getItem('activeBans');
-				if (!activeBans) activeBans = {};
-				let bans = activeBans[user.id];
-				bans.forEach((ban, index) =>
+				storage.nonConcurrentAccess('activeBans', key =>
 				{
-					if (ban.guild === message.guild.id) bans.splice(index, 1);
+					let activeBans = storage.getItem(key);
+					if (!activeBans) activeBans = {};
+					let bans = activeBans[user.id];
+					bans.forEach((ban, index) =>
+					{
+						if (ban.guild === message.guild.id) bans.splice(index, 1);
+					});
+					if (bans.length === 0) delete activeBans[user.id];
+					else activeBans[user.id] = bans;
+					storage.setItem(key, activeBans);
+				})
+				.then(() =>
+					storage.nonConcurrentAccess('activeAppeals', key =>
+					{
+						let activeAppeals = storage.getItem(key);
+						if (!activeAppeals) activeAppeals = {};
+						message.channel.fetchMessage(activeAppeals[user.id])
+						.then(msg => msg.delete()).catch(console.log);
+						delete activeAppeals[user.id];
+						storage.setItem(key, activeAppeals);
+					})
+				)
+				.then(() =>
+				{
+					console.log(`Unbanned user '${user.username}#${user.discriminator}'`);
 				});
-				if (bans.length === 0) delete activeBans[user.id];
-				else activeBans[user.id] = bans;
-				storage.setItem('activeBans', activeBans);
-				storage.setItem('checkingBans', false);
-
-				while (storage.getItem('checkingAppeals')) {} // eslint-disable-line
-				storage.setItem('checkingAppeals', true);
-				let activeAppeals = storage.getItem('activeAppeals');
-				if (!activeAppeals) activeAppeals = {};
-				message.channel.fetchMessage(activeAppeals[user.id])
-					.then(msg => msg.delete()).catch(console.log);
-				delete activeAppeals[user.id];
-				storage.setItem('activeAppeals', activeAppeals);
-				storage.setItem('checkingAppeals', false);
-				console.log(`Unbanned user '${user.username}#${user.discriminator}'`);
 			})
-			.catch(err =>
-			{
-				storage.setItem('checkingBans', false);
-				storage.setItem('checkingAppeals', false);
-				console.log(err);
-			});
+			.catch(console.log);
 	}
 };
