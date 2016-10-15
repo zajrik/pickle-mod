@@ -49,6 +49,10 @@ exports.default = class Mute extends Command
 				? p[1] * 1000 * 60 * 60 : p[2] === 'd'
 				? p[1] * 1000 * 60 * 60 * 24 : null;
 		}
+		else
+		{
+			p = [null];
+		}
 		let reason = args.join(' ');
 		if (!reason)
 		{
