@@ -89,13 +89,14 @@ exports.default = class Mute extends Command
 				{
 					let activeMutes = storage.getItem(key);
 					if (!activeMutes) activeMutes = {};
-					activeMutes[user.id] = {
-						user: user.id,
+					if (!activeMutes[user.id]) activeMutes[user.id] = [];
+					activeMutes[user.id].push({
 						raw: `${user.username}#${user.discriminator}`,
-						timestamp: Date.parse(message.timestamp),
+						user: user.id,
+						guild: message.guild.id,
 						duration: duration,
-						guild: message.guild.id
-					};
+						timestamp: Date.parse(message.timestamp)
+					});
 					storage.setItem(key, activeMutes);
 					console.log(`Muted user '${user.username}#${user.discriminator}'`);
 				});

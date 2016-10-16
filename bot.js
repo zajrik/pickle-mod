@@ -12,7 +12,6 @@ const bot = new Bot({
 	statusText: 'Obey the law.',
 	commandsDir: path.join(__dirname, 'commands'),
 	disableBase: [
-		'setprefix',
 		'disablegroup',
 		'enablegroup',
 		'listgroups',
@@ -20,5 +19,9 @@ const bot = new Bot({
 	]
 }).start();
 
-bot.setDefaultSetting('prefix', '?');
 bot.mod = new ModActions(bot);
+bot.on('ready', () =>
+{
+	bot.setDefaultSetting('prefix', '?');
+	bot.setDefaultSetting('cases', 0);
+});

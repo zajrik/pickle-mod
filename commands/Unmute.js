@@ -33,10 +33,18 @@ exports.default = class Unmute extends Command
 				storage.nonConcurrentAccess('activeMutes', key =>
 				{
 					let activeMutes = storage.getItem(key);
-					delete activeMutes[member.user.id];
+					activeMutes[member.user.id] = activeMutes[member.user.id]
+						.filter(a => a.guild !== message.guild.id);
 					storage.setItem(key, activeMutes);
 					console.log(`Unmuted ${member.user.username}#${member.user.discriminator}`);
 				});
+			})
+			.then(() =>
+			{
+				message.delete();
+				message.channel.sendMessage(`Unmuted ${user.username}#${user.discriminator}`)
+					.then(response => response.delete(5000));
+				user.sendMessage(`You have been unmuted on ${message.guild.name}. You may now send messages.`);
 			})
 			.catch(console.log);
 	}
