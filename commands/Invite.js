@@ -10,7 +10,7 @@ exports.default = class Invite extends Command
 			description: 'Get an invite link to add me to a server',
 			usage: '<prefix>invite',
 			extraHelp: '',
-			group: 'mod'
+			group: 'base'
 		});
 	}
 
