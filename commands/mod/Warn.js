@@ -32,6 +32,16 @@ exports.default = class Warn extends Command
 				});
 			return;
 		}
+		if (message.guild.members.get(user.id).roles.find('name', 'Mod') || user.id === message.guild.ownerID || user.bot)
+		{
+			message.channel.sendMessage(`You may not use this command on that user.`)
+				.then(response =>
+				{
+					message.delete(5000);
+					response.delete(5000);
+				});
+			return;
+		}
 		if (!reason)
 		{
 			message.channel.sendMessage('You must provide a reason to warn that user.')
