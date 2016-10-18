@@ -20,8 +20,6 @@ const bot = new Bot({
 }).start();
 
 bot.mod = new ModActions(bot);
-bot.on('ready', () =>
-{
-	bot.setDefaultSetting('prefix', '?');
-	bot.setDefaultSetting('cases', 0);
-});
+bot.setDefaultSetting('prefix', '?');
+bot.setDefaultSetting('cases', 0);
+bot.removeDefaultSetting('disabledGroups');

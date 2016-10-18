@@ -8,7 +8,7 @@ exports.default = class Mute extends Command
 			name: 'mute',
 			aliases: [],
 			description: 'Mute a user',
-			usage: '<prefix>mute <@user> <reason>',
+			usage: '<prefix>mute <@user> [duration] <reason>',
 			extraHelp: '',
 			group: 'mod',
 			guildOnly: true,
