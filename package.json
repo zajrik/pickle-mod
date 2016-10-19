@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/zajrik/modbot#readme",
   "dependencies": {
-    "yamdbf": "^2.0.21"
+    "yamdbf": "^2.1.1"
   }
 }
