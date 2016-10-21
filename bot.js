@@ -8,7 +8,7 @@ const bot = new Bot({
 	token: config.token,
 	config: config,
 	selfbot: false,
-	version: '1.0.0',
+	version: require(path.join(__dirname, 'package.json')).version,
 	statusText: 'Obey the law.',
 	commandsDir: path.join(__dirname, 'commands'),
 	disableBase: [
