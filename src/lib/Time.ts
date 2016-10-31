@@ -1,14 +1,18 @@
+type Difference = {
+	ms?: number;
+	days?: number;
+	hours?: number;
+	mins?: number;
+	secs?: number;
+	toString(): string;
+	toSimplifiedString?(): string;
+}
+
 /**
  * Extend the Date class to provide helper methods
- * @extends {Date}
  */
-class Time extends Date
+export default class Time extends Date
 {
-	constructor()
-	{
-		super();
-	}
-
 	/**
 	 * Return an object containing the time difference between a and be
 	 * @param {int} a Time in milliseconds
@@ -17,36 +21,39 @@ class Time extends Date
 	 *                  Also exposes two methods, toString and
 	 *                  toSimplifiedString for the object
 	 */
-	static difference(a, b)
+	public static difference(a: number, b: number): Difference
 	{
-		var difference = {};
-		var ms = a - b;
+		let difference: Difference = {};
+		let ms: number = a - b;
 		difference.ms = ms;
 
 		// Calculate and separate days, hours, mins, and secs
-		var days = Math.floor(ms / 1000 / 60 / 60 / 24);
+		let days: number = Math.floor(ms / 1000 / 60 / 60 / 24);
 		ms -= days * 1000 * 60 * 60 * 24;
-		var hours = Math.floor(ms / 1000 / 60 / 60);
+		let hours: number = Math.floor(ms / 1000 / 60 / 60);
 		ms -= hours * 1000 * 60 * 60;
-		var mins = Math.floor(ms / 1000 / 60);
+		let mins: number = Math.floor(ms / 1000 / 60);
 		ms -= mins * 1000 * 60;
-		var secs = Math.floor(ms / 1000);
+		let secs: number = Math.floor(ms / 1000);
 
-		var timeString = '';
+		let timeString: string = '';
 		if (days) { difference.days = days; timeString += `${days} days${hours ? ', ' : ' '}`; }
 		if (hours) { difference.hours = hours; timeString += `${hours} hours${mins ? ', ' : ' '}`; }
 		if (mins) { difference.mins = mins; timeString += `${mins} mins${secs ? ', ' : ' '}`; }
 		if (secs) { difference.secs = secs; timeString += `${secs} secs`; }
 
 		// Returns the time string as '# days, # hours, # mins, # secs'
-		difference.toString = () => timeString;
+		difference.toString = (): string => timeString;
 
 		// Returns the time string as '#d #h #m #s'
-		difference.toSimplifiedString = () =>
+		difference.toSimplifiedString = (): string =>
 			timeString.replace(/ours|ins|ecs| /g, '').replace(/,/g, ' ');
 
 		return difference;
 	}
-}
 
-module.exports = Time;
+	public constructor()
+	{
+		super();
+	}
+}
