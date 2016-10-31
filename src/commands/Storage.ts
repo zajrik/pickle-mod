@@ -13,7 +13,7 @@ export default class Storage extends Command
 			description: 'Get/set/remove a value in storage',
 			usage: '<prefix>storage <get|set|rem> <key> [value]',
 			extraHelp: 'Strings must be quoted! Single or double-quote is fine. Treat the value you are setting as if it were a real Javascript value.',
-			group: 'tag',
+			group: 'base',
 			argOpts: { stringArgs: true },
 			ownerOnly: true
 		});
