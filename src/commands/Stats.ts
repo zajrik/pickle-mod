@@ -1,12 +1,12 @@
 'use strict';
-import { Command, version } from 'yamdbf';
+import { Bot, Command, version } from 'yamdbf';
 import * as Discord from 'discord.js';
 import { User, Message } from 'discord.js';
 import Time from '../lib/Time';
 
 export default class Stats extends Command
 {
-	public constructor(bot)
+	public constructor(bot: Bot)
 	{
 		super(bot, {
 			name: 'stats',

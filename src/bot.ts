@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 import * as path from 'path';
 import ModBot from './lib/ModBot';
 import ModActions from './lib/ModActions';
@@ -9,7 +9,7 @@ const bot: ModBot = new ModBot({
 	token: config.token,
 	config: config,
 	version: '2.0.0',
-	statusText: null,
+	statusText: 'Obey the law.',
 	commandsDir: path.join(__dirname, 'commands'),
 		disableBase: [
 		'disablegroup',
@@ -24,5 +24,4 @@ const bot: ModBot = new ModBot({
 .setDefaultSetting('cases', 0)
 .start()
 .on('ready', () => console.log('\u0007'));
-
 bot.mod = new ModActions(bot);

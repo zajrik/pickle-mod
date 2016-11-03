@@ -1,11 +1,11 @@
 'use strict';
-import { Command } from 'yamdbf';
+import { Bot, Command } from 'yamdbf';
 import { User, Message } from 'discord.js';
 import { execSync } from 'child_process';
 
 export default class Bash extends Command
 {
-	public constructor(bot)
+	public constructor(bot: Bot)
 	{
 		super(bot, {
 			name: '$',
@@ -24,10 +24,10 @@ export default class Bash extends Command
 		message.delete();
 		if (!args[0])
 			return message.channel.sendMessage('You must provide a command to execute.')
-				.then(res => (<Message> res).delete(5000));
+				.then((res: Message) => res.delete(5000));
 		if (args.includes('rm') || args.includes('sudo') || args.includes('su'))
 			return message.channel.sendMessage('Forbidden.')
-				.then(res => (<Message> res).delete(5000));
+				.then((res: Message) => res.delete(5000));
 		const execution: Message = <Message> await message.channel.sendMessage('_Executing..._');
 		let result: string;
 		try
@@ -39,7 +39,17 @@ export default class Bash extends Command
 			result = err;
 		}
 		const output: string = `**INPUT:**\n\`\`\`bash\n$ ${args.join(' ')}\n\`\`\`\n`
-			+ `**OUTPUT:**\n\`\`\`ts\n${result}\n\`\`\``;
+			+ `**OUTPUT:**\n\`\`\`ts\n${this._clean(result)}\n\`\`\``;
 		return execution.delete().then(() => message.channel.sendMessage(output, { split: true }));
+	}
+
+	private _clean(text: string): string
+	{
+		return typeof text === 'string' ? text
+			.replace(/`/g, `\`${String.fromCharCode(8203)}`)
+			.replace(/@/g, `@${String.fromCharCode(8203)}`)
+			.replace(/[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g, '[REDACTED]')
+			.replace(/email: '[^']+'/g, `email: '[REDACTED]'`)
+			: text;
 	}
 };

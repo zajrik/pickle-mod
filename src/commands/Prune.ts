@@ -1,10 +1,10 @@
 'use strict';
-import { Command } from 'yamdbf';
+import { Bot, Command } from 'yamdbf';
 import { User, Message, Collection } from 'discord.js';
 
 export default class Prune extends Command
 {
-	public constructor(bot)
+	public constructor(bot: Bot)
 	{
 		super(bot, {
 			name: 'prune',
@@ -22,9 +22,9 @@ export default class Prune extends Command
 		const member: User = mentions[0];
 		if (!quantity || quantity < 1)
 			return message.channel.sendMessage('You must enter a number of messages to prune')
-				.then(res => (<Message> res).delete(5000));
+				.then((res: Message) => res.delete(5000));
 		if (!member) return message.channel.sendMessage('You must mention a user to prune')
-			.then(res => (<Message> res).delete(5000));
+			.then((res: Message) => res.delete(5000));
 		let messages: Collection<string, Message>;
 		messages = (await message.channel.fetchMessages({ limit: 100 }))
 			.filter((a: Message) => a.author.id === member.id);
@@ -34,6 +34,6 @@ export default class Prune extends Command
 		if (member.id !== message.author.id) message.delete();
 		return pruning.delete()
 			.then(() => message.channel.sendMessage('Prune operation completed.'))
-			.then(res => (<Message> res).delete(5000));
+			.then((res: Message) => res.delete(5000));
 	}
 };

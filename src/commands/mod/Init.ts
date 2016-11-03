@@ -1,11 +1,11 @@
 'use strict';
-import { Command } from 'yamdbf';
+import { Bot, Command } from 'yamdbf';
 import { Message, User } from 'discord.js';
 import ModBot from '../../lib/ModBot';
 
 export default class Kick extends Command
 {
-	public constructor(bot)
+	public constructor(bot: Bot)
 	{
 		super(bot, {
 			name: 'init',

@@ -1,12 +1,10 @@
 'use strict';
-import { Command, version } from 'yamdbf';
-import * as Discord from 'discord.js';
+import { Bot, Command } from 'yamdbf';
 import { User, Message } from 'discord.js';
-import Time from '../lib/Time';
 
 export default class Invite extends Command
 {
-	public constructor(bot)
+	public constructor(bot: Bot)
 	{
 		super(bot, {
 			name: 'invite',

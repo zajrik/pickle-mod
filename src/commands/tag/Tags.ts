@@ -1,10 +1,10 @@
 'use strict';
-import { Command } from 'yamdbf';
+import { Bot, Command } from 'yamdbf';
 import { User, Message } from 'discord.js';
 
 export default class Tags extends Command
 {
-	public constructor(bot)
+	public constructor(bot: Bot)
 	{
 		super(bot, {
 			name: 'tags',
@@ -22,8 +22,8 @@ export default class Tags extends Command
 		const tags: Object = this.bot.storage.getItem('tags');
 		if (!tags || Object.keys(tags).length === 0)
 			return message.channel.sendMessage('You currently have no saved tags.')
-				.then(res => (<Message> res).delete(5000));
+				.then((res: Message) => res.delete(5000));
 		return message.channel.sendMessage(`**Current tags:**\n${Object.keys(tags).sort().join(', ')}`)
-			.then(res => (<Message> res).delete(10000));
+			.then((res: Message) => res.delete(10000));
 	}
 };

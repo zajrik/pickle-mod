@@ -20,23 +20,23 @@
 		"eofline": true,
 		"no-bitwise": false,
 		"no-console": [false],
-		"member-ordering": [
-			true, { "order": [
-              "public-static-field",
-              "public-static-method",
-              "protected-static-field",
-              "protected-static-method",
-              "private-static-field",
-              "private-static-method",
-              "public-instance-field",
-              "protected-instance-field",
-              "private-instance-field",
-              "constructor",
-              "public-instance-method",
-              "protected-instance-method",
-              "private-instance-method"
-            ]}
-		],
+		// "member-ordering": [
+		// 	true, { "order": [
+        //       "protected-static-field",
+        //       "private-static-field",
+        //       "public-static-field",
+        //       "protected-instance-field",
+        //       "private-instance-field",
+        //       "public-instance-field",
+        //       "constructor",
+        //       "protected-instance-method",
+        //       "private-instance-method",
+        //       "public-instance-method",
+        //       "private-static-method",
+        //       "protected-static-method",
+        //       "public-static-method"
+        //     ]}
+		// ],
 		"member-access": [true, "check-accessor", "check-constructor"],
 		"no-consecutive-blank-lines": true,
 		"no-constructor-vars": true,
