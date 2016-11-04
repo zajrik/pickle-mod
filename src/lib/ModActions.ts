@@ -6,6 +6,12 @@ import { LocalStorage, GuildStorage } from 'yamdbf';
 import { GuildMember, GuildChannel, Guild, Message, User } from 'discord.js';
 
 /**
+ * Storage entry containing all users with active mutes
+ * and their Mute objects representing mutes in each guild
+ */
+export type ActiveMutes = { [id: string]: Mute[] }
+
+/**
  * A mute entry in storage
  */
 type Mute = {
@@ -17,10 +23,20 @@ type Mute = {
 }
 
 /**
- * Storage entry containing all users with active mutes
- * and their Mute objects representing mutes in each guild
+ * Storage entry containing all guilds with active lockdowns
+ * and their lockdown objects
  */
-type ActiveMutes = { [id: string]: Mute[] }
+export type ActiveLockdowns = { [id: string]: Lockdown }
+
+/**
+ * A lockdown entry in storage. Contains information necessary
+ * for later removal of the channel lockdown
+ */
+type Lockdown = {
+	message: string;
+	duration: number;
+	timestamp: number;
+}
 
 /**
  * Provides controls allowing the bot to execute moderation commands
@@ -48,8 +64,10 @@ export default class ModActions
 			if (channel.type === 'text' && !channel.permissionsFor(this._bot.user)
 				.hasPermission('MANAGE_ROLES_OR_PERMISSIONS')) return;
 			console.log(`Setting 'Muted' role permissions in channel: ${channel.guild.name}/${channel.name}`);
-			channel.overwritePermissions(channel.guild.roles.find('name', 'Muted'), this._mutedOverwrites)
+			await channel.overwritePermissions(channel.guild.roles.find('name', 'Muted'), this._mutedOverwrites)
 				.catch(console.log);
+			await channel.overwritePermissions(channel.guild.roles.find('name', 'Mod'), <any> { SEND_MESSAGES: true });
+			await channel.overwritePermissions(channel.guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true });
 		});
 
 		this._bot.on('guildCreate', (guild: Guild) =>
@@ -67,7 +85,7 @@ export default class ModActions
 				if (!activeMutes) return;
 				for (let user of Object.keys(activeMutes))
 				{
-					if (activeMutes[user].length === 0) return delete activeMutes[user];
+					if (activeMutes[user].length === 0) { delete activeMutes[user]; continue; };
 					for (let i = 0; i < activeMutes[user].length; i++)
 					{
 						const mute: Mute = activeMutes[user][i];
@@ -115,6 +133,14 @@ export default class ModActions
 				console.log(`Setting 'Muted' role permissions in channel: ${channel.guild.name}/${channel.name}`);
 				await channel.overwritePermissions(guild.roles.find('name', 'Muted'), this._mutedOverwrites);
 			}
+			console.log(channel.name);
+			console.log(1);
+			await channel.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true });
+			console.log(2);
+			if (channel.name === 'mod-logs') return;
+			console.log(3);
+			await channel.overwritePermissions(guild.roles.find('name', 'Mod'), <any> { SEND_MESSAGES: true });
+			console.log(4);
 		}
 	}
 

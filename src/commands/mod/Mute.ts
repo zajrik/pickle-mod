@@ -1,6 +1,7 @@
 'use strict';
 import { Bot, Command, LocalStorage } from 'yamdbf';
 import { User, Message } from 'discord.js';
+import { ActiveMutes } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
 
 export default class Mute extends Command
@@ -32,15 +33,15 @@ export default class Mute extends Command
 			return message.channel.sendMessage('You may not use this command on that user.')
 				.then((res: Message) => res.delete(5000));
 
-		let duration: number, m: any = null;
+		let duration: number, match: RegExpMatchArray ;
 		if (/^\d+[m|h|d]$/.test(<string> args[0]))
 		{
-			m = (<string> args.shift()).match(/(\d+)(m|h|d)$/);
-			m[1] = parseFloat(m[1]);
-			duration = m[2] === 'm'
-				? m[1] * 1000 * 60 : m[2] === 'h'
-				? m[1] * 1000 * 60 * 60 : m[2] === 'd'
-				? m[1] * 1000 * 60 * 60 * 24 : null;
+			match = (<string> args.shift()).match(/(\d+)(m|h|d)$/);
+			duration = parseFloat(match[1]);
+			duration = match[2] === 'm'
+				? duration * 1000 * 60 : match[2] === 'h'
+				? duration * 1000 * 60 * 60 : match[2] === 'd'
+				? duration * 1000 * 60 * 60 * 24 : null;
 		}
 
 		const reason: string = args.join(' ').trim();
@@ -57,7 +58,7 @@ export default class Mute extends Command
 			await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Mute', reason, message.author, m[0]);
 			await storage.nonConcurrentAccess('activeMutes', (key: string) =>
 			{
-				let activeMutes: any = storage.getItem(key) || {};
+				let activeMutes: ActiveMutes = storage.getItem(key) || {};
 				if (!activeMutes[user.id]) activeMutes[user.id] = [];
 				activeMutes[user.id].push({
 					raw: `${user.username}#${user.discriminator}`,

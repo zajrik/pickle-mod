@@ -1,6 +1,7 @@
 'use strict';
 import { Bot, Command, LocalStorage } from 'yamdbf';
 import { User, Message } from 'discord.js';
+import { ActiveMutes } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
 
 export default class Unmute extends Command
@@ -33,11 +34,12 @@ export default class Unmute extends Command
 			await (<ModBot> this.bot).mod.unmute(user, message.guild);
 			await storage.nonConcurrentAccess('activeMutes', key =>
 			{
-				let activeMutes: any = storage.getItem(key) || {};
+				let activeMutes: ActiveMutes = storage.getItem(key) || {};
 				activeMutes[user.id] = activeMutes[user.id].filter(a => a.guild !== message.guild.id);
 				storage.setItem(key, activeMutes);
 				console.log(`Unmuted user '${user.username}#${user.discriminator}'`);
 			});
+			user.sendMessage(`You have been unmuted on ${message.guild.name}. You may now send messages.`);
 			return message.channel.sendMessage(`Unmuted ${user.username}#${user.discriminator}`)
 				.then((res: Message) => res.delete(5000));
 		}
