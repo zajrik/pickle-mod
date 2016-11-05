@@ -9,12 +9,12 @@ import { TextChannel, GuildMember, GuildChannel, Guild, Message, User } from 'di
  * Storage entry containing all users with active mutes
  * and their Mute objects representing mutes in each guild
  */
-export type ActiveMutes = { [id: string]: Mute[] }
+export type ActiveMutes = { [id: string]: MuteObj[] }
 
 /**
  * A mute entry in storage
  */
-type Mute = {
+export type MuteObj = {
 	raw: string;
 	user: string;
 	guild: string;
@@ -23,16 +23,39 @@ type Mute = {
 }
 
 /**
+ * Storage entry containing all users with active bans
+ * and their ban objects representing bans in each guild
+ */
+export type ActiveBans = { [id: string]: BanObj[] }
+
+/**
+ * A ban entry in storage
+ */
+export type BanObj = {
+	user: string;
+	raw: string;
+	guild: string;
+	guildName: string;
+	reason: string;
+	timestamp: number;
+}
+
+/**
+ * Storage entry containing all active appeals
+ */
+export type ActiveAppeals = { [id: string]: string }
+
+/**
  * Storage entry containing all guilds with active lockdowns
  * and their lockdown objects
  */
-export type ActiveLockdowns = { [id: string]: Lockdown }
+export type ActiveLockdowns = { [id: string]: LockdownObj }
 
 /**
  * A lockdown entry in storage. Contains information necessary
  * for later removal of the channel lockdown
  */
-type Lockdown = {
+export type LockdownObj = {
 	message: string;
 	channel: string;
 	allow: number;
@@ -91,7 +114,7 @@ export default class ModActions
 					if (activeMutes[user].length === 0) { delete activeMutes[user]; continue; };
 					for (let i = 0; i < activeMutes[user].length; i++)
 					{
-						const mute: Mute = activeMutes[user][i];
+						const mute: MuteObj = activeMutes[user][i];
 						if (!mute.duration) return;
 						if (Time.difference(mute.duration, Time.now() - mute.timestamp).ms > 1) continue;
 						console.log(`Removing expired mute for user '${mute.raw}'`);
@@ -116,7 +139,7 @@ export default class ModActions
 				if (!activeLockdowns) return;
 				for (let id of Object.keys(activeLockdowns))
 				{
-					const lockdown: Lockdown = activeLockdowns[id];
+					const lockdown: LockdownObj = activeLockdowns[id];
 					const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
 					if (Time.difference(lockdown.duration, Time.now() - lockdown.timestamp).ms > 1) continue;
 					console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
