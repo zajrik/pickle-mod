@@ -3,6 +3,7 @@ import { Bot, Command, LocalStorage } from 'yamdbf';
 import { User, Message } from 'discord.js';
 import { ActiveMutes } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
+import Time from '../../lib/Time';
 
 export default class Mute extends Command
 {
@@ -33,17 +34,7 @@ export default class Mute extends Command
 			return message.channel.sendMessage('You may not use this command on that user.')
 				.then((res: Message) => res.delete(5000));
 
-		let duration: number, match: RegExpMatchArray ;
-		if (/^\d+[m|h|d]$/.test(<string> args[0]))
-		{
-			match = (<string> args.shift()).match(/(\d+)(m|h|d)$/);
-			duration = parseFloat(match[1]);
-			duration = match[2] === 'm'
-				? duration * 1000 * 60 : match[2] === 'h'
-				? duration * 1000 * 60 * 60 : match[2] === 'd'
-				? duration * 1000 * 60 * 60 * 24 : null;
-		}
-
+		const duration: number = Time.parseShorthand(<string> args.shift());
 		const reason: string = args.join(' ').trim();
 		if (!reason) return message.channel.sendMessage('You must provide a reason to mute that user.')
 			.then((res: Message) => res.delete(5000));

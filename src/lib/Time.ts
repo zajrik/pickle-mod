@@ -43,13 +43,33 @@ export default class Time extends Date
 		if (secs) { difference.secs = secs; timeString += `${secs} secs`; }
 
 		// Returns the time string as '# days, # hours, # mins, # secs'
-		difference.toString = (): string => timeString;
+		difference.toString = (): string => timeString.trim();
 
 		// Returns the time string as '#d #h #m #s'
 		difference.toSimplifiedString = (): string =>
-			timeString.replace(/ours|ins|ecs| /g, '').replace(/,/g, ' ');
+			timeString.replace(/ours|ins|ecs| /g, '').replace(/,/g, ' ').trim();
 
 		return difference;
+	}
+
+	/**
+	 * Parse a duration shorthand and return the duration in ms
+	 * 
+	 * Shorthand examples: 10m, 5h, 1d
+	 */
+	public static parseShorthand(shorthand: string): number
+	{
+		let duration: number, match: RegExpMatchArray ;
+		if (/^\d+[m|h|d]$/.test(<string> shorthand))
+		{
+			match = shorthand.match(/(\d+)(m|h|d)$/);
+			duration = parseFloat(match[1]);
+			duration = match[2] === 'm'
+				? duration * 1000 * 60 : match[2] === 'h'
+				? duration * 1000 * 60 * 60 : match[2] === 'd'
+				? duration * 1000 * 60 * 60 * 24 : null;
+		}
+		return duration;
 	}
 
 	public constructor()

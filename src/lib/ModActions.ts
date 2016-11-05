@@ -3,7 +3,7 @@ import Time from './Time';
 import Timer from './timer/Timer';
 import ModBot from './ModBot';
 import { LocalStorage, GuildStorage } from 'yamdbf';
-import { GuildMember, GuildChannel, Guild, Message, User } from 'discord.js';
+import { TextChannel, GuildMember, GuildChannel, Guild, Message, User } from 'discord.js';
 
 /**
  * Storage entry containing all users with active mutes
@@ -34,6 +34,9 @@ export type ActiveLockdowns = { [id: string]: Lockdown }
  */
 type Lockdown = {
 	message: string;
+	channel: string;
+	allow: number;
+	deny: number;
 	duration: number;
 	timestamp: number;
 }
@@ -102,6 +105,37 @@ export default class ModActions
 				storage.setItem(key, activeMutes);
 			});
 		}));
+
+		// Add timer for auto-removal of expired channel lockdowns
+		this._bot.timers.add(new Timer(this._bot, 'lockdown', 60, async () =>
+		{
+			const storage: LocalStorage = this._bot.storage;
+			storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
+			{
+				const activeLockdowns: ActiveLockdowns = storage.getItem(key);
+				if (!activeLockdowns) return;
+				for (let id of Object.keys(activeLockdowns))
+				{
+					const lockdown: Lockdown = activeLockdowns[id];
+					const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
+					if (Time.difference(lockdown.duration, Time.now() - lockdown.timestamp).ms > 1) continue;
+					console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
+					const payload: any = {
+						id: channel.guild.roles.find('name', '@everyone').id,
+						type: 'role',
+						allow: lockdown.allow,
+						deny: lockdown.deny
+					};
+					await this._bot.rest.methods.setChannelOverwrite(channel, payload);
+					delete activeLockdowns[id];
+					channel.fetchMessage(lockdown.message)
+						.then(msg => msg.delete());
+					channel.sendMessage('The lockdown on this channel has ended.')
+						.then((res: Message) => res.delete(10000));
+				}
+				storage.setItem(key, activeLockdowns);
+			});
+		}));
 	}
 
 	/**
@@ -115,15 +149,15 @@ export default class ModActions
 		if (!guild.channels.find('name', 'mod-logs')) await guild.createChannel('mod-logs', 'text');
 		if (!guild.channels.find('name', 'ban-appeals')) await guild.createChannel('ban-appeals', 'text');
 		await guild.channels.find('name', 'mod-logs')
-			.overwritePermissions(guild.roles.find('name', '@everyone'), { SEND_MESSAGES: false });
+			.overwritePermissions(guild.roles.find('name', '@everyone'), <any> { SEND_MESSAGES: false });
 		await guild.channels.find('name', 'mod-logs')
-			.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), { SEND_MESSAGES: true });
+			.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true });
 		await guild.channels.find('name', 'ban-appeals')
-			.overwritePermissions(guild.roles.find('name', '@everyone'), { SEND_MESSAGES: false, READ_MESSAGES: false });
+			.overwritePermissions(guild.roles.find('name', '@everyone'), <any> { SEND_MESSAGES: false, READ_MESSAGES: false });
 		await guild.channels.find('name', 'ban-appeals')
-			.overwritePermissions(guild.roles.find('name', 'Mod'), { SEND_MESSAGES: true, READ_MESSAGES: true });
+			.overwritePermissions(guild.roles.find('name', 'Mod'), <any> { SEND_MESSAGES: true, READ_MESSAGES: true });
 		await guild.channels.find('name', 'ban-appeals')
-			.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), { SEND_MESSAGES: true, READ_MESSAGES: true });
+			.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true, READ_MESSAGES: true });
 		for (let channel of guild.channels.values())
 		{
 			if (!guild.roles.find('name', 'Muted')) return;
@@ -133,14 +167,9 @@ export default class ModActions
 				console.log(`Setting 'Muted' role permissions in channel: ${channel.guild.name}/${channel.name}`);
 				await channel.overwritePermissions(guild.roles.find('name', 'Muted'), this._mutedOverwrites);
 			}
-			console.log(channel.name);
-			console.log(1);
 			await channel.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true });
-			console.log(2);
 			if (channel.name === 'mod-logs') return;
-			console.log(3);
 			await channel.overwritePermissions(guild.roles.find('name', 'Mod'), <any> { SEND_MESSAGES: true });
-			console.log(4);
 		}
 	}
 
@@ -171,16 +200,16 @@ export default class ModActions
 					type: 'Warn' | 'Mute' | 'Kick' | 'Ban',
 					reason: string,
 					issuer: User,
-					duration: number): Message
+					duration: number): Promise<Message>
 	{
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		let caseNum: number = storage.getSetting('cases') || 0;
 		caseNum++;
 		storage.setSetting('cases', caseNum);
-		return guild.channels.find('name', 'mod-logs').sendMessage(``
+		return (<TextChannel> guild.channels.find('name', 'mod-logs')).sendMessage(``
 			+ `**Case ${caseNum} | ${type}**\n`
 			+ `\`Member:\` ${user} (${(<User> user).username}#${(<User> user).discriminator})\n`
-			+ `${duration ? '\`Length:\` ' + duration + '\n' : ''}` // eslint-disable-line
+			+ `${duration ? '\`Length:\` ' + duration + '\n' : ''}`
 			+ `\`Reason:\` ${reason}\n`
 			+ `\`Issuer:\` ${issuer.username}#${issuer.discriminator}`
 		);
