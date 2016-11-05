@@ -34,7 +34,8 @@ export default class Mute extends Command
 			return message.channel.sendMessage('You may not use this command on that user.')
 				.then((res: Message) => res.delete(5000));
 
-		const duration: number = Time.parseShorthand(<string> args.shift());
+		const durationString: string = <string> args.shift();
+		const duration: number = Time.parseShorthand(durationString);
 		const reason: string = args.join(' ').trim();
 		if (!reason) return message.channel.sendMessage('You must provide a reason to mute that user.')
 			.then((res: Message) => res.delete(5000));
@@ -46,7 +47,7 @@ export default class Mute extends Command
 		{
 			const storage: LocalStorage = this.bot.storage;
 			await (<ModBot> this.bot).mod.mute(user, message.guild);
-			await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Mute', reason, message.author, m[0]);
+			await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Mute', reason, message.author, durationString);
 			await storage.nonConcurrentAccess('activeMutes', (key: string) =>
 			{
 				let activeMutes: ActiveMutes = storage.getItem(key) || {};
