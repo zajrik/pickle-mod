@@ -48,4 +48,4 @@ export default class Unmute extends Command
 			console.log(err.stack);
 		}
 	}
-};
+}

@@ -26,7 +26,7 @@ export default class Timer
 
 		this._bot.setInterval(async () =>
 		{
-			if (this._ticks > this._interval) this._ticks = 0;
+			if (this._ticks >= this._interval) this._ticks = 0;
 			if (this._ticks === 0)
 			try
 			{

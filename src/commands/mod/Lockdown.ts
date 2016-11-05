@@ -87,4 +87,4 @@ export default class Lockdown extends Command
 			});
 		}
 	}
-};
+}

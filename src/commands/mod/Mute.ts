@@ -70,4 +70,4 @@ export default class Mute extends Command
 			console.log(err.stack);
 		}
 	}
-};
+}

@@ -200,7 +200,7 @@ export default class ModActions
 					type: 'Warn' | 'Mute' | 'Kick' | 'Ban',
 					reason: string,
 					issuer: User,
-					duration: string): Promise<Message>
+					duration?: string): Promise<Message>
 	{
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		let caseNum: number = storage.getSetting('cases') || 0;

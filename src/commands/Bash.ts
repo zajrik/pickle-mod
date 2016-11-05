@@ -52,4 +52,4 @@ export default class Bash extends Command
 			.replace(/email: '[^']+'/g, `email: '[REDACTED]'`)
 			: text;
 	}
-};
+}

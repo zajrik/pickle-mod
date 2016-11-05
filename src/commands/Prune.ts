@@ -36,4 +36,4 @@ export default class Prune extends Command
 			.then(() => message.channel.sendMessage('Prune operation completed.'))
 			.then((res: Message) => res.delete(5000));
 	}
-};
+}

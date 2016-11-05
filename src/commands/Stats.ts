@@ -31,4 +31,4 @@ export default class Stats extends Command
 			+ `• Discord.js : v${Discord.version}\n`
 			+ `\`\`\``);
 	}
-};
+}

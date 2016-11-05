@@ -50,4 +50,4 @@ export default class Storage extends Command
 					.then((res: Message) => res.delete(5000));
 		}
 	}
-};
+}

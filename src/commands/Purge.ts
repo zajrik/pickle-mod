@@ -31,4 +31,4 @@ export default class Purge extends Command
 			.then(() => message.channel.sendMessage('Purge operation completed.'))
 			.then((res: Message) => res.delete(5000));
 	}
-};
+}

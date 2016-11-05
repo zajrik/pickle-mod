@@ -34,4 +34,4 @@ export default class Kick extends Command
 		}
 		response.delete();
 	}
-};
+}
