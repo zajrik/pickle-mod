@@ -1,10 +1,10 @@
 {
   "name": "modbot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Discord bot for server moderation purposes",
   "main": "bot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "tslint './src/**/*.ts'"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,14 @@
   },
   "homepage": "https://github.com/zajrik/modbot#readme",
   "dependencies": {
-    "yamdbf": "^2.2.1"
+    "yamdbf": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.46",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.1.0",
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.6"
   }
 }

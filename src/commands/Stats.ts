@@ -1,11 +1,12 @@
-const Command = require('yamdbf').Command;
-const YAMDBF = require('yamdbf');
-const Discord = require('discord.js');
-const Time = require('../lib/Time');
+'use strict';
+import { Bot, Command, version } from 'yamdbf';
+import * as Discord from 'discord.js';
+import { User, Message } from 'discord.js';
+import Time from '../lib/Time';
 
-exports.default = class Stats extends Command
+export default class Stats extends Command
 {
-	constructor(bot)
+	public constructor(bot: Bot)
 	{
 		super(bot, {
 			name: 'stats',
@@ -17,7 +18,7 @@ exports.default = class Stats extends Command
 		});
 	}
 
-	action(message, args, mentions, original) // eslint-disable-line no-unused-vars
+	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
 	{
 		message.channel.sendMessage(`\`\`\`css\n`
 			+ `MODBOT STATISTICS\n`
@@ -26,8 +27,8 @@ exports.default = class Stats extends Command
 			+ `• Users      : ${this.bot.users.size}\n`
 			+ `• Servers    : ${this.bot.guilds.size}\n`
 			+ `• Channels   : ${this.bot.channels.size}\n`
-			+ `• YAMDBF     : v${YAMDBF.version}\n`
+			+ `• YAMDBF     : v${version}\n`
 			+ `• Discord.js : v${Discord.version}\n`
 			+ `\`\`\``);
 	}
-};
+}

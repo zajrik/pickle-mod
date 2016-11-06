@@ -8,3 +8,6 @@ npm-debug*
 bottest.js
 /pkg/*
 /storage/*
+/typings/*
+/.vscode/*
+yarn*
