@@ -19,7 +19,7 @@ export default class Kick extends Command
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string)
+	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		message.delete();
 		const response: Message = <Message> (await message.channel.sendMessage('Setting up the server...'));

@@ -1,7 +1,7 @@
 'use strict';
 import { Bot, Command, LocalStorage } from 'yamdbf';
 import { User, Message } from 'discord.js';
-import { ActiveMutes } from '../../lib/ModActions';
+import { ActiveMutes, MuteObj } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
 
 export default class Unmute extends Command
@@ -32,10 +32,10 @@ export default class Unmute extends Command
 		{
 			const storage: LocalStorage = this.bot.storage;
 			await (<ModBot> this.bot).mod.unmute(user, message.guild);
-			await storage.nonConcurrentAccess('activeMutes', key =>
+			await storage.nonConcurrentAccess('activeMutes', (key: string) =>
 			{
 				let activeMutes: ActiveMutes = storage.getItem(key) || {};
-				activeMutes[user.id] = activeMutes[user.id].filter(a => a.guild !== message.guild.id);
+				activeMutes[user.id] = activeMutes[user.id].filter((a: MuteObj) => a.guild !== message.guild.id);
 				storage.setItem(key, activeMutes);
 				console.log(`Unmuted user '${user.username}#${user.discriminator}'`);
 			});

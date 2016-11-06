@@ -112,7 +112,7 @@ export default class ModActions
 				for (let user of Object.keys(activeMutes))
 				{
 					if (activeMutes[user].length === 0) { delete activeMutes[user]; continue; };
-					for (let i = 0; i < activeMutes[user].length; i++)
+					for (let i: number = 0; i < activeMutes[user].length; i++)
 					{
 						const mute: MuteObj = activeMutes[user][i];
 						if (!mute.duration) return;
@@ -152,7 +152,7 @@ export default class ModActions
 					await this._bot.rest.methods.setChannelOverwrite(channel, payload);
 					delete activeLockdowns[id];
 					channel.fetchMessage(lockdown.message)
-						.then(msg => msg.delete());
+						.then((msg: Message) => msg.delete());
 					channel.sendMessage('The lockdown on this channel has ended.')
 						.then((res: Message) => res.delete(10000));
 				}
@@ -165,7 +165,7 @@ export default class ModActions
 	 * Create Muted and Mod roles, mod-logs and ban-appeals channels
 	 * and assign the necessary permissions to all channels for the roles
 	 */
-	public async initGuild(guild: Guild)
+	public async initGuild(guild: Guild): Promise<void>
 	{
 		if (!guild.roles.find('name', 'Muted')) await guild.createRole({ name: 'Muted' });
 		if (!guild.roles.find('name', 'Mod')) await guild.createRole({ name: 'Mod' });

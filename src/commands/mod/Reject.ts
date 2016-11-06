@@ -31,13 +31,13 @@ export default class Reject extends Command
 			.then((res: Message) => res.delete(5000));
 
 		const storage: LocalStorage = this.bot.storage;
-		const appeal = storage.getItem('activeAppeals')[id];
+		const appeal: string = storage.getItem('activeAppeals')[id];
 		if (!appeal) return message.channel.sendMessage('Could not find an appeal with that ID.')
 			.then((res: Message) => res.delete(5000));
 
 		const ask: Message = <Message> await message.channel.sendMessage(
 			`Are you sure you want to reject appeal \`${id}\`?`);
-		const confirmation: Message = (await message.channel.awaitMessages(a =>
+		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
 			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
 
 		if (!confirmation) return message.channel.sendMessage('Command timed out, aborting reject.')
@@ -52,7 +52,7 @@ export default class Reject extends Command
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
 			const bans: BanObj[] = activeBans[user.id];
-			for (let i = 0; i < bans.length; i++)
+			for (let i: number = 0; i < bans.length; i++)
 			{
 				if (bans[i].guild === message.guild.id) bans.splice(i--, 1);
 			}

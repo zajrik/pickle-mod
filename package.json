@@ -4,7 +4,7 @@
   "description": "Discord bot for server moderation purposes",
   "main": "bot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "tslint './src/**/*.ts'"
   },
   "repository": {
     "type": "git",

@@ -32,7 +32,7 @@ export default class Approve extends Command
 			.then((res: Message) => res.delete(5000));
 
 		const storage: LocalStorage = this.bot.storage;
-		const appeal = storage.getItem('activeAppeals')[id];
+		const appeal: string = storage.getItem('activeAppeals')[id];
 		if (!appeal) return message.channel.sendMessage('Could not find an appeal with that ID.')
 			.then((res: Message) => res.delete(5000));
 
@@ -48,7 +48,7 @@ export default class Approve extends Command
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
 			const bans: BanObj[] = activeBans[user.id];
-			for (let i = 0; i < bans.length; i++)
+			for (let i: number = 0; i < bans.length; i++)
 			{
 				if (bans[i].guild === message.guild.id) bans.splice(i--, 1);
 			}

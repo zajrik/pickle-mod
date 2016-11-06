@@ -39,7 +39,7 @@ export default class Ban extends Command
 
 		const ask: Message = <Message> await message.channel.sendMessage(
 			`Are you sure you want to ban ${user.username}#${user.discriminator}? (yes/y | no/n) Reason:\n"${reason}"`);
-		const confirmation: Message = (await message.channel.awaitMessages(a =>
+		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
 			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
 
 		if (!confirmation) return message.channel.sendMessage('Command timed out, aborting ban.')

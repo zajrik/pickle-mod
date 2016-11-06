@@ -2,7 +2,7 @@
 import * as path from 'path';
 import ModBot from './lib/ModBot';
 import ModActions from './lib/ModActions';
-const config = require('./config.json');
+const config: any = require('./config.json');
 
 const bot: ModBot = new ModBot({
 	name: 'YAMDBF Mod',
