@@ -9,8 +9,8 @@ export default class Invite extends Command
 		super(bot, {
 			name: 'invite',
 			aliases: [],
-			description: 'Bot statistics',
-			usage: '<prefix>stats',
+			description: 'Get an invite url for this bot',
+			usage: '<prefix>invite',
 			extraHelp: '',
 			group: 'base'
 		});
