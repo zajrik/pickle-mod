@@ -24,6 +24,7 @@ export default class Tag extends Command
 		switch (action)
 		{
 			case 'add':
+				if (!message.member.roles.find('name', 'Mod')) return;
 				if (this.bot.storage.exists(`tags/${args[1]}`))
 					return message.channel.sendMessage(
 						`Tag "${args[1]}" already exists. Use \`tag update ${args[1]}\` to update it.`)
@@ -34,6 +35,7 @@ export default class Tag extends Command
 					.then((res: Message) => res.delete(5000));
 
 			case 'del':
+				if (!message.member.roles.find('name', 'Mod')) return;
 				if (!this.bot.storage.exists(`tags/${args[1]}`))
 					return message.channel.sendMessage(`Tag "${args[1]}" does not exist.`)
 						.then((res: Message) => res.delete(5000));
@@ -42,6 +44,7 @@ export default class Tag extends Command
 					.then((res: Message) => res.delete(5000));
 
 			case 'update':
+				if (!message.member.roles.find('name', 'Mod')) return;
 				if (!this.bot.storage.exists(`tags/${args[1]}`))
 					return message.channel.sendMessage(`Tag "${args[1]}" does not exist.`)
 						.then((res: Message) => res.delete(5000));
