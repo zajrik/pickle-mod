@@ -102,7 +102,7 @@ export default class ModActions
 		});
 
 		// Add timer for auto-removal of expired user mutes
-		this._bot.timers.add(new Timer(this._bot, 'mute', 60, async () =>
+		this._bot.timers.add(new Timer(this._bot, 'mute', 30, async () =>
 		{
 			const storage: LocalStorage = this._bot.storage;
 			storage.nonConcurrentAccess('activeMutes', async (key: string) =>
@@ -115,13 +115,16 @@ export default class ModActions
 					for (let i: number = 0; i < activeMutes[user].length; i++)
 					{
 						const mute: MuteObj = activeMutes[user][i];
-						if (!mute.duration) return;
+						const isMuted: boolean = !!(await this._bot.guilds.get(mute.guild)
+							.fetchMember(user)).roles.find('name', 'Muted');
+						if (!mute.duration && isMuted) continue;
+						else if (!mute.duration) mute.duration = 0;
 						if (Time.difference(mute.duration, Time.now() - mute.timestamp).ms > 1) continue;
 						console.log(`Removing expired mute for user '${mute.raw}'`);
 						const guild: Guild = this._bot.guilds.get(mute.guild);
 						const member: GuildMember = guild.members.get(mute.user);
 						await member.removeRole(guild.roles.find('name', 'Muted'));
-						member.sendMessage(`Your mute on ${guild.name} has expired. You may now send messages.`);
+						member.sendMessage(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
 						activeMutes[user].splice(i--, 1);
 					}
 				}

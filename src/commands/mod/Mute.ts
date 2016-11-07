@@ -34,9 +34,9 @@ export default class Mute extends Command
 			return message.channel.sendMessage('You may not use this command on that user.')
 				.then((res: Message) => res.delete(5000));
 
-		const durationString: string = <string> args.shift();
+		const durationString: string = <string> args[0];
 		const duration: number = Time.parseShorthand(durationString);
-		const reason: string = args.join(' ').trim();
+		const reason: string = (duration ? args.slice(1) : args).join(' ').trim();
 		if (!reason) return message.channel.sendMessage('You must provide a reason to mute that user.')
 			.then((res: Message) => res.delete(5000));
 

@@ -11,7 +11,7 @@ const bot: ModBot = new ModBot({
 	version: '2.0.0',
 	statusText: 'Obey the law.',
 	commandsDir: path.join(__dirname, 'commands'),
-		disableBase: [
+	disableBase: [
 		'disablegroup',
 		'enablegroup',
 		'listgroups',
