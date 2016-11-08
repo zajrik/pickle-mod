@@ -10,15 +10,16 @@ export default class Timer
 {
 	private _bot: Bot;
 	private _interval: number;
-	private _callback: () => void;
+	/** Must be async */
+	private _callback: () => Promise<any>;
 	private _storage: LocalStorage;
 	private _ticks: number;
 	public name: string;
 
-	public constructor(bot: Bot, name: string, interval: number, callback: () => void)
+	public constructor(bot: Bot, name: string, interval: number, callback: () => Promise<any>)
 	{
 		this.name = name;
-		this._storage = new LocalStorage('storage/timer-storage');
+		this._storage = new LocalStorage(`storage/timer-${this.name}`);
 		this._bot = bot;
 		this._interval = interval;
 		this._callback = callback;
@@ -27,15 +28,7 @@ export default class Timer
 		this._bot.setInterval(async () =>
 		{
 			if (this._ticks >= this._interval) this._ticks = 0;
-			if (this._ticks === 0)
-			try
-			{
-				await this._callback();
-			}
-			catch (err)
-			{
-				console.log(err.stack);
-			}
+			if (this._ticks++ === 0) this._callback().catch(console.error);
 			this._storage.setItem(this.name, this._ticks++);
 		}, 1000);
 	}
