@@ -28,8 +28,8 @@ export default class Timer
 		this._bot.setInterval(async () =>
 		{
 			if (this._ticks >= this._interval) this._ticks = 0;
-			if (this._ticks === 0) this._callback().catch(console.error);
-			this._storage.setItem(this.name, this._ticks++);
+			if (this._ticks++ === 0) this._callback().catch(console.error);
+			this._storage.setItem(this.name, this._ticks);
 		}, 1000);
 	}
 }
