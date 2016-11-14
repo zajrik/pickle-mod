@@ -23,5 +23,6 @@ const bot: ModBot = new ModBot({
 .setDefaultSetting('prefix', '?')
 .setDefaultSetting('cases', 0)
 .start()
-.on('ready', () => console.log('\u0007'));
+.on('ready', () => console.log('\u0007'))
+.on('disconnect', () => process.exit());
 bot.mod = new ModActions(bot);
