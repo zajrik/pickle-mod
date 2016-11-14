@@ -34,6 +34,6 @@ export default class Prune extends Command
 		if (member.id !== message.author.id) message.delete();
 		return pruning.delete()
 			.then(() => message.channel.sendMessage('Prune operation completed.'))
-			.then((res: Message) => res.delete(5000));
+			.then((res: Message) => res.delete(3000));
 	}
 }

@@ -32,15 +32,18 @@ export default class Bash extends Command
 		let result: string;
 		try
 		{
-			result = execSync(args.join(' '), { cwd: '../', timeout: 5000 }).toString();
+			result = execSync(args.join(' '), { cwd: '../', timeout: 10000 }).toString();
 		}
 		catch (err)
 		{
 			result = err;
 		}
-		const output: string = `**INPUT:**\n\`\`\`bash\n$ ${args.join(' ')}\n\`\`\`\n`
-			+ `**OUTPUT:**\n\`\`\`ts\n${this._clean(result)}\n\`\`\``;
-		return execution.delete().then(() => message.channel.sendMessage(output, { split: true }));
+		const output: string = `**INPUT:**\n\`\`\`bash\n$ ${args.join(' ')}\n\`\`\`\n**OUTPUT:**`;
+		return execution.delete().then(() =>
+		{
+			message.channel.sendMessage(output);
+			message.channel.sendCode('ts', this._clean(result), { split: true });
+		});
 	}
 
 	private _clean(text: string): string
