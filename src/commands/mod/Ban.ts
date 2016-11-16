@@ -1,5 +1,5 @@
 'use strict';
-import { Bot, Command, LocalStorage, GuildStorage } from 'yamdbf';
+import { Bot, Command, LocalStorage } from 'yamdbf';
 import { User, Message } from 'discord.js';
 import { ActiveBans } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
