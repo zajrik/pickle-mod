@@ -2,6 +2,7 @@
 import Time from './Time';
 import Timer from './timer/Timer';
 import ModBot from './ModBot';
+import * as moment from 'moment';
 import { LocalStorage, GuildStorage } from 'yamdbf';
 import { TextChannel, GuildMember, GuildChannel, Guild, Message, User } from 'discord.js';
 
@@ -232,13 +233,31 @@ export default class ModActions
 		let caseNum: number = storage.getSetting('cases') || 0;
 		caseNum++;
 		storage.setSetting('cases', caseNum);
-		return (<TextChannel> guild.channels.find('name', 'mod-logs')).sendMessage(``
-			+ `**Case ${caseNum} | ${type}**\n`
-			+ `\`Member:\` ${user} (${(<User> user).username}#${(<User> user).discriminator})\n`
-			+ `${duration ? '\`Length:\` ' + duration + '\n' : ''}`
-			+ `\`Reason:\` ${reason}\n`
-			+ `\`Issuer:\` ${issuer.username}#${issuer.discriminator}`
-		);
+
+		enum colors
+		{
+			'Warn' = 16776960,
+			'Mute' = 16763904,
+			'Kick' = 16745216,
+			'Ban' = 16718080
+		}
+
+		const embed: any = {
+			color: colors[type],
+			author: {
+				name: `${issuer.username}#${issuer.discriminator}`,
+				icon_url: issuer.avatarURL
+			},
+			description: `**Member:** ${user} (${(<User> user).username}#${(<User> user).discriminator})\n`
+				+ `**Action:** ${type}\n`
+				+ `${duration ? `**Length:** ${duration}\n` : ''}`
+				+ `**Reason:** ${reason}`,
+			footer: {
+				text: `Case ${caseNum} | ${moment().format('dddd, MMM Do, YYYY | h:mm a')}`
+			}
+		};
+
+		return (<TextChannel> guild.channels.find('name', 'mod-logs')).sendMessage(``, <any> { embed: embed });
 	}
 
 	/**
