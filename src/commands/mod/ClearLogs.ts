@@ -46,20 +46,20 @@ export default class ClearLogs extends Command
 		this.bot.guildStorages.get(message.guild).setSetting('cases', 0);
 
 		const logsChannel: TextChannel = <TextChannel> this.bot.guilds.get(message.guild.id).channels.find('name', 'mod-logs');
-		const purgeMessage: Message = <Message> await logsChannel.sendMessage('Purge operation in progress...');
+		const purgeMessage: Message = <Message> await logsChannel.sendMessage('Mod log reset in progress...');
 		let purging: boolean = true;
 		while (purging)
 		{
 			let messages: Collection<string, Message>;
 			messages = (await logsChannel.fetchMessages({ limit: 100 }));
-			purging = !(messages.size === 1 && messages.first().content === 'Purge operation in progress...')
+			purging = !(messages.size === 1 && messages.first().content === 'Mod log reset in progress...')
 				|| messages.size === 0;
 			const toDelete: string[] = messages.keyArray().slice(1);
 			for (let key of toDelete) { await messages.get(key).delete(); }
 		}
 
 		return purgeMessage.delete()
-			.then(() => logsChannel.sendMessage('Purge operation completed.'))
+			.then(() => logsChannel.sendMessage('Mod log reset completed.'))
 			.then((res: Message) => res.delete(3000))
 			.then(() => message.channel.sendMessage('Mod log reset completed.'))
 			.then((res: Message) => res.delete(3000));
