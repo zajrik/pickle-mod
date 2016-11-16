@@ -43,11 +43,13 @@ export default class Ban extends Command
 			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
 
 		if (!confirmation) return message.channel.sendMessage('Command timed out, aborting ban.')
-			.then((res: Message) => res.delete(5000)).then(<any> ask.delete());
+			.then((res: Message) => res.delete(5000))
+			.then(() => ask.delete());
 
 		if (!/^(?:yes|y)$/.test(confirmation.content))
 			return message.channel.sendMessage('Okay, aborting ban.')
-				.then((res: Message) => res.delete(5000)).then(<any> ask.delete());
+				.then((res: Message) => res.delete(5000))
+				.then(() => [ask, confirmation].forEach((a: Message) => a.delete()));
 
 		await (<ModBot> this.bot).mod.ban(user, message.guild);
 		await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Ban', reason, message.author);
@@ -71,6 +73,8 @@ export default class Ban extends Command
 		console.log(`Banned ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
 		user.sendMessage(`You have been banned from ${message.guild.name}.\n\`Reason:\` ${reason}\n\nYou can appeal your ban by DMing me the command \`appeal <message>\`, where \`'<message>'\` is a message detailing why you think you deserve to have your ban lifted. You must send this command without a prefix or I won't recognize it. If you are currently banned from more than one server that I serve, you may only appeal the most recent ban until that appeal is approved or rejected.\n\nAfter you have sent your appeal it will be passed to the server moderators for review. You will be notified when your appeal has been approved or rejected. If your appeal is rejected, you may not appeal again.\n\nIf you are unable to DM me because we do not have any mutual servers, you may use this invite to gain a mutual server and then DM me your appeal.\nhttps://discord.gg/TEXjY6e`);
 		message.channel.sendMessage(`Successfully banned ${user.username}#${user.discriminator}`)
-			.then((res: Message) => res.delete(5000)).then(<any> ask.delete()).then(<any> confirmation.delete());
+			.then((res: Message) => res.delete(5000))
+			.then(() => confirmation.delete())
+			.then(() => ask.delete());
 	}
 }

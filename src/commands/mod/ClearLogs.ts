@@ -22,8 +22,8 @@ export default class ClearLogs extends Command
 	{
 		const channelName: string = (<GuildChannel> message.channel).name;
 		if ( channelName === 'mod-logs' || channelName === 'ban-appeals') return message.delete()
-			.then(<any> message.channel.sendMessage('You may not use that command in this channel.')
-				.then((res: Message) => res.delete(5000)));
+			.then(() => message.channel.sendMessage('You may not use that command in this channel.'))
+			.then((res: Message) => res.delete(5000));
 
 		const ask: Message = <Message> await message.channel.sendMessage(
 			`Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)`);
@@ -31,13 +31,13 @@ export default class ClearLogs extends Command
 			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
 
 		if (!confirmation) return message.channel.sendMessage('Command timed out, aborting mod-logs reset.')
-			.then((res: Message) => res.delete(5000)).then(() => [message, ask]
-				.forEach((a: Message) => a.delete()));
+			.then((res: Message) => res.delete(5000))
+			.then(() => [message, ask].forEach((a: Message) => a.delete()));
 
 		if (!/^(?:yes|y)$/.test(confirmation.content))
 			return message.channel.sendMessage('Okay, aborting mod-logs reset.')
-				.then((res: Message) => res.delete(5000)).then(() => [message, ask, confirmation]
-					.forEach((a: Message) => a.delete()));
+				.then((res: Message) => res.delete(5000))
+				.then(() => [message, ask, confirmation].forEach((a: Message) => a.delete()));
 
 		message.channel.sendMessage('Okay, clearing mod logs.')
 			.then((res: Message) => res.delete(5000));
