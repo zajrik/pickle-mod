@@ -62,6 +62,6 @@ export default class ClearLogs extends Command
 			.then(() => logsChannel.sendMessage('Mod log reset completed.'))
 			.then((res: Message) => res.delete(3000))
 			.then(() => message.channel.sendMessage('Mod log reset completed.'))
-			.then((res: Message) => res.delete(3000));
+			.then((res: Message) => res.delete(5000));
 	}
 }

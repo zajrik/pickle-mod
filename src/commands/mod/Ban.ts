@@ -1,5 +1,5 @@
 'use strict';
-import { Bot, Command, LocalStorage } from 'yamdbf';
+import { Bot, Command, LocalStorage, GuildStorage } from 'yamdbf';
 import { User, Message } from 'discord.js';
 import { ActiveBans } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
@@ -37,10 +37,22 @@ export default class Ban extends Command
 		if (!reason) return message.channel.sendMessage('You must provide a reason to ban that user.')
 			.then((res: Message) => res.delete(5000));
 
+		const embed: any = {
+			color: 16718080,
+			author: {
+				name: `${user.username}#${user.discriminator}`,
+				icon_url: user.avatarURL
+			},
+			description: reason,
+			footer: {
+				text: (<ModBot> this.bot).mod.checkUserHistory(message.guild, user)
+			}
+		};
+
 		const ask: Message = <Message> await message.channel.sendMessage(
-			`Are you sure you want to ban ${user.username}#${user.discriminator}? (__y__es | __n__o) Reason:\n"${reason}"`);
+			`Are you sure you want issue this ban? (__y__es | __n__o)`,	<any> { embed: embed });
 		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
-			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
+			a.author.id === message.author.id, { max: 1, time: 20000 })).first();
 
 		if (!confirmation) return message.channel.sendMessage('Command timed out, aborting ban.')
 			.then((res: Message) => res.delete(5000))

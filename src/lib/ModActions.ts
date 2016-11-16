@@ -261,6 +261,20 @@ export default class ModActions
 	}
 
 	/**
+	 * Check the number of past offenses a user has had
+	 */
+	public checkUserHistory(guild: Guild, user: User): string
+	{
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		const warns: number = (storage.getItem('warnings') || {})[user.id] || 0;
+		const mutes: number = (storage.getItem('mutes') || {})[user.id] || 0;
+		const kicks: number = (storage.getItem('kicks') || {})[user.id] || 0;
+		const bans: number = (storage.getItem('bans') || {})[user.id] || 0;
+
+		return `This user has had ${warns} warnings, ${mutes} mutes, ${kicks} kicks, and ${bans} bans.`;
+	}
+
+	/**
 	 * Give a formal warning to the provided user
 	 */
 	public warn(user: User | string, guild: Guild): Promise<User | string>
