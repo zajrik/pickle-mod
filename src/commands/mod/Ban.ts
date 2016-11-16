@@ -38,7 +38,7 @@ export default class Ban extends Command
 			.then((res: Message) => res.delete(5000));
 
 		const ask: Message = <Message> await message.channel.sendMessage(
-			`Are you sure you want to ban ${user.username}#${user.discriminator}? (yes/y | no/n) Reason:\n"${reason}"`);
+			`Are you sure you want to ban ${user.username}#${user.discriminator}? (__y__es | __n__o) Reason:\n"${reason}"`);
 		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
 			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
 
