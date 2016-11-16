@@ -2,6 +2,8 @@
 import { Bot, Command, LocalStorage } from 'yamdbf';
 import { User, Message, TextChannel, Guild } from 'discord.js';
 import { ActiveAppeals, ActiveBans, BanObj } from '../../lib/ModActions';
+import * as moment from 'moment';
+
 
 export default class Appeal extends Command
 {
@@ -41,14 +43,34 @@ export default class Appeal extends Command
 					'You must provide an appeal message if you want to appeal a ban.');
 
 				const guild: Guild = this.bot.guilds.get(ban.guild);
+				const embed: any = {
+					color: 65454,
+					author: {
+						name: `${ban.raw}`,
+						icon_url: message.author.avatarURL
+					},
+					fields: [
+						{
+							name: 'Reason for ban',
+							value: ban.reason
+						},
+						{
+							name: 'Appeal message',
+							value: reason
+						},
+						{
+							name: 'Actions',
+							value: `To approve this appeal, use \`${this.bot.getPrefix(guild)}approve ${ban.user}\`\n`
+								+ `To reject this appeal, use \`${this.bot.getPrefix(guild)}reject ${ban.user}\``
+						}
+					],
+					footer: {
+						text: `${moment().format('dddd, MMM Do, YYYY | h:mm a')}`
+					}
+				};
+
 				const appeal: Message = <Message> await (<TextChannel> guild.channels.find('name', 'ban-appeals'))
-					.sendMessage(`\`------------------APPEAL------------------\`\n`
-						+ `\`User:\` ${ban.raw}\n`
-						+ `\`Reason for ban:\` ${ban.reason}\n\n`
-						+ `\`Appeal message:\` ${reason}\n\n`
-						+ `To approve this appeal, use \`${this.bot.getPrefix(guild)}approve ${ban.user}\`\n`
-						+ `To reject this appeal, use \`${this.bot.getPrefix(guild)}reject ${ban.user}\`\n`
-						+ `\`------------------------------------------\``);
+					.sendMessage('', <any> { embed: embed });
 
 				activeAppeals[message.author.id] = appeal.id;
 				storage.setItem(appealsKey, activeAppeals);
