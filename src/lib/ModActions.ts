@@ -271,7 +271,7 @@ export default class ModActions
 		const kicks: number = (storage.getItem('kicks') || {})[user.id] || 0;
 		const bans: number = (storage.getItem('bans') || {})[user.id] || 0;
 
-		return `This user has had ${warns} warnings, ${mutes} mutes, ${kicks} kicks, and ${bans} bans.`;
+		return `This user has ${warns} warnings, ${mutes} mutes, ${kicks} kicks, and ${bans} bans.`;
 	}
 
 	/**
