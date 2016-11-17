@@ -40,7 +40,10 @@ export default class Appeal extends Command
 				const reason: string = args.join(' ');
 
 				if (!reason) return message.channel.sendMessage(
-					'You must provide an appeal message if you want to appeal a ban.');
+					'You must provide an appeal message if you want to appeal a ban. Please limit the message to 1,000 characters or less.');
+
+				if (reason.length > 1000) return message.channel.sendMessage(
+					'You must limit your appeal message to 1,000 characters or less.');
 
 				const guild: Guild = this.bot.guilds.get(ban.guild);
 				const embed: any = {
