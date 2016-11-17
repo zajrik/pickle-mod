@@ -37,15 +37,16 @@ export default class Ban extends Command
 		if (!reason) return message.channel.sendMessage('You must provide a reason to ban that user.')
 			.then((res: Message) => res.delete(5000));
 
+		const offenses: any = (<ModBot> this.bot).mod.checkUserHistory(message.guild, user);
 		const embed: any = {
-			color: 16718080,
+			color: offenses.color,
 			author: {
 				name: `${user.username}#${user.discriminator}`,
 				icon_url: user.avatarURL
 			},
 			description: reason,
 			footer: {
-				text: (<ModBot> this.bot).mod.checkUserHistory(message.guild, user)
+				text: offenses.toString()
 			}
 		};
 

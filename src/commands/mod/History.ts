@@ -21,14 +21,15 @@ export default class History extends Command
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		const user: User = mentions[0];
+		const offenses: any = (<ModBot> this.bot).mod.checkUserHistory(message.guild, user);
 		const embed: any = {
-			color: 16718080,
+			color: offenses.color,
 			author: {
 				name: `${user.username}#${user.discriminator}`,
 				icon_url: user.avatarURL
 			},
 			footer: {
-				text: (<ModBot> this.bot).mod.checkUserHistory(message.guild, user)
+				text: offenses.toString()
 			}
 		};
 

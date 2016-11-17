@@ -263,15 +263,31 @@ export default class ModActions
 	/**
 	 * Check the number of past offenses a user has had
 	 */
-	public checkUserHistory(guild: Guild, user: User): string
+	public checkUserHistory(guild: Guild, user: User): { toString: () => string, color: number, values: number[]}
 	{
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		const warns: number = (storage.getItem('warnings') || {})[user.id] || 0;
 		const mutes: number = (storage.getItem('mutes') || {})[user.id] || 0;
 		const kicks: number = (storage.getItem('kicks') || {})[user.id] || 0;
 		const bans: number = (storage.getItem('bans') || {})[user.id] || 0;
+		const values: any[] = [warns, mutes, kicks, bans];
+		const colors: number[] = [
+			8450847,
+			10870283,
+			13091073,
+			14917123,
+			16152591,
+			16667430,
+			16462404
+		];
+		const colorIndex: number = Math.min(values
+			.reduce((a: number, b: number) => a + b), colors.length - 1);
 
-		return `This user has ${warns} warnings, ${mutes} mutes, ${kicks} kicks, and ${bans} bans.`;
+		return {
+			toString: () => `This user has ${warns} warnings, ${mutes} mutes, ${kicks} kicks, and ${bans} bans.`,
+			color: colors[colorIndex],
+			values: values
+		};
 	}
 
 	/**
