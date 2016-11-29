@@ -270,7 +270,7 @@ export default class ModActions
 		const mutes: number = (storage.getItem('mutes') || {})[user.id] || 0;
 		const kicks: number = (storage.getItem('kicks') || {})[user.id] || 0;
 		const bans: number = (storage.getItem('bans') || {})[user.id] || 0;
-		const values: any[] = [warns, mutes, kicks, bans];
+		const values: number[] = [warns, mutes, kicks, bans];
 		const colors: number[] = [
 			8450847,
 			10870283,
@@ -293,56 +293,56 @@ export default class ModActions
 	/**
 	 * Give a formal warning to the provided user
 	 */
-	public warn(user: User | string, guild: Guild): Promise<User | string>
+	public async warn(user: User | string, guild: Guild): Promise<User | string>
 	{
 		this._count(user, guild, 'warnings');
-		return Promise.resolve(user);
+		return user;
 	}
 
 	/**
 	 * Mute a user in a guild
 	 */
-	public mute(user: User | string, guild: Guild): Promise<GuildMember>
+	public async mute(user: User | string, guild: Guild): Promise<GuildMember>
 	{
 		this._count(user, guild, 'mutes');
 		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
-		return member.addRole(guild.roles.find('name', 'Muted'));
+		return await member.addRole(guild.roles.find('name', 'Muted'));
 	}
 
 	/**
 	 * Unmute a user in a guild
 	 */
-	public unmute(user: User | string, guild: Guild): Promise<GuildMember>
+	public async unmute(user: User | string, guild: Guild): Promise<GuildMember>
 	{
 		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
-		return member.removeRole(guild.roles.find('name', 'Muted'));
+		return await member.removeRole(guild.roles.find('name', 'Muted'));
 	}
 
 	/**
 	 * Kick a user from a guild
 	 */
-	public kick(user: User | string, guild: Guild): Promise<GuildMember>
+	public async kick(user: User | string, guild: Guild): Promise<GuildMember>
 	{
 		this._count(user, guild, 'kicks');
 		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
-		return member.kick();
+		return await member.kick();
 	}
 
 	/**
 	 * Ban a user from a guild
 	 */
-	public ban(user: User | string, guild: Guild): Promise<GuildMember>
+	public async ban(user: User | string, guild: Guild): Promise<GuildMember>
 	{
 		this._count(user, guild, 'bans');
 		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
-		return guild.ban(member, 7);
+		return <GuildMember> await guild.ban(member, 7);
 	}
 
 	/**
 	 * Unban a user from a guild. Requires knowledge of the user's ID
 	 */
-	public unban(id: string, guild: Guild): Promise<User>
+	public async unban(id: string, guild: Guild): Promise<User>
 	{
-		return guild.unban(id);
+		return await guild.unban(id);
 	}
 }
