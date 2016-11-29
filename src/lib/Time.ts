@@ -1,27 +1,31 @@
+'use strict';
+
+/**
+ * Represents a difference between two given valid Unix time signatures
+ */
 type Difference = {
-	ms?: number;
-	days?: number;
-	hours?: number;
-	mins?: number;
-	secs?: number;
+	ms?: int;
+	days?: int;
+	hours?: int;
+	mins?: int;
+	secs?: int;
 	toString(): string;
 	toSimplifiedString?(): string;
 }
+
+type int = number;
 
 /**
  * Extend the Date class to provide helper methods
  */
 export default class Time extends Date
 {
+	public constructor() { super(); }
+
 	/**
-	 * Return an object containing the time difference between a and be
-	 * @param {int} a Time in milliseconds
-	 * @param {int} b Time in milliseconds
-	 * @returns {Object} object containing days, hours, mins, secs, and ms
-	 *                  Also exposes two methods, toString and
-	 *                  toSimplifiedString for the object
+	 * Return an object containing the time difference between a and b
 	 */
-	public static difference(a: number, b: number): Difference
+	public static difference(a: int, b: int): Difference
 	{
 		let difference: Difference = {};
 		let ms: number = a - b;
@@ -47,7 +51,7 @@ export default class Time extends Date
 
 		// Returns the time string as '#d #h #m #s'
 		difference.toSimplifiedString = (): string =>
-			timeString.replace(/ours|ins|ecs| /g, '').replace(/,/g, ' ').trim();
+			timeString.replace(/ays|ours|ins|ecs| /g, '').replace(/,/g, ' ').trim();
 
 		return difference;
 	}
@@ -57,23 +61,18 @@ export default class Time extends Date
 	 * 
 	 * Shorthand examples: 10m, 5h, 1d
 	 */
-	public static parseShorthand(shorthand: string): number
+	public static parseShorthand(shorthand: string): int
 	{
-		let duration: number, match: RegExpMatchArray ;
+		let duration: int, match: RegExpMatchArray ;
 		if (/^\d+[m|h|d]$/.test(<string> shorthand))
 		{
 			match = shorthand.match(/(\d+)(m|h|d)$/);
-			duration = parseFloat(match[1]);
+			duration = parseInt(match[1]);
 			duration = match[2] === 'm'
 				? duration * 1000 * 60 : match[2] === 'h'
 				? duration * 1000 * 60 * 60 : match[2] === 'd'
 				? duration * 1000 * 60 * 60 * 24 : null;
 		}
 		return duration;
-	}
-
-	public constructor()
-	{
-		super();
 	}
 }
