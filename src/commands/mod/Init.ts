@@ -30,7 +30,7 @@ export default class Kick extends Command
 		}
 		catch (err)
 		{
-			message.author.sendMessage(`There was an error setting up the server. Contact zajrik#2656 on YAMDBF Official and provide this error:\n${err.stack}`);
+			message.author.sendMessage(`There was an error setting up the server. Contact zajrik#2656 on YAMDBF Official and provide this error:\n${err}\n\nThe most common cause for problems during setting up or when running any mod commands is due to the \`YAMDBF Mod\` role being lower than other roles I have to interact with. Try moving this role to the top, or as high as you are willing to move it (Make sure it's above the \`Muted\` role I create, at least) and run the \`init\` command again.`);
 		}
 		response.delete();
 	}

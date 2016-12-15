@@ -99,7 +99,7 @@ export default class ModActions
 
 		this._bot.on('guildCreate', (guild: Guild) =>
 		{
-			guild.owner.sendMessage(`Hello! I'm here to help you with your server moderation needs! To get started, in a text channel on your server that I would have 'read messages' permissions, execute the command \`?init\`. I'll tell you when I'm done setting up my business on your server. From there, should you choose, you can change my command prefix using \`?setprefix <prefix>\` from within your server.\n\nUse \`?help\` from within a server text channel to see the commands available for server moderation.`);
+			guild.owner.sendMessage(`Hello! I'm here to help you with your server moderation needs! To get started, in a text channel on your server that I would have 'read messages' permissions, execute the command \`?init\`. I'll tell you when I'm done setting up my business on your server. From there, should you choose, you can change my command prefix using \`?setprefix <prefix>\` from within your server.\n\nUse \`?help\` from within a server text channel to see the commands available for server moderation.\n\n**Note:** Be sure to set the \`YAMDBF Mod\` role above other roles in the server to make sure I am able to set up the server and handle moderation commands.`);
 		});
 
 		// Add timer for auto-removal of expired user mutes
