@@ -13,8 +13,7 @@ export default class ClearLogs extends Command
 			usage: '<prefix>clearlogs',
 			extraHelp: '',
 			group: 'mod',
-			permissions: ['MANAGE_GUILD'],
-			roles: ['Mod'],
+			permissions: ['MANAGE_GUILD']
 		});
 	}
 

@@ -13,8 +13,7 @@ export default class History extends Command
 			description: 'Check a user\'s offense history',
 			usage: '<prefix>history <@user>',
 			extraHelp: '',
-			group: 'mod',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

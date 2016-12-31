@@ -13,8 +13,7 @@ export default class Kick extends Command
 			description: 'Kick a user',
 			usage: '<prefix>kick <@user> <reason>',
 			extraHelp: '',
-			group: 'mod',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

@@ -15,8 +15,7 @@ export default class Mute extends Command
 			description: 'Mute a user',
 			usage: '<prefix>mute <@user> [duration] <reason>',
 			extraHelp: '',
-			group: 'mod',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

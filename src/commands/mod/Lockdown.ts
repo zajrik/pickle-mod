@@ -14,8 +14,7 @@ export default class Lockdown extends Command
 			description: 'Lock down a channel for a set time',
 			usage: '<prefix>lockdown <duration|clear>',
 			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t10m or 5h or 1d\n\nUse `lockdown clear` to remove the channel lockdown',
-			group: 'mod',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

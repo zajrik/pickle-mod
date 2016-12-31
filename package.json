@@ -1,6 +1,6 @@
 {
   "name": "modbot",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Discord bot for server moderation purposes",
   "main": "bot.js",
   "scripts": {
@@ -26,7 +26,8 @@
   "dependencies": {
     "discord.js": "github:hydrabolt/discord.js#indev",
     "moment": "^2.16.0",
-    "yamdbf": "^2.5.0"
+    "typescript": "^2.1.4",
+    "yamdbf": "^2.5.7"
   },
   "devDependencies": {
     "@types/node": "^6.0.46",

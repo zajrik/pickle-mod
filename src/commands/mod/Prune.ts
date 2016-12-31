@@ -12,8 +12,7 @@ export default class Prune extends Command
 			description: 'Remove the last given quantity of messages for the provided member',
 			usage: '<prefix>prune <quantity> <member>',
 			extraHelp: 'Can delete up to 100 messages per command call',
-			group: 'base',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

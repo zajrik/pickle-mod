@@ -1,6 +1,6 @@
 'use strict';
-import { Bot, Command, LocalStorage } from 'yamdbf';
-import { User, Message } from 'discord.js';
+import { Bot, Command, LocalStorage, Message } from 'yamdbf';
+import { User } from 'discord.js';
 import { ActiveMutes, MuteObj } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
 
@@ -14,8 +14,7 @@ export default class Unmute extends Command
 			description: 'Unmute a user',
 			usage: '<prefix>unmute <@user>',
 			extraHelp: '',
-			group: 'mod',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

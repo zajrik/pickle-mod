@@ -14,8 +14,7 @@ export default class Ban extends Command
 			description: 'Ban a user',
 			usage: '<prefix>ban <@user> <reason>',
 			extraHelp: '',
-			group: 'mod',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

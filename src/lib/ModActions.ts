@@ -2,9 +2,8 @@
 import Time from './Time';
 import Timer from './timer/Timer';
 import ModBot from './ModBot';
-import * as moment from 'moment';
-import { LocalStorage, GuildStorage } from 'yamdbf';
-import { TextChannel, GuildMember, GuildChannel, Guild, Message, User } from 'discord.js';
+import { LocalStorage, GuildStorage, Message } from 'yamdbf';
+import { TextChannel, GuildMember, Guild, Collection, User, RichEmbed, MessageEmbed } from 'discord.js';
 
 /**
  * Storage entry containing all users with active mutes
@@ -77,29 +76,34 @@ export default class ModActions
 	public constructor(bot: ModBot)
 	{
 		this._bot = bot;
-		this._mutedOverwrites = {
-			SEND_MESSAGES: false,
-			SEND_TTS_MESSAGES: false,
-			EMBED_LINKS: false,
-			ATTACH_FILES: false,
-			SPEAK: false
-		};
-
-		this._bot.on('channelCreate', async (channel: GuildChannel) =>
-		{
-			if (!channel.guild) return;
-			if (channel.type === 'text' && !channel.permissionsFor(this._bot.user)
-				.hasPermission('MANAGE_ROLES_OR_PERMISSIONS')) return;
-			console.log(`Setting 'Muted' role permissions in channel: ${channel.guild.name}/${channel.name}`);
-			await channel.overwritePermissions(channel.guild.roles.find('name', 'Muted'), this._mutedOverwrites)
-				.catch(console.log);
-			await channel.overwritePermissions(channel.guild.roles.find('name', 'Mod'), <any> { SEND_MESSAGES: true });
-			await channel.overwritePermissions(channel.guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true });
-		});
 
 		this._bot.on('guildCreate', (guild: Guild) =>
 		{
-			guild.owner.sendMessage(`Hello! I'm here to help you with your server moderation needs! To get started, in a text channel on your server that I would have 'read messages' permissions, execute the command \`?init\`. I'll tell you when I'm done setting up my business on your server. From there, should you choose, you can change my command prefix using \`?setprefix <prefix>\` from within your server.\n\nUse \`?help\` from within a server text channel to see the commands available for server moderation.\n\n**Note:** Be sure to set the \`YAMDBF Mod\` role above other roles in the server to make sure I am able to set up the server and handle moderation commands.`);
+			// Implement a message with the setup instructions
+		});
+
+		this._bot.on('guildBanAdd', async (guild: Guild, user: User) =>
+		{
+			let storage: GuildStorage = this._bot.guildStorages.get(guild);
+			if (!this.hasLoggingChannel(guild)) return;
+			await this.caseLog(
+				user,
+				guild,
+				'Ban',
+				`Use \`${storage.getSetting('prefix')}reason ${storage.getSetting('cases') + 1} <reason text>\` to set a reason for this ban`,
+				this._bot.user);
+		});
+
+		this._bot.on('guildBanRemove', async (guild: Guild, user: User) =>
+		{
+			let storage: GuildStorage = this._bot.guildStorages.get(guild);
+			if (!this.hasLoggingChannel(guild)) return;
+			await this.caseLog(
+				user,
+				guild,
+				'Unban',
+				`Use \`${storage.getSetting('prefix')}reason ${storage.getSetting('cases') + 1} <reason text>\` to set a reason for this unban`,
+				this._bot.user);
 		});
 
 		// Add timer for auto-removal of expired user mutes
@@ -153,7 +157,7 @@ export default class ModActions
 						allow: lockdown.allow,
 						deny: lockdown.deny
 					};
-					await this._bot.rest.methods.setChannelOverwrite(channel, payload);
+					await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
 					delete activeLockdowns[id];
 					channel.fetchMessage(lockdown.message)
 						.then((msg: Message) => msg.delete());
@@ -166,47 +170,12 @@ export default class ModActions
 	}
 
 	/**
-	 * Create Muted and Mod roles, mod-logs and ban-appeals channels
-	 * and assign the necessary permissions to all channels for the roles
-	 */
-	public async initGuild(guild: Guild): Promise<void>
-	{
-		if (!guild.roles.find('name', 'Muted')) await guild.createRole({ name: 'Muted' });
-		if (!guild.roles.find('name', 'Mod')) await guild.createRole({ name: 'Mod' });
-		if (!guild.channels.find('name', 'mod-logs')) await guild.createChannel('mod-logs', 'text');
-		if (!guild.channels.find('name', 'ban-appeals')) await guild.createChannel('ban-appeals', 'text');
-		await guild.channels.find('name', 'mod-logs')
-			.overwritePermissions(guild.roles.find('name', '@everyone'), <any> { SEND_MESSAGES: false });
-		await guild.channels.find('name', 'mod-logs')
-			.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true });
-		await guild.channels.find('name', 'ban-appeals')
-			.overwritePermissions(guild.roles.find('name', '@everyone'), <any> { SEND_MESSAGES: false, READ_MESSAGES: false });
-		await guild.channels.find('name', 'ban-appeals')
-			.overwritePermissions(guild.roles.find('name', 'Mod'), <any> { SEND_MESSAGES: true, READ_MESSAGES: true });
-		await guild.channels.find('name', 'ban-appeals')
-			.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true, READ_MESSAGES: true });
-		for (let channel of guild.channels.values())
-		{
-			if (!guild.roles.find('name', 'Muted')) return;
-			if (!channel.permissionOverwrites.get(guild.roles.find('name', 'Muted').id)
-				&& channel.permissionsFor(this._bot.user).hasPermission('MANAGE_ROLES_OR_PERMISSIONS'))
-			{
-				console.log(`Setting 'Muted' role permissions in channel: ${channel.guild.name}/${channel.name}`);
-				await channel.overwritePermissions(guild.roles.find('name', 'Muted'), this._mutedOverwrites);
-			}
-			await channel.overwritePermissions(guild.roles.find('name', 'YAMDBF Mod'), <any> { SEND_MESSAGES: true });
-			if (channel.name === 'mod-logs') return;
-			await channel.overwritePermissions(guild.roles.find('name', 'Mod'), <any> { SEND_MESSAGES: true });
-		}
-	}
-
-	/**
 	 * Increment the number of times the given user has
 	 * received a given type of formal moderation action
 	 */
 	private _count(user: User | string,
 					guild: Guild | string,
-					type: 'warnings' | 'mutes' | 'kicks' | 'bans'): void
+					type: 'warnings' | 'mutes' | 'kicks' | 'softbans' | 'bans'): void
 	{
 		const storage: GuildStorage = this._bot.guildStorages.get(<string> guild);
 		let counts: any = storage.getItem(type);
@@ -219,16 +188,39 @@ export default class ModActions
 		storage.setItem(type, counts);
 	}
 
+	/** Check whether the channel for case logging has been set for a guild */
+	public hasLoggingChannel(guild: Guild): boolean
+	{
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		return Boolean(storage.settingExists('modlogs') && guild.channels.has(storage.getSetting('modlogs')));
+	}
+
+	/** Check whether a mod role has been set for a guild */
+	public hasSetModRole(guild: Guild): boolean
+	{
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		return Boolean(storage.settingExists('modrole') && guild.channels.has(storage.getSetting('modrole')));
+	}
+
+	/** Check whether a user has the mod role for a guild */
+	public hasModRole(guild: Guild, member: GuildMember): boolean
+	{
+		if (!this.hasSetModRole(guild)) return false;
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		return member.roles.has(storage.getSetting('modrole'));
+	}
+
 	/**
 	 * Post the moderation case to the mod-logs channel
 	 */
 	public caseLog(user: User | string,
 					guild: Guild,
-					type: 'Warn' | 'Mute' | 'Kick' | 'Ban',
+					type: 'Warn' | 'Mute' | 'Kick' | 'Softban' | 'Ban' | 'Unban',
 					reason: string,
 					issuer: User,
 					duration?: string): Promise<Message>
 	{
+		if (!this.hasLoggingChannel(guild)) return null;
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		let caseNum: number = storage.getSetting('cases') || 0;
 		caseNum++;
@@ -236,28 +228,96 @@ export default class ModActions
 
 		enum colors
 		{
+			'Unban' = 8450847,
 			'Warn' = 16776960,
 			'Mute' = 16763904,
 			'Kick' = 16745216,
+			'Softban' = 16745216,
 			'Ban' = 16718080
 		}
 
-		const embed: any = {
-			color: colors[type],
-			author: {
-				name: `${issuer.username}#${issuer.discriminator}`,
-				icon_url: issuer.avatarURL
-			},
-			description: `**Member:** ${user} (${(<User> user).username}#${(<User> user).discriminator})\n`
+		const embed: RichEmbed = new RichEmbed()
+			.setColor(colors[type])
+			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
+			.setDescription(`**Member:** ${(<User> user).username}#${(<User> user).discriminator} (${(<User> user).id})\n`
 				+ `**Action:** ${type}\n`
 				+ `${duration ? `**Length:** ${duration}\n` : ''}`
-				+ `**Reason:** ${reason}`,
-			footer: {
-				text: `Case ${caseNum} | ${moment().format('dddd, MMM Do, YYYY | h:mm a')}`
-			}
-		};
+				+ `**Reason:** ${reason}`)
+			.setFooter(`Case ${caseNum}`)
+			.setTimestamp();
 
-		return (<TextChannel> guild.channels.find('name', 'mod-logs')).sendMessage(``, <any> { embed: embed });
+		return (<TextChannel> guild.channels.get(storage.getSetting('modlogs'))).sendEmbed(embed);
+	}
+
+	/**
+	 * Find the specified logged case message
+	 */
+	public async findCase(guild: Guild, num: number): Promise<Message>
+	{
+		const messages: Collection<string, Message> = await (<TextChannel> guild.channels
+			.get(this._bot.guildStorages.get(guild).getSetting('modlogs')))
+			.fetchMessages({ limit: 100 });
+
+		const foundCase: Message = messages.find((msg: Message) =>
+			msg.embeds.length > 0 ? msg.embeds[0].footer.text === `Case ${num}` : false);
+
+		return foundCase || null;
+	}
+
+	/**
+	 * Edit a logged moderation case to provide or edit a reason.
+	 * Only works if the editor is the original issuer
+	 */
+	public async editCase(guild: Guild, num: number, issuer: User, reason: string): Promise<Message>
+	{
+		const caseMessage: Message = await this.findCase(guild, num);
+		if (!caseMessage) return null;
+		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
+		if (messageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
+			|| messageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
+
+		const embed: RichEmbed = new RichEmbed()
+			.setColor(messageEmbed.color)
+			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
+			.setDescription(messageEmbed.description.replace(/\*\*Reason:\*\* .+/, `**Reason:** ${reason}`))
+			.setFooter(messageEmbed.footer.text)
+			.setTimestamp(new Date(messageEmbed.createdTimestamp));
+
+		let options: any = {};
+		return caseMessage.edit('', Object.assign(options, { embed }));
+	}
+
+	/**
+	 * Merge two cases (ban and unban) together with a new reason
+	 */
+	public async mergeSoftban(guild: Guild, first: number, second: number, issuer: User, reason: string): Promise<Message>
+	{
+		const banCaseMessage: Message = await this.findCase(guild, first);
+		if (!banCaseMessage) return null;
+		console.log(`Found case ${first}`);
+
+		const banMessageEmbed: MessageEmbed = banCaseMessage.embeds[0];
+		if (banMessageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
+			&& banMessageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
+		console.log(`Issuer was valid`);
+
+		const unbanCaseMessage: Message = await this.findCase(guild, second);
+		if (!unbanCaseMessage) return null;
+		console.log(`Found case ${second}`);
+
+		const embed: RichEmbed = new RichEmbed()
+			.setColor(banMessageEmbed.color)
+			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
+			.setDescription(banMessageEmbed.description
+				.replace(/\*\*Action:\*\* .+/, `**Action:** Softban`)
+				.replace(/\*\*Reason:\*\*/, `**Reason:** ${reason}`))
+			.setFooter(banMessageEmbed.footer.text)
+			.setTimestamp(new Date(banMessageEmbed.createdTimestamp));
+
+		let options: any = {};
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		storage.setSetting('cases', storage.getSetting('cases') - 1);
+		return banCaseMessage.edit('', Object.assign(options, { embed })).then(() => unbanCaseMessage.delete());
 	}
 
 	/**
@@ -269,6 +329,7 @@ export default class ModActions
 		const warns: number = (storage.getItem('warnings') || {})[user.id] || 0;
 		const mutes: number = (storage.getItem('mutes') || {})[user.id] || 0;
 		const kicks: number = (storage.getItem('kicks') || {})[user.id] || 0;
+		const softbans: number = (storage.getItem('softbans') || {})[user.id] || 0;
 		const bans: number = (storage.getItem('bans') || {})[user.id] || 0;
 		const values: number[] = [warns, mutes, kicks, bans];
 		const colors: number[] = [
@@ -284,7 +345,7 @@ export default class ModActions
 			.reduce((a: number, b: number) => a + b), colors.length - 1);
 
 		return {
-			toString: () => `This user has ${warns} warnings, ${mutes} mutes, ${kicks} kicks, and ${bans} bans.`,
+			toString: () => `This user has ${warns} warnings, ${mutes} mutes, ${kicks + softbans} kicks, and ${bans} bans.`,
 			color: colors[colorIndex],
 			values: values
 		};
@@ -344,5 +405,17 @@ export default class ModActions
 	public async unban(id: string, guild: Guild): Promise<User>
 	{
 		return await guild.unban(id);
+	}
+
+	/**
+	 * Softban a user from a guild, removing the past 7 days of their messages
+	 */
+	public async softban(user: User | string, guild: Guild): Promise<User>
+	{
+		this._count(user, guild, 'softbans');
+		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
+		await guild.ban(member, 7);
+		await new Promise((r: any) => setTimeout(r, 5e3));
+		return await guild.unban(member.id);
 	}
 }

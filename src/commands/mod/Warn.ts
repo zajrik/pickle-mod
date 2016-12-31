@@ -13,8 +13,7 @@ export default class Warn extends Command
 			description: 'Give a formal warning to a user',
 			usage: '<prefix>warn <@user> <reason>',
 			extraHelp: '',
-			group: 'mod',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

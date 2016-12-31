@@ -14,8 +14,7 @@ export default class Reject extends Command
 			usage: '<prefix>reject <id>',
 			extraHelp: '',
 			group: 'mod',
-			argOpts: { stringArgs: true },
-			roles: ['Mod']
+			argOpts: { stringArgs: true }
 		});
 	}
 

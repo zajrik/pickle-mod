@@ -1,7 +1,0 @@
-{
-  "globalDependencies": {
-    "discord.js": "github:acdenisSK/discord.js-typings/discord.d.ts",
-    "node": "registry:dt/node#6.0.0+20161019125345",
-    "yamdbf": "github:zajrik/yamdbf-typings/yamdbf.d.ts"
-  }
-}

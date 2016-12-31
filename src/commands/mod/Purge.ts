@@ -12,8 +12,7 @@ export default class Purge extends Command
 			description: 'Remove the last given quantity of messages from the channel',
 			usage: '<prefix>purge <quantity>',
 			extraHelp: 'Can delete up to 100 messages per command call',
-			group: 'base',
-			roles: ['Mod']
+			group: 'mod'
 		});
 	}
 

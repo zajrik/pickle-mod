@@ -15,8 +15,7 @@ export default class Approve extends Command
 			usage: '<prefix>approve <id>',
 			extraHelp: '',
 			group: 'mod',
-			argOpts: { stringArgs: true },
-			roles: ['Mod']
+			argOpts: { stringArgs: true }
 		});
 	}
 
