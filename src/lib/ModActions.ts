@@ -36,7 +36,6 @@ export type BanObj = {
 	raw: string;
 	guild: string;
 	guildName: string;
-	reason: string;
 	timestamp: number;
 }
 
@@ -84,25 +83,52 @@ export default class ModActions
 
 		this._bot.on('guildBanAdd', async (guild: Guild, user: User) =>
 		{
-			let storage: GuildStorage = this._bot.guildStorages.get(guild);
+			let settings: GuildStorage = this._bot.guildStorages.get(guild);
 			if (!this.hasLoggingChannel(guild)) return;
+			const storage: LocalStorage = this._bot.storage;
+			await storage.nonConcurrentAccess('activeBans', (key: string) =>
+			{
+				const activeBans: ActiveBans = storage.getItem(key) || {};
+				if (!activeBans[user.id]) activeBans[user.id] = [];
+				activeBans[user.id].push({
+					user: user.id,
+					raw: `${user.username}#${user.discriminator}`,
+					guild: guild.id,
+					guildName: guild.name,
+					timestamp: new Date().getTime()
+				});
+				storage.setItem(key, activeBans);
+			});
 			await this.caseLog(
 				user,
 				guild,
 				'Ban',
-				`Use \`${storage.getSetting('prefix')}reason ${storage.getSetting('cases') + 1} <reason text>\` to set a reason for this ban`,
+				`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this ban`,
 				this._bot.user);
 		});
 
 		this._bot.on('guildBanRemove', async (guild: Guild, user: User) =>
 		{
-			let storage: GuildStorage = this._bot.guildStorages.get(guild);
+			let settings: GuildStorage = this._bot.guildStorages.get(guild);
 			if (!this.hasLoggingChannel(guild)) return;
+			let storage: LocalStorage = this._bot.storage;
+			await storage.nonConcurrentAccess('activeBans', (key: string) =>
+			{
+				const activeBans: ActiveBans = storage.getItem(key) || {};
+				const bans: BanObj[] = activeBans[user.id];
+				for (let i: number = 0; i < bans.length; i++)
+				{
+					if (bans[i].guild === guild.id) bans.splice(i--, 1);
+				}
+				if (bans.length === 0) delete activeBans[user.id];
+				else activeBans[user.id] = bans;
+				storage.setItem(key, activeBans);
+			});
 			await this.caseLog(
 				user,
 				guild,
 				'Unban',
-				`Use \`${storage.getSetting('prefix')}reason ${storage.getSetting('cases') + 1} <reason text>\` to set a reason for this unban`,
+				`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this unban`,
 				this._bot.user);
 		});
 
@@ -138,7 +164,7 @@ export default class ModActions
 		}));
 
 		// Add timer for auto-removal of expired channel lockdowns
-		this._bot.timers.add(new Timer(this._bot, 'lockdown', 60, async () =>
+		this._bot.timers.add(new Timer(this._bot, 'lockdown', 30, async () =>
 		{
 			const storage: LocalStorage = this._bot.storage;
 			storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
@@ -159,10 +185,7 @@ export default class ModActions
 					};
 					await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
 					delete activeLockdowns[id];
-					channel.fetchMessage(lockdown.message)
-						.then((msg: Message) => msg.delete());
-					channel.sendMessage('The lockdown on this channel has ended.')
-						.then((res: Message) => res.delete(10000));
+					channel.sendMessage('**The lockdown on this channel has ended.**');
 				}
 				storage.setItem(key, activeLockdowns);
 			});
@@ -195,19 +218,42 @@ export default class ModActions
 		return Boolean(storage.settingExists('modlogs') && guild.channels.has(storage.getSetting('modlogs')));
 	}
 
+	public hasAppealsChannel(guild: Guild): boolean
+	{
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		return Boolean(storage.settingExists('appeals') && guild.channels.has(storage.getSetting('appeals')));
+	}
+
 	/** Check whether a mod role has been set for a guild */
 	public hasSetModRole(guild: Guild): boolean
 	{
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		return Boolean(storage.settingExists('modrole') && guild.channels.has(storage.getSetting('modrole')));
+		return Boolean(storage.settingExists('modrole') && guild.roles.has(storage.getSetting('modrole')));
+	}
+
+	/** Check whether a muted role has been set for a guild */
+	public hasSetMutedRole(guild: Guild): boolean
+	{
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		return Boolean(storage.settingExists('mutedrole') && guild.roles.has(storage.getSetting('mutedrole')));
 	}
 
 	/** Check whether a user has the mod role for a guild */
-	public hasModRole(guild: Guild, member: GuildMember): boolean
+	public hasModRole(member: GuildMember): boolean
 	{
-		if (!this.hasSetModRole(guild)) return false;
-		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		if (!this.hasSetModRole(member.guild)) return false;
+		const storage: GuildStorage = this._bot.guildStorages.get(member.guild);
 		return member.roles.has(storage.getSetting('modrole'));
+	}
+
+	/** Check whether a member is allowed to call mod commands */
+	public canCallModCommand(message: Message): boolean
+	{
+		if (!this.hasLoggingChannel(message.guild)) return false;
+		if (!this.hasAppealsChannel(message.guild)) return false;
+		if (!this.hasSetModRole(message.guild)) return false;
+		if (!this.hasModRole(message.member)) return false;
+		return true;
 	}
 
 	/**

@@ -1,7 +1,8 @@
 'use strict';
-import { Bot, Command, LocalStorage } from 'yamdbf';
-import { User, Message, TextChannel } from 'discord.js';
+import { Bot, Command, LocalStorage, Message } from 'yamdbf';
+import { User, TextChannel } from 'discord.js';
 import { ActiveBans, BanObj, ActiveAppeals } from '../../lib/ModActions';
+import ModBot from '../../lib/ModBot';
 
 export default class Reject extends Command
 {
@@ -14,13 +15,14 @@ export default class Reject extends Command
 			usage: '<prefix>reject <id>',
 			extraHelp: '',
 			group: 'mod',
-			argOpts: { stringArgs: true }
+			argOpts: { stringArgs: true },
+			guildOnly: true
 		});
 	}
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		message.delete();
+		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
 		if ((<TextChannel> message.channel).name !== 'ban-appeals')
 			return message.channel.sendMessage('Reject command may only be run in #ban-appeals')
 				.then((res: Message) => res.delete(5000));

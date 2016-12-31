@@ -1,6 +1,6 @@
 'use strict';
-import { Bot, Command, LocalStorage } from 'yamdbf';
-import { User, Message, TextChannel, Guild } from 'discord.js';
+import { Bot, Command, LocalStorage, GuildStorage } from 'yamdbf';
+import { User, Message, TextChannel, Guild, RichEmbed } from 'discord.js';
 import { ActiveAppeals, ActiveBans, BanObj } from '../../lib/ModActions';
 import * as moment from 'moment';
 
@@ -46,34 +46,18 @@ export default class Appeal extends Command
 					'You must limit your appeal message to 1,000 characters or less.');
 
 				const guild: Guild = this.bot.guilds.get(ban.guild);
-				const embed: any = {
-					color: 65454,
-					author: {
-						name: `${ban.raw}`,
-						icon_url: message.author.avatarURL
-					},
-					fields: [
-						{
-							name: 'Reason for ban',
-							value: ban.reason
-						},
-						{
-							name: 'Appeal message',
-							value: reason
-						},
-						{
-							name: 'Actions',
-							value: `To approve this appeal, use \`${this.bot.getPrefix(guild)}approve ${ban.user}\`\n`
-								+ `To reject this appeal, use \`${this.bot.getPrefix(guild)}reject ${ban.user}\``
-						}
-					],
-					footer: {
-						text: `${moment().format('dddd, MMM Do, YYYY | h:mm a')}`
-					}
-				};
+				const embed: RichEmbed = new RichEmbed()
+					.setColor(65454)
+					.setAuthor(ban.raw, message.author.avatarURL)
+					.addField('Appeal message', reason)
+					.addField('Actions',
+						`To approve this appeal, use \`${this.bot.getPrefix(guild)}approve ${ban.user}\`\n`
+						+ `To reject this appeal, use \`${this.bot.getPrefix(guild)}reject ${ban.user}\``)
+					.setTimestamp();
 
-				const appeal: Message = <Message> await (<TextChannel> guild.channels.find('name', 'ban-appeals'))
-					.sendMessage('', <any> { embed: embed });
+				const guildStorage: GuildStorage = this.bot.guildStorages.get(guild);
+				const appeal: Message = <Message> await (<TextChannel> guild.channels
+					.get(guildStorage.getSetting('appeals'))).sendEmbed(embed);
 
 				activeAppeals[message.author.id] = appeal.id;
 				storage.setItem(appealsKey, activeAppeals);

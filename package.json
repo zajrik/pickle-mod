@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/zajrik/modbot#readme",
   "dependencies": {
-    "discord.js": "github:hydrabolt/discord.js#indev",
+    "discord.js": "^11.0.0",
     "moment": "^2.16.0",
     "typescript": "^2.1.4",
     "yamdbf": "^2.5.7"

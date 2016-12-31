@@ -1,6 +1,7 @@
 'use strict';
-import { Bot, Command } from 'yamdbf';
-import { User, Message, Collection, GuildChannel, TextChannel } from 'discord.js';
+import { Bot, Command, Message, GuildStorage } from 'yamdbf';
+import { User, Collection, TextChannel } from 'discord.js';
+import ModBot from '../../lib/ModBot';
 
 export default class ClearLogs extends Command
 {
@@ -19,32 +20,27 @@ export default class ClearLogs extends Command
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		const channelName: string = (<GuildChannel> message.channel).name;
-		if ( channelName === 'mod-logs' || channelName === 'ban-appeals') return message.delete()
-			.then(() => message.channel.sendMessage('You may not use that command in this channel.'))
-			.then((res: Message) => res.delete(5000));
+		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
+		const channelName: string = (<TextChannel> message.channel).name;
+		if (channelName === message.guild.channels.get(message.guild.storage.getSetting('modlogs')).name)
+			return message.channel.sendMessage('You may not use that command in this channel.');
 
-		const ask: Message = <Message> await message.channel.sendMessage(
+		await message.channel.sendMessage(
 			`Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)`);
 		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
 			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
 
-		if (!confirmation) return message.channel.sendMessage('Command timed out, aborting mod-logs reset.')
-			.then((res: Message) => res.delete(5000))
-			.then(() => [message, ask].forEach((a: Message) => a.delete()));
+		if (!confirmation) return message.channel.sendMessage('Command timed out, aborting mod-logs reset.');
 
 		if (!/^(?:yes|y)$/.test(confirmation.content))
-			return message.channel.sendMessage('Okay, aborting mod-logs reset.')
-				.then((res: Message) => res.delete(5000))
-				.then(() => [message, ask, confirmation].forEach((a: Message) => a.delete()));
+			return message.channel.sendMessage('Okay, aborting mod-logs reset.');
 
-		message.channel.sendMessage('Okay, clearing mod logs.')
-			.then((res: Message) => res.delete(5000));
-		[message, ask, confirmation].forEach((a: Message) => a.delete());
+		message.channel.sendMessage('Okay, clearing mod logs.');
+		let storage: GuildStorage = message.guild.storage;
+		storage.setSetting('cases', 0);
 
-		this.bot.guildStorages.get(message.guild).setSetting('cases', 0);
-
-		const logsChannel: TextChannel = <TextChannel> this.bot.guilds.get(message.guild.id).channels.find('name', 'mod-logs');
+		const logsChannelId: string = storage.getSetting('modlogs');
+		const logsChannel: TextChannel = <TextChannel> message.guild.channels.get(logsChannelId);
 		const purgeMessage: Message = <Message> await logsChannel.sendMessage('Mod log reset in progress...');
 		while (true)
 		{
@@ -55,9 +51,6 @@ export default class ClearLogs extends Command
 		}
 
 		return purgeMessage.delete()
-			.then(() => logsChannel.sendMessage('Mod log reset completed.'))
-			.then((res: Message) => res.delete(3000))
-			.then(() => message.channel.sendMessage('Mod log reset completed.'))
-			.then((res: Message) => res.delete(5000));
+			.then(() => message.channel.sendMessage('Mod log reset completed.'));
 	}
 }

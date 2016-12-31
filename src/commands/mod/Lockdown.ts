@@ -1,8 +1,9 @@
 'use strict';
-import { Bot, Command, LocalStorage } from 'yamdbf';
-import { User, Message, TextChannel } from 'discord.js';
+import { Bot, Command, LocalStorage, Message } from 'yamdbf';
+import { User, TextChannel } from 'discord.js';
 import Time from '../../lib/Time';
 import { ActiveLockdowns } from '../../lib/ModActions';
+import ModBot from '../../lib/ModBot';
 
 export default class Lockdown extends Command
 {
@@ -14,15 +15,14 @@ export default class Lockdown extends Command
 			description: 'Lock down a channel for a set time',
 			usage: '<prefix>lockdown <duration|clear>',
 			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t10m or 5h or 1d\n\nUse `lockdown clear` to remove the channel lockdown',
-			group: 'mod'
+			group: 'mod',
+			guildOnly: true
 		});
 	}
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		message.delete();
-		if ((<TextChannel> message.channel).name === 'mod-logs'
-			|| (<TextChannel> message.channel).name === 'ban-appeals') return;
+		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
 		if (args[0] !== 'clear')
 		{
 			const duration: number = Time.parseShorthand(<string> args[0]);
@@ -67,8 +67,7 @@ export default class Lockdown extends Command
 			{
 				let activeLockdowns: ActiveLockdowns = storage.getItem(key) || {};
 				if (!activeLockdowns[message.channel.id])
-					return message.channel.sendMessage('This channel is not locked down.')
-						.then((res: Message) => res.delete(5000));
+					return message.channel.sendMessage('This channel is not locked down.');
 				const oldPayload: any = activeLockdowns[message.channel.id];
 				const payload: any = {
 					id: message.guild.roles.find('name', '@everyone').id,
@@ -76,13 +75,10 @@ export default class Lockdown extends Command
 					allow: oldPayload.allow,
 					deny: oldPayload.deny
 				};
-				await this.bot.rest.methods.setChannelOverwrite(message.channel, payload);
+				await (<any> this.bot).rest.methods.setChannelOverwrite(message.channel, payload);
 				delete activeLockdowns[message.channel.id];
 				storage.setItem(key, activeLockdowns);
-				message.channel.fetchMessage(oldPayload.message)
-					.then((msg: Message) => msg.delete());
-				message.channel.sendMessage('The lockdown on this channel has ended.')
-					.then((res: Message) => res.delete(10000));
+				message.channel.sendMessage('**The lockdown on this channel has ended.**');
 			});
 		}
 	}
