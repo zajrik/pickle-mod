@@ -27,8 +27,8 @@ export default class Ban extends Command
 		if (user.id === message.author.id)
 			return message.channel.sendMessage(`I don't think you want to ban yourself.`);
 
-		if (message.guild.member(user.id).roles.has(message.guild.storage.getSetting('modrole'))
-			|| user.id === message.guild.ownerID || user.bot)
+		const modRole: string = message.guild.storage.getSetting('modrole');
+		if (message.guild.member(user.id).roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.sendMessage('You may not use this command on that user.');
 
 		const offenses: any = (<ModBot> this.bot).mod.checkUserHistory(message.guild, user);
@@ -52,6 +52,8 @@ export default class Ban extends Command
 		await (<ModBot> this.bot).mod.ban(user, message.guild);
 
 		console.log(`Banned ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
-		message.channel.sendMessage(`Successfully banned ${user.username}#${user.discriminator}`);
+		message.channel.sendMessage(`Successfully banned ${user.username}#${user.discriminator}`
+			+ `Remember to use \`${this.bot.getPrefix(message.guild)}reason <case#> <...reason>\` `
+			+ `to set a reason for this ban.`);
 	}
 }

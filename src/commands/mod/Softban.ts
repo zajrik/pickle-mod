@@ -1,18 +1,18 @@
-'use strict';
 import { Bot, Command, Message } from 'yamdbf';
 import { User } from 'discord.js';
 import ModBot from '../../lib/ModBot';
 
-export default class Kick extends Command
+export default class Softban extends Command
 {
 	public constructor(bot: Bot)
 	{
 		super(bot, {
-			name: 'kick',
+			name: 'softban',
 			aliases: [],
-			description: 'Kick a user',
-			usage: '<prefix>kick <@user> <reason>',
+			description: 'Softban a user',
+			usage: '<prefix>softban <@user>',
 			extraHelp: '',
+			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});
@@ -31,12 +31,12 @@ export default class Kick extends Command
 		if (message.guild.member(user.id).roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.sendMessage('You may not use this command on that user.');
 
-		const reason: string = args.join(' ').trim();
-		if (!reason) return message.channel.sendMessage('You must provide a reason to kick that user.');
+		const kicking: Message = <Message> await message.channel.sendMessage(
+			`Softbanning ${user.username}#${user.discriminator}... (Waiting for unban)`);
 
-		await (<ModBot> this.bot).mod.kick(user, message.guild);
-		await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Kick', reason, message.author);
-		console.log(`Kicked ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
-		message.channel.sendMessage(`Kicked ${user.username}#${user.discriminator}`);
+		await (<ModBot> this.bot).mod.softban(user, message.guild);
+		return kicking.edit(`Successfully softbanned ${user.username}#${user.discriminator}\n`
+			+ `Remember to set reasons for the ban and unban with `
+			+ `\`${this.bot.getPrefix(message.guild)}reason <case#> <...reason>\``);
 	}
 }

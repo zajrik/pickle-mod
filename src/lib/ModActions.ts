@@ -1,4 +1,3 @@
-'use strict';
 import Time from './Time';
 import Timer from './timer/Timer';
 import ModBot from './ModBot';
@@ -86,6 +85,8 @@ export default class ModActions
 			let settings: GuildStorage = this._bot.guildStorages.get(guild);
 			if (!this.hasLoggingChannel(guild)) return;
 			const storage: LocalStorage = this._bot.storage;
+
+			// Add the ban to storage for appealing
 			await storage.nonConcurrentAccess('activeBans', (key: string) =>
 			{
 				const activeBans: ActiveBans = storage.getItem(key) || {};
@@ -99,6 +100,7 @@ export default class ModActions
 				});
 				storage.setItem(key, activeBans);
 			});
+
 			await this.caseLog(
 				user,
 				guild,
@@ -111,7 +113,9 @@ export default class ModActions
 		{
 			let settings: GuildStorage = this._bot.guildStorages.get(guild);
 			if (!this.hasLoggingChannel(guild)) return;
-			let storage: LocalStorage = this._bot.storage;
+			const storage: LocalStorage = this._bot.storage;
+
+			// Remove the active ban in storage for the user
 			await storage.nonConcurrentAccess('activeBans', (key: string) =>
 			{
 				const activeBans: ActiveBans = storage.getItem(key) || {};
@@ -124,6 +128,27 @@ export default class ModActions
 				else activeBans[user.id] = bans;
 				storage.setItem(key, activeBans);
 			});
+
+			// Try to remove an active appeal for the user if there
+			// was one in the guild
+			await storage.nonConcurrentAccess('activeAppeals', async (key: string) =>
+			{
+				const activeAppeals: ActiveAppeals = storage.getItem(key) || {};
+				const appealsChannel: TextChannel = <TextChannel> guild.channels
+					.get(settings.getSetting('appeals'));
+				try
+				{
+					const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
+					appeal.delete();
+					delete activeAppeals[user.id];
+					storage.setItem(key, activeAppeals);
+				}
+				catch (err)
+				{
+					return;
+				}
+			});
+
 			await this.caseLog(
 				user,
 				guild,
@@ -329,8 +354,7 @@ export default class ModActions
 			.setFooter(messageEmbed.footer.text)
 			.setTimestamp(new Date(messageEmbed.createdTimestamp));
 
-		let options: any = {};
-		return caseMessage.edit('', Object.assign(options, { embed }));
+		return caseMessage.edit('', Object.assign({}, { embed }));
 	}
 
 	/**
@@ -360,10 +384,9 @@ export default class ModActions
 			.setFooter(banMessageEmbed.footer.text)
 			.setTimestamp(new Date(banMessageEmbed.createdTimestamp));
 
-		let options: any = {};
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		storage.setSetting('cases', storage.getSetting('cases') - 1);
-		return banCaseMessage.edit('', Object.assign(options, { embed })).then(() => unbanCaseMessage.delete());
+		return banCaseMessage.edit('', Object.assign({}, { embed })).then(() => unbanCaseMessage.delete());
 	}
 
 	/**
@@ -372,12 +395,9 @@ export default class ModActions
 	public checkUserHistory(guild: Guild, user: User): { toString: () => string, color: number, values: number[]}
 	{
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		const warns: number = (storage.getItem('warnings') || {})[user.id] || 0;
-		const mutes: number = (storage.getItem('mutes') || {})[user.id] || 0;
-		const kicks: number = (storage.getItem('kicks') || {})[user.id] || 0;
-		const softbans: number = (storage.getItem('softbans') || {})[user.id] || 0;
-		const bans: number = (storage.getItem('bans') || {})[user.id] || 0;
-		const values: number[] = [warns, mutes, kicks, bans];
+		const [warns, mutes, kicks, softbans, bans]: number[] = ['warnings', 'mutes', 'kicks', 'softbans', 'bans']
+			.map((type: string) => (storage.getItem(type) || {})[user.id] || 0);
+		const values: number[] = [warns, mutes, kicks, softbans, bans];
 		const colors: number[] = [
 			8450847,
 			10870283,
@@ -413,7 +433,8 @@ export default class ModActions
 	{
 		this._count(user, guild, 'mutes');
 		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
-		return await member.addRole(guild.roles.find('name', 'Muted'));
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		return await member.addRole(guild.roles.get(storage.getSetting('mutedrole')));
 	}
 
 	/**
@@ -422,7 +443,8 @@ export default class ModActions
 	public async unmute(user: User | string, guild: Guild): Promise<GuildMember>
 	{
 		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
-		return await member.removeRole(guild.roles.find('name', 'Muted'));
+		const storage: GuildStorage = this._bot.guildStorages.get(guild);
+		return await member.removeRole(guild.roles.get(storage.getSetting('mutedrole')));
 	}
 
 	/**

@@ -1,7 +1,6 @@
-'use strict';
-import { Bot, Command, LocalStorage } from 'yamdbf';
-import { User, Message, TextChannel, Invite } from 'discord.js';
-import { ActiveBans, BanObj, ActiveAppeals } from '../../lib/ModActions';
+import { Bot, Command, LocalStorage, Message } from 'yamdbf';
+import { User, Invite } from 'discord.js';
+import { ActiveAppeals } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
 
 export default class Approve extends Command
@@ -23,8 +22,9 @@ export default class Approve extends Command
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
-		if ((<TextChannel> message.channel).name !== 'ban-appeals')
-			return message.channel.sendMessage('Approve command may only be run in #ban-appeals')
+		const appealsChannel: string = message.guild.storage.getItem('appeals');
+		if (message.channel.id !== appealsChannel)
+			return message.channel.sendMessage('Approve command may only be run in the appeals channel.')
 				.then((res: Message) => res.delete(5e3));
 
 		message.delete();
