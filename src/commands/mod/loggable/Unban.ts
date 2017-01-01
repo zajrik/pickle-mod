@@ -28,8 +28,8 @@ export default class Unban extends Command
 		try
 		{
 			user = await (<ModBot> this.bot).mod.unban(id, message.guild);
-			return message.channel.sendMessage(`Successfully unbanned \`${user.username}#${user.discriminator}\`\n`
-				+ `Remember to use \`${this.bot.getPrefix(message.guild)}reason <case#> <...reason>\` `
+			return message.channel.sendMessage(`Successfully unbanned ${user.username}#${user.discriminator}\n`
+				+ `Remember to use \`${this.bot.getPrefix(message.guild)}reason latest <...reason>\` `
 				+ `to set a reason for this unbanning.`);
 		}
 		catch (err)

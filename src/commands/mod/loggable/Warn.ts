@@ -36,7 +36,6 @@ export default class Warn extends Command
 		await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Warn', reason, message.author);
 		await user.sendMessage(`You've received a warning in ${message.guild.name}.\n\`Reason:\` ${reason}`);
 		console.log(`Warned ${user.username}#${user.discriminator} in guild '${message.guild.name}'`);
-		message.channel.sendMessage(`Warned ${user.username}#${user.discriminator}`)
-			.then((res: Message) => res.delete(5000));
+		message.channel.sendMessage(`Warned ${user.username}#${user.discriminator}`);
 	}
 }

@@ -12,7 +12,7 @@ export default class Mute extends Command
 			name: 'mute',
 			aliases: [],
 			description: 'Mute a user',
-			usage: '<prefix>mute <@user> [duration] <reason>',
+			usage: '<prefix>mute <@user> <duration> <reason>',
 			extraHelp: '',
 			group: 'mod',
 			guildOnly: true
@@ -35,6 +35,8 @@ export default class Mute extends Command
 
 		const durationString: string = <string> args[0];
 		const duration: number = Time.parseShorthand(durationString);
+		if (!duration) return message.channel.sendMessage('You must provide a duration. (example: `30m`, `1h`, `2d`)');
+
 		const reason: string = (duration ? args.slice(1) : args).join(' ').trim();
 		if (!reason) return message.channel.sendMessage('You must provide a reason to mute that user.');
 
@@ -60,6 +62,7 @@ export default class Mute extends Command
 				});
 				storage.setItem(key, activeMutes);
 				console.log(`Muted user '${user.username}#${user.discriminator}'`);
+				user.sendMessage(`You've been muted in ${message.guild.name}`);
 			});
 			return message.channel.sendMessage(`Muted ${user.username}#${user.discriminator}`);
 		}

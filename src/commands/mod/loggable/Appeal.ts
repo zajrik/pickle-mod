@@ -49,7 +49,7 @@ export default class Appeal extends Command
 					.addField('Appeal message', reason)
 					.addField('Actions',
 						`To approve this appeal, use \`${this.bot.getPrefix(guild)}approve ${ban.user}\`\n`
-						+ `To reject this appeal, use \`${this.bot.getPrefix(guild)}reject ${ban.user}\``)
+						+ `To reject this appeal, use \`${this.bot.getPrefix(guild)}reject ${ban.user} <...reason>\``)
 					.setTimestamp();
 
 				const guildStorage: GuildStorage = this.bot.guildStorages.get(guild);

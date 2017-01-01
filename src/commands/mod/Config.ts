@@ -19,9 +19,9 @@ export default class Config extends Command
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!(<any> this.bot.config).owner.includes(message.author.id)
-			|| !(<TextChannel> message.channel).permissionsFor(message.member)
-				.hasPermission('MANAGE_GUILD'))
+		if (!((<any> this.bot.config).owner.includes(message.author.id)
+			|| (<TextChannel> message.channel).permissionsFor(message.member)
+				.hasPermission('MANAGE_GUILD')))
 			return;
 
 		const option: string = (<string> args.shift()).toLowerCase();

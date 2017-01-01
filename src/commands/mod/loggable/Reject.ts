@@ -51,7 +51,8 @@ export default class Reject extends Command
 			return message.channel.sendMessage('Okay, aborting reject.')
 				.then((res: Message) => res.delete(5e3))
 				.then(() => ask.delete())
-				.then(() => confirmation.delete());
+				.then(() => confirmation.delete())
+				.then(() => message.delete());
 
 		const user: User = await this.bot.fetchUser(id);
 		await storage.nonConcurrentAccess('activeBans', (key: string) =>
@@ -79,7 +80,8 @@ export default class Reject extends Command
 		message.channel.sendMessage(`Rejected appeal \`${id}\``)
 			.then((res: Message) => res.delete(5000))
 			.then(<any> ask.delete())
-			.then(<any> confirmation.delete());
+			.then(<any> confirmation.delete())
+			.then(() => message.delete());
 
 		user.sendMessage(`Your ban appeal for ${
 			message.guild.name} has been rejected. You may not appeal again.\n\nReason: ${reason}`);

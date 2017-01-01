@@ -22,10 +22,9 @@ export default class Approve extends Command
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
-		const appealsChannel: string = message.guild.storage.getItem('appeals');
+		const appealsChannel: string = message.guild.storage.getSetting('appeals');
 		if (message.channel.id !== appealsChannel)
-			return message.channel.sendMessage('Approve command may only be run in the appeals channel.')
-				.then((res: Message) => res.delete(5e3));
+			return message.channel.sendMessage('Approve command may only be run in the appeals channel.');
 
 		message.delete();
 		const id: string = <string> args[0];

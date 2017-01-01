@@ -51,7 +51,7 @@ export default class Ban extends Command
 
 		console.log(`Banned ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
 		message.channel.sendMessage(`Successfully banned ${user.username}#${user.discriminator}`
-			+ `Remember to use \`${this.bot.getPrefix(message.guild)}reason <case#> <...reason>\` `
+			+ `Remember to use \`${this.bot.getPrefix(message.guild)}reason latest <...reason>\` `
 			+ `to set a reason for this ban.`);
 	}
 }

@@ -20,7 +20,8 @@ export default class Reason extends Command
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
-		const id: number = <number> args.shift();
+		let id: number = <number> args.shift();
+		if (id.toString() === 'latest') id = message.guild.storage.getSetting('cases');
 		if (!id || isNaN(id)) return message.channel.sendMessage('You must provide a case number.');
 
 		const reason: string = args.join(' ');

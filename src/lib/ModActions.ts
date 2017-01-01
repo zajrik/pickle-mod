@@ -274,6 +274,7 @@ export default class ModActions
 	/** Check whether a member is allowed to call mod commands */
 	public canCallModCommand(message: Message): boolean
 	{
+		if (!message.guild) return false;
 		if (!this.hasLoggingChannel(message.guild)) return false;
 		if (!this.hasAppealsChannel(message.guild)) return false;
 		if (!this.hasSetModRole(message.guild)) return false;

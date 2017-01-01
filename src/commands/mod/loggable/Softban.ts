@@ -36,7 +36,7 @@ export default class Softban extends Command
 
 		await (<ModBot> this.bot).mod.softban(user, message.guild);
 		return kicking.edit(`Successfully softbanned ${user.username}#${user.discriminator}\n`
-			+ `Remember to set reasons for the ban and unban with `
+			+ `Remember to set reasons for both the ban and unban with `
 			+ `\`${this.bot.getPrefix(message.guild)}reason <case#> <...reason>\``);
 	}
 }
