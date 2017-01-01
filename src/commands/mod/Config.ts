@@ -9,7 +9,7 @@ export default class Config extends Command
 			name: 'config',
 			aliases: [],
 			description: 'Configure options for the server',
-			usage: '<prefix>config <mod|mute|logs|appeals> [...args]',
+			usage: '<prefix>config <mod|mute|logs|appeals|reset> [...args]',
 			extraHelp: '',
 			group: 'mod',
 			guildOnly: true,

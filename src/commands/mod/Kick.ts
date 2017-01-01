@@ -11,7 +11,7 @@ export default class Kick extends Command
 			name: 'kick',
 			aliases: [],
 			description: 'Kick a user',
-			usage: '<prefix>kick <@user> <reason>',
+			usage: '<prefix>kick <@user> <...reason>',
 			extraHelp: '',
 			group: 'mod',
 			guildOnly: true

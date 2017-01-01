@@ -22,6 +22,12 @@ export default class History extends Command
 	{
 		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
 		const user: User = mentions[0];
+		if (!user) return message.channel.sendMessage('You must mention a user to check.');
+
+		if (args[0] === 'reset')
+			for (const type of ['warnings', 'mutes', 'kicks', 'softbans', 'bans'])
+				message.guild.storage.removeItem(`${type}/${user.id}`);
+
 		const offenses: any = (<ModBot> this.bot).mod.checkUserHistory(message.guild, user);
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)

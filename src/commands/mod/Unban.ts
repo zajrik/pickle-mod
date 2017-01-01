@@ -22,7 +22,6 @@ export default class Unban extends Command
 	{
 		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
 		const id: string = <string> args[0];
-
 		if (!id) return message.channel.sendMessage('You must provide an ID to unban.');
 
 		let user: User;

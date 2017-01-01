@@ -344,8 +344,9 @@ export default class ModActions
 		const caseMessage: Message = await this.findCase(guild, num);
 		if (!caseMessage) return null;
 		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
-		if (messageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
-			|| messageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
+		if (messageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`
+			&& messageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`)
+			return null;
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(messageEmbed.color)
