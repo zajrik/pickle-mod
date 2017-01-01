@@ -1,4 +1,3 @@
-'use strict';
 import { Bot, Command, Message, GuildStorage } from 'yamdbf';
 import { User, Collection, TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';

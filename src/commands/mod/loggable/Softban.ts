@@ -1,6 +1,6 @@
 import { Bot, Command, Message } from 'yamdbf';
 import { User } from 'discord.js';
-import ModBot from '../../lib/ModBot';
+import ModBot from '../../../lib/ModBot';
 
 export default class Softban extends Command
 {

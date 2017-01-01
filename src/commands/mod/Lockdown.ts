@@ -1,9 +1,8 @@
-'use strict';
 import { Bot, Command, LocalStorage, Message } from 'yamdbf';
 import { User, TextChannel } from 'discord.js';
-import Time from '../../lib/Time';
 import { ActiveLockdowns } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
+import Time from '../../lib/Time';
 
 export default class Lockdown extends Command
 {

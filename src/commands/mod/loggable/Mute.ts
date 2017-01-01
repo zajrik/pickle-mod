@@ -1,9 +1,8 @@
-'use strict';
 import { Bot, Command, LocalStorage, Message } from 'yamdbf';
-import { User, Role } from 'discord.js';
-import { ActiveMutes } from '../../lib/ModActions';
-import ModBot from '../../lib/ModBot';
-import Time from '../../lib/Time';
+import { User } from 'discord.js';
+import { ActiveMutes } from '../../../lib/ModActions';
+import ModBot from '../../../lib/ModBot';
+import Time from '../../../lib/Time';
 
 export default class Mute extends Command
 {

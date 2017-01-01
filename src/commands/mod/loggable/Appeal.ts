@@ -1,7 +1,6 @@
-'use strict';
 import { Bot, Command, LocalStorage, GuildStorage } from 'yamdbf';
 import { User, Message, TextChannel, Guild, RichEmbed } from 'discord.js';
-import { ActiveAppeals, ActiveBans, BanObj } from '../../lib/ModActions';
+import { ActiveAppeals, ActiveBans, BanObj } from '../../../lib/ModActions';
 
 export default class Appeal extends Command
 {

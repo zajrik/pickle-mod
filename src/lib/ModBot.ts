@@ -14,6 +14,7 @@ export default class ModBot extends Bot
 	{
 		super(botOptions);
 		this.timers = new TimerCollection<string, Timer>();
+		this.mod = new ModActions(this);
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.memberLog(member, true, 8450847));
 		this.on('guildMemberRemove', (member: GuildMember) => this.memberLog(member, false, 13091073));

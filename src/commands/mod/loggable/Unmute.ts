@@ -1,8 +1,7 @@
-'use strict';
 import { Bot, Command, LocalStorage, Message } from 'yamdbf';
 import { User } from 'discord.js';
-import { ActiveMutes, MuteObj } from '../../lib/ModActions';
-import ModBot from '../../lib/ModBot';
+import { ActiveMutes, MuteObj } from '../../../lib/ModActions';
+import ModBot from '../../../lib/ModBot';
 
 export default class Unmute extends Command
 {

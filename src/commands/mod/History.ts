@@ -1,4 +1,3 @@
-'use strict';
 import { Bot, Command, Message } from 'yamdbf';
 import { User, RichEmbed } from 'discord.js';
 import ModBot from '../../lib/ModBot';

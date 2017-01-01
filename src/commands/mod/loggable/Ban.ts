@@ -1,8 +1,6 @@
-'use strict';
-import { Bot, Command, LocalStorage, Message } from 'yamdbf';
+import { Bot, Command, Message } from 'yamdbf';
 import { User, RichEmbed } from 'discord.js';
-import { ActiveBans } from '../../lib/ModActions';
-import ModBot from '../../lib/ModBot';
+import ModBot from '../../../lib/ModBot';
 
 export default class Ban extends Command
 {

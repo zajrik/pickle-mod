@@ -8,8 +8,9 @@ const bot: ModBot = new ModBot({
 	name: 'YAMDBF Mod',
 	token: config.token,
 	config: config,
-	version: '2.0.0',
+	version: '3.0.0',
 	statusText: 'Obey the law.',
+	readyText: 'Ready\u0007',
 	commandsDir: path.join(__dirname, 'commands'),
 	disableBase: [
 		'disablegroup',
@@ -23,6 +24,4 @@ const bot: ModBot = new ModBot({
 .setDefaultSetting('prefix', '?')
 .setDefaultSetting('cases', 0)
 .start()
-.on('ready', () => console.log('\u0007'))
 .on('disconnect', () => process.exit());
-bot.mod = new ModActions(bot);

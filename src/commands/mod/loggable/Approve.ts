@@ -1,7 +1,7 @@
 import { Bot, Command, LocalStorage, Message } from 'yamdbf';
 import { User, Invite } from 'discord.js';
-import { ActiveAppeals } from '../../lib/ModActions';
-import ModBot from '../../lib/ModBot';
+import { ActiveAppeals } from '../../../lib/ModActions';
+import ModBot from '../../../lib/ModBot';
 
 export default class Approve extends Command
 {

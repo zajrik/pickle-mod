@@ -1,7 +1,7 @@
 import { Bot, Command, LocalStorage, Message } from 'yamdbf';
-import { User, TextChannel } from 'discord.js';
-import { ActiveBans, BanObj, ActiveAppeals } from '../../lib/ModActions';
-import ModBot from '../../lib/ModBot';
+import { User } from 'discord.js';
+import { ActiveBans, BanObj, ActiveAppeals } from '../../../lib/ModActions';
+import ModBot from '../../../lib/ModBot';
 
 export default class Reject extends Command
 {
