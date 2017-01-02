@@ -25,25 +25,26 @@ export default class Help extends Command
 		const mentionName: string = `@${this.bot.user.username}#${this.bot.user.discriminator}`;
 		const prefix: string = !dm ? message.guild.storage.getSetting('prefix') : '';
 
-		let usableCommands: Collection<string, Command> = new Collection<string, Command>(
-			this.bot.commands.map((c: Command) => [c.name, c]));
+		let usableCommands: Collection<string, Command> =
+			new Collection<string, Command>(this.bot.commands.entries());
 		let command: Command;
 		let output: string = '';
 		let embed: RichEmbed = new RichEmbed();
 
 		if (!args[0])
 		{
-			embed.setTitle('Moderation commands')
+			embed.setAuthor('Moderation commands', this.bot.user.avatarURL)
 				.addField(`${prefix}warn <@user> <...reason>`, 'Give a formal warning to a user')
 				.addField(`${prefix}mute <@user> <duration> <...reason>`,
 					`Mute a user for a specified duration.\n`
-					+ 'Duration format examples: `30m`, `2h`, `1d`')
-				.addField(`${prefix}unmute <@user>`, `Unmute a user`)
+					+ 'Duration format examples: `30m`, `2h`, `1d`', true)
+				.addField(`${prefix}unmute <@user>`, `Unmute a user`, true)
 				.addField(`${prefix}kick <@user> <...reason>`, `Kick a user from the server`)
 				.addField(`${prefix}softban <@user>`, `Kick a user from the server, removing 7 days of their messages`)
-				.addField(`${prefix}ban <@user>`, `Ban a user from the server.`)
-				.addField(`${prefix}unban <id>`, `Unban a user by ID.`)
-				.addField(`${prefix}reason <case#> <...reason>`, `Set the reason for a moderation case`)
+				.addField(`${prefix}ban <@user>`, `Ban a user from the server.`, true)
+				.addField(`${prefix}unban <id>`, `Unban a user by ID.`, true)
+				.addField('\u200b', '\u200b', true)
+				.addField(`${prefix}reason <case#|latest> <...reason>`, `Set the reason for a moderation case`)
 				.addField(`${prefix}lockdown <duration>`,
 					`Lock down the channel the command is called in for a specified duration.\n`
 					+ 'Duration format examples: `30m`, `2h`, `1d`');
@@ -52,11 +53,14 @@ export default class Help extends Command
 				'ban', 'unban', 'reason', 'lockdown', 'eval', '$', 'appeal'])
 				usableCommands.delete(cmd);
 
-			const storage: GuildStorage = message.guild.storage;
-			for (const [name, cmd] of usableCommands.entries())
-				if (storage.settingExists('disabledGroups')
-					&& storage.getSetting('disabledGroups').includes(cmd.group))
-					usableCommands.delete(name);
+			if (message.guild)
+			{
+				const storage: GuildStorage = message.guild.storage;
+				for (const [name, cmd] of usableCommands.entries())
+					if (storage.settingExists('disabledGroups')
+						&& storage.getSetting('disabledGroups').includes(cmd.group))
+						usableCommands.delete(name);
+			}
 
 			embed.addField('Other commands', usableCommands.map((c: Command) => c.name).join(', '))
 				.addField('\u200b', `Use \`help <command>\` ${this.bot.selfbot ? '' : `or \`${

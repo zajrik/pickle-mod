@@ -9,7 +9,7 @@ export default class ClearLogs extends Command
 		super(bot, {
 			name: 'clearlogs',
 			aliases: [],
-			description: 'Clear mod-logs, resetting cases to 0',
+			description: 'Clear the moderation logs channel, resetting cases to 0',
 			usage: '<prefix>clearlogs',
 			extraHelp: '',
 			group: 'mod',

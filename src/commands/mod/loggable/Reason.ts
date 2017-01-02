@@ -10,7 +10,7 @@ export default class Reason extends Command
 			name: 'reason',
 			aliases: [],
 			description: 'Set a reason for a case',
-			usage: '<prefix>reason <case#> <...reason>',
+			usage: '<prefix>reason <case#|latest> <...reason>',
 			extraHelp: 'Can be used to edit your own cases or to set a reason for a ban/unban case that was posted by the bot',
 			group: 'mod',
 			guildOnly: true

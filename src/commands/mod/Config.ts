@@ -1,5 +1,7 @@
 import { Bot, Command, Message, GuildStorage } from 'yamdbf';
-import { User, TextChannel, GuildChannel, Role } from 'discord.js';
+import { User, TextChannel, GuildChannel, Role, RichEmbed } from 'discord.js';
+import ModActions from '../../lib/ModActions';
+import ModBot from '../../lib/ModBot';
 
 export default class Config extends Command
 {
@@ -9,7 +11,7 @@ export default class Config extends Command
 			name: 'config',
 			aliases: [],
 			description: 'Configure options for the server',
-			usage: '<prefix>config <mod|mute|logs|appeals|reset> [...args]',
+			usage: '<prefix>config <mod|mute|logs|appeals|status|reset> [...args]',
 			extraHelp: '',
 			group: 'mod',
 			guildOnly: true,
@@ -26,8 +28,21 @@ export default class Config extends Command
 
 		const option: string = (<string> args.shift()).toLowerCase();
 		if (!option) return message.channel.sendMessage('You must provide an option.');
-		if (!/^(?:mod|mute|logs|appeals|reset)$/.test(option))
+		if (!/^(?:mod|mute|logs|appeals|status|reset)$/.test(option))
 			return message.channel.sendMessage(`Invalid option: \`${option}\``);
+
+		const mod: ModActions = (<ModBot> this.bot).mod;
+		let [modRoleSet, logs, appeals, mute]: boolean[] = [
+			mod.hasSetModRole(message.guild),
+			mod.hasLoggingChannel(message.guild),
+			mod.hasAppealsChannel(message.guild),
+			mod.hasSetMutedRole(message.guild)
+		];
+
+		function check(bool: boolean): string
+		{
+			return bool ? '\\✅' : '\\❌';
+		}
 
 		function normalize(text: string): string
 		{
@@ -64,6 +79,14 @@ export default class Config extends Command
 				if (!appealsChannel) return message.channel.sendMessage(`Couldn't find channel \`${value}\``);
 				message.guild.storage.setSetting('appeals', appealsChannel.id);
 				return message.channel.sendMessage(`Set appeals channel to ${appealsChannel}`);
+
+			case 'status':
+				const embed: RichEmbed = new RichEmbed()
+					.setColor(0xEFEAEA)
+					.setAuthor('Server config status', this.bot.user.avatarURL)
+					.setDescription(`${check(modRoleSet)} **Mod role\n${check(logs)} Logs channel\n`
+						+ `${check(appeals)} Appeals channel\n${check(mute)} Mute role**`);
+				return message.channel.sendEmbed(embed);
 
 			case 'reset':
 				await message.channel.sendMessage(`Are you sure you want to reset config? (__y__es | __n__o)`);
