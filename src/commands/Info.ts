@@ -36,7 +36,7 @@ export default class Info extends Command
 			.addField('YAMDBF Info', 'https://yamdbf.js.org', true)
 			.addField('Bot Invite', `[Click here](https://discordapp.com/oauth2/authorize`
 				+ `?permissions=490826759&scope=bot&client_id=${this.bot.user.id})`, true)
-			.addField('\u200b', 'Be sure to use the `guide` command for information on setting up your server for moderation!')
+			.addField('\u200b', 'Be sure to use the `-guide` command for information on setting up your server for moderation!')
 			.setFooter('YAMDBF', this.bot.user.avatarURL)
 			.setTimestamp();
 
