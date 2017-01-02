@@ -171,8 +171,8 @@ export default class ModActions
 					for (let i: number = 0; i < activeMutes[user].length; i++)
 					{
 						const mute: MuteObj = activeMutes[user][i];
-						const isMuted: boolean = !!(await this._bot.guilds.get(mute.guild)
-							.fetchMember(user)).roles.find('name', 'Muted');
+						const isMuted: boolean = (await this._bot.guilds.get(mute.guild)
+							.fetchMember(user)).roles.exists('name', 'Muted');
 						if (!mute.duration && isMuted) continue;
 						else if (!mute.duration) mute.duration = 0;
 						if (Time.difference(mute.duration, Time.now() - mute.timestamp).ms > 1) continue;
