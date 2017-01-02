@@ -19,9 +19,9 @@ export default class Info extends Command
 
 	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
 	{
-		message.delete();
 		const prefix: string = !dm ? message.guild.storage.getSetting('prefix') : '';
-		
+		    
+		message.delete();	
 		const embed: RichEmbed = new RichEmbed()
 			.setAuthor('YAMDBF Mod Info', this.bot.user.avatarURL)
 			.setColor(11854048)
