@@ -171,15 +171,17 @@ export default class ModActions
 					for (let i: number = 0; i < activeMutes[user].length; i++)
 					{
 						const mute: MuteObj = activeMutes[user][i];
+						const mutedRole: string = this._bot.guildStorages.get(mute.guild).getSetting('mutedrole');
+						if (!mutedRole) continue;
 						const isMuted: boolean = (await this._bot.guilds.get(mute.guild)
-							.fetchMember(user)).roles.exists('name', 'Muted');
+							.fetchMember(user)).roles.exists('id', mutedRole);
 						if (!mute.duration && isMuted) continue;
 						else if (!mute.duration) mute.duration = 0;
 						if (Time.difference(mute.duration, Time.now() - mute.timestamp).ms > 1) continue;
 						console.log(`Removing expired mute for user '${mute.raw}'`);
 						const guild: Guild = this._bot.guilds.get(mute.guild);
 						const member: GuildMember = guild.members.get(mute.user);
-						await member.removeRole(guild.roles.find('name', 'Muted'));
+						await member.removeRole(guild.roles.get(mutedRole));
 						member.sendMessage(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
 						activeMutes[user].splice(i--, 1);
 					}
