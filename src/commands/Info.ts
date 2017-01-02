@@ -19,7 +19,6 @@ export default class Info extends Command
 
 	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
 	{
-		const prefix: string = message.guild ? message.guild.storage.getSetting('prefix') : '';
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)
 			.setAuthor('YAMDBF Mod Info', this.bot.user.avatarURL)
@@ -37,8 +36,10 @@ export default class Info extends Command
 			.addField('YAMDBF Info', 'https://yamdbf.js.org', true)
 			.addField('Bot Invite', `[Click here](https://discordapp.com/oauth2/authorize`
 				+ `?permissions=490826759&scope=bot&client_id=${this.bot.user.id})`, true)
-			.addField('\u200b', `Be sure to use the \`${prefix}guide\` command for information `
-				+ `on setting up your server for moderation!`)
+			.addField('\u200b', `Be sure to use the \`guide\` command for information `
+				+ `on setting up your server for moderation! The default prefix for commands is \`?\`. `
+				+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
+				+ `just use \`@${this.bot.user.username}#${this.bot.user.discriminator} prefix\`.`)
 			.setFooter('YAMDBF', this.bot.user.avatarURL)
 			.setTimestamp();
 
