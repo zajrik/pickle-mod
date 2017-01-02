@@ -129,6 +129,13 @@ export default class ModActions
 				storage.setItem(key, activeBans);
 			});
 
+			await this.caseLog(
+				user,
+				guild,
+				'Unban',
+				`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this unban`,
+				this._bot.user);
+
 			// Try to remove an active appeal for the user if there
 			// was one in the guild
 			await storage.nonConcurrentAccess('activeAppeals', async (key: string) =>
@@ -148,13 +155,6 @@ export default class ModActions
 					return;
 				}
 			});
-
-			await this.caseLog(
-				user,
-				guild,
-				'Unban',
-				`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this unban`,
-				this._bot.user);
 		});
 
 		// Add timer for auto-removal of expired user mutes
