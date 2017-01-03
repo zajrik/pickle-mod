@@ -2,7 +2,7 @@
 import * as path from 'path';
 import ModBot from './lib/ModBot';
 const config: any = require('./config.json');
-const pkg: any = require('./package.json');
+const pkg: any = require('../package.json');
 
 const bot: ModBot = new ModBot({ // tslint:disable-line
 	name: 'YAMDBF Mod',
