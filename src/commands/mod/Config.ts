@@ -26,9 +26,9 @@ export default class Config extends Command
 				.hasPermission('MANAGE_GUILD')))
 			return;
 
-		const option: string = (<string> args.shift()).toLowerCase();
+		const option: string = <string> args.shift();
 		if (!option) return message.channel.sendMessage('You must provide an option.');
-		if (!/^(?:mod|mute|logs|appeals|status|reset)$/.test(option))
+		if (!/^(?:mod|mute|logs|appeals|status|reset)$/i.test(option))
 			return message.channel.sendMessage(`Invalid option: \`${option}\``);
 
 		const mod: ModActions = (<ModBot> this.bot).mod;
@@ -50,7 +50,7 @@ export default class Config extends Command
 		}
 
 		const value: string = args.join(' ');
-		switch (option)
+		switch (option.toLowerCase())
 		{
 			case 'mod':
 				const modRole: Role = message.guild.roles.find((role: Role) =>
