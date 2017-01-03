@@ -174,7 +174,7 @@ export default class ModActions
 						const mutedRole: string = this._bot.guildStorages.get(mute.guild).getSetting('mutedrole');
 						if (!mutedRole) continue;
 						const isMuted: boolean = (await this._bot.guilds.get(mute.guild)
-							.fetchMember(user)).roles.exists('id', mutedRole);
+							.fetchMember(user)).roles.has(mutedRole);
 						if (!mute.duration && isMuted) continue;
 						else if (!mute.duration) mute.duration = 0;
 						if (Time.difference(mute.duration, Time.now() - mute.timestamp).ms > 1) continue;
