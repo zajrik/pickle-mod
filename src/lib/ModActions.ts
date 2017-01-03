@@ -120,6 +120,7 @@ export default class ModActions
 			{
 				const activeBans: ActiveBans = storage.getItem(key) || {};
 				const bans: BanObj[] = activeBans[user.id];
+				if (!bans) return;
 				for (let i: number = 0; i < bans.length; i++)
 				{
 					if (bans[i].guild === guild.id) bans.splice(i--, 1);
