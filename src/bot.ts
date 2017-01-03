@@ -2,12 +2,13 @@
 import * as path from 'path';
 import ModBot from './lib/ModBot';
 const config: any = require('./config.json');
+const pkg: any = require('./package.json');
 
 const bot: ModBot = new ModBot({ // tslint:disable-line
 	name: 'YAMDBF Mod',
 	token: config.token,
 	config: config,
-	version: '3.0.0',
+	version: pkg.version,
 	statusText: 'Obey the law.',
 	readyText: 'Ready\u0007',
 	commandsDir: path.join(__dirname, 'commands'),
