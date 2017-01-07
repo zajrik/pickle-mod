@@ -2,9 +2,9 @@ import { Bot, Command, Message, GuildStorage } from 'yamdbf';
 import { User, Collection, TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';
 
-export default class ClearLogs extends Command
+export default class ClearLogs extends Command<ModBot>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: ModBot)
 	{
 		super(bot, {
 			name: 'clearlogs',
@@ -19,7 +19,7 @@ export default class ClearLogs extends Command
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.canCallModCommand(message)) return;
 		const channelName: string = (<TextChannel> message.channel).name;
 		if (channelName === message.guild.channels.get(message.guild.storage.getSetting('modlogs')).name)
 			return message.channel.sendMessage('You may not use that command in this channel.');
