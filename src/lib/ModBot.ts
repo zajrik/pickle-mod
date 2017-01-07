@@ -1,6 +1,6 @@
 'use strict';
 import { Bot, BotOptions } from 'yamdbf';
-import { GuildMember, TextChannel, RichEmbed, Message } from 'discord.js';
+import { GuildMember, TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 import ModActions from './ModActions';
 import TimerCollection from './timer/TimerCollection';
 import Timer from './timer/Timer';
@@ -18,6 +18,8 @@ export default class ModBot extends Bot
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.memberLog(member, true, 8450847));
 		this.on('guildMemberRemove', (member: GuildMember) => this.memberLog(member, false, 13091073));
+		this.on('guildCreate', (guild: Guild) => this.guildJoin(guild, true, 8450847));
+		this.on('guildDelete', (guild: Guild) => this.guildJoin(guild, true, 13091073));
 		this.on('command', (name: string, args: any, original: string, execTime: number, message: Message) =>
 			this.logCommand(name, args, original, execTime, message));
 	}
@@ -42,19 +44,32 @@ export default class ModBot extends Bot
 	/**
 	 * Log command usage to the logging channel in config
 	 */
-	private logCommand(name: string, args: any, original: string, execTime: number, message: Message): void
+	private logCommand(name: string, args: any, original: string, execTime: number, message: Message): Promise<Message>
 	{
 		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.logs);
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)
 			.setAuthor(`${message.author.username}#${message.author.discriminator} (${message.author.id})`,
-				message.author.avatarURL)
-			.addField('Guild', message.guild.name, true)
-			.addField('Exec time', `${execTime.toFixed(2)}ms`, true)
+				message.author.avatarURL);
+		if (message.guild) embed.addField('Guild', message.guild.name, true);
+		embed.addField('Exec time', `${execTime.toFixed(2)}ms`, true)
 			.addField('Command content', original)
 			.setFooter(message.channel.type.toUpperCase(), this.user.avatarURL)
 			.setTimestamp();
+		return logChannel.sendEmbed(embed);
+	}
 
-		logChannel.sendEmbed(embed);
+	/**
+	 * Log guild join/leave
+	 */
+	private guildJoin(guild: Guild, joined: boolean, color: number): Promise<Message>
+	{
+		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.guilds);
+		const embed: RichEmbed = new RichEmbed()
+			.setColor(color)
+			.setAuthor(`${guild.name} (${guild.id})`, guild.iconURL)
+			.setFooter(joined ? 'Joined guild' : 'Left guild' , '')
+			.setTimestamp();
+		return logChannel.sendEmbed(embed);
 	}
 }
