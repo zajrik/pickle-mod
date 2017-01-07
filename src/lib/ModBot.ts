@@ -18,6 +18,8 @@ export default class ModBot extends Bot
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.memberLog(member, true, 8450847));
 		this.on('guildMemberRemove', (member: GuildMember) => this.memberLog(member, false, 13091073));
+		this.on('command', (name: string, args: any, original: string, execTime: number, message: Message) =>
+			this.logCommand(name, args, original, execTime, message));
 	}
 
 	/**
@@ -35,5 +37,24 @@ export default class ModBot extends Bot
 			.setFooter(joined ? 'User joined' : 'User left' , '')
 			.setTimestamp();
 		return memberLog.sendEmbed(embed);
+	}
+
+	/**
+	 * Log command usage to the logging channel in config
+	 */
+	private logCommand(name: string, args: any, original: string, execTime: number, message: Message): void
+	{
+		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.logs);
+		const embed: RichEmbed = new RichEmbed()
+			.setColor(11854048)
+			.setAuthor(`${message.author.username}#${message.author.discriminator} (${message.author.id})`,
+				message.author.avatarURL)
+			.addField('Guild', message.guild.name, true)
+			.addField('Exec time', `${execTime.toFixed(2)}ms`, true)
+			.addField('Command content', original)
+			.setFooter(message.channel.type.toUpperCase(), this.user.avatarURL)
+			.setTimestamp();
+
+		logChannel.sendEmbed(embed);
 	}
 }
