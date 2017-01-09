@@ -28,16 +28,17 @@ export default class Prune extends Command<ModBot>
 
 		if (!member) return message.channel.sendMessage('You must mention a user to prune');
 
-		const messages: Array<[string, Message]> = (await message.channel.fetchMessages(
+		const messages: Message[] = (await message.channel.fetchMessages(
 			{ limit: 100, before: message.id }))
-				.filter((a: Message) => a.author.id === member.id)
-				.map((m: Message) => [m.id, m]);
-		messages.length = quantity;
+			.filter((a: Message) => a.author.id === member.id)
+			.array();
+		messages.length = Math.min(quantity, messages.length);
+		if (messages.length === 0) return message.reply(
+			'There were no messages by that user to delete in the past 100 messages.');
 
-		const toDelete: Collection<string, Message> = new Collection<string, Message>(messages);
-		toDelete.set(message.id, message);
+		if (messages.length === 1) await messages[0].delete();
+		else await message.channel.bulkDelete(messages);
 
-		await message.channel.bulkDelete(toDelete);
 		return message.author.sendMessage('Prune operation completed.');
 	}
 }

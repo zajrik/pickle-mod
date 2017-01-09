@@ -28,8 +28,8 @@ export default class Purge extends Command<ModBot>
 		let messages: Collection<string, Message>;
 		messages = (await message.channel.fetchMessages(
 			{ limit: Math.min(quantity, 100), before: message.id }));
-		messages.set(message.id, message);
 
+		message.delete();
 		await message.channel.bulkDelete(messages);
 		return message.author.sendMessage('Purge operation completed.');
 	}
