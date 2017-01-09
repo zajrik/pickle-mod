@@ -64,11 +64,12 @@ export default class Time extends Date
 	public static parseShorthand(shorthand: string): int
 	{
 		let duration: int, match: RegExpMatchArray;
-		if (/^(?:\d+(?:\.\d+)?)[m|h|d]$/.test(<string> shorthand))
+		if (/^(?:\d+(?:\.\d+)?)[s|m|h|d]$/.test(<string> shorthand))
 		{
-			match = shorthand.match(/(\d+(?:\.\d+)?)(m|h|d)$/);
+			match = shorthand.match(/(\d+(?:\.\d+)?)(s|m|h|d)$/);
 			duration = parseFloat(match[1]);
-			duration = match[2] === 'm'
+			duration = match[2] === 's'
+				? duration * 1000 : match[2] === 'm'
 				? duration * 1000 * 60 : match[2] === 'h'
 				? duration * 1000 * 60 * 60 : match[2] === 'd'
 				? duration * 1000 * 60 * 60 * 24 : null;

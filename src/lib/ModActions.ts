@@ -75,11 +75,6 @@ export default class ModActions
 	{
 		this._bot = bot;
 
-		this._bot.on('guildCreate', (guild: Guild) =>
-		{
-			// Implement a message with the setup instructions
-		});
-
 		this._bot.on('guildBanAdd', async (guild: Guild, user: User) =>
 		{
 			let settings: GuildStorage = this._bot.guildStorages.get(guild);
@@ -159,7 +154,7 @@ export default class ModActions
 		});
 
 		// Add timer for auto-removal of expired user mutes
-		this._bot.timers.add(new Timer(this._bot, 'mute', 30, async () =>
+		this._bot.timers.add(new Timer(this._bot, 'mute', 15, async () =>
 		{
 			const storage: LocalStorage = this._bot.storage;
 			storage.nonConcurrentAccess('activeMutes', async (key: string) =>
@@ -192,7 +187,7 @@ export default class ModActions
 		}));
 
 		// Add timer for auto-removal of expired channel lockdowns
-		this._bot.timers.add(new Timer(this._bot, 'lockdown', 30, async () =>
+		this._bot.timers.add(new Timer(this._bot, 'lockdown', 5, async () =>
 		{
 			const storage: LocalStorage = this._bot.storage;
 			storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
@@ -423,7 +418,7 @@ export default class ModActions
 	}
 
 	/**
-	 * Give a formal warning to the provided user
+	 * Increment a user's warnings
 	 */
 	public async warn(user: User | string, guild: Guild): Promise<User | string>
 	{

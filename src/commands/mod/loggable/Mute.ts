@@ -1,19 +1,19 @@
-import { Bot, Command, LocalStorage, Message } from 'yamdbf';
+import { Command, LocalStorage, Message } from 'yamdbf';
 import { User } from 'discord.js';
 import { ActiveMutes } from '../../../lib/ModActions';
 import ModBot from '../../../lib/ModBot';
 import Time from '../../../lib/Time';
 
-export default class Mute extends Command
+export default class Mute extends Command<ModBot>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: ModBot)
 	{
 		super(bot, {
 			name: 'mute',
 			aliases: [],
 			description: 'Mute a user',
 			usage: '<prefix>mute <@user> <duration> <reason>',
-			extraHelp: '',
+			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d',
 			group: 'mod',
 			guildOnly: true
 		});
@@ -21,8 +21,8 @@ export default class Mute extends Command
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
-		if (!(<ModBot> this.bot).mod.hasSetMutedRole(message.guild)) return;
+		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.hasSetMutedRole(message.guild)) return;
 		if (!mentions[0]) return message.channel.sendMessage('You must mention a user to mute.');
 		const user: User = mentions[0];
 
@@ -47,8 +47,8 @@ export default class Mute extends Command
 		try
 		{
 			const storage: LocalStorage = this.bot.storage;
-			await (<ModBot> this.bot).mod.mute(user, message.guild);
-			await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Mute', reason, message.author, durationString);
+			await this.bot.mod.mute(user, message.guild);
+			await this.bot.mod.caseLog(user, message.guild, 'Mute', reason, message.author, durationString);
 			await storage.nonConcurrentAccess('activeMutes', (key: string) =>
 			{
 				let activeMutes: ActiveMutes = storage.getItem(key) || {};

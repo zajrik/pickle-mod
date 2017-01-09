@@ -1,19 +1,19 @@
-import { Bot, Command, LocalStorage, Message } from 'yamdbf';
+import { Command, LocalStorage, Message } from 'yamdbf';
 import { User, TextChannel } from 'discord.js';
 import { ActiveLockdowns } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
 import Time from '../../lib/Time';
 
-export default class Lockdown extends Command
+export default class Lockdown extends Command<ModBot>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: ModBot)
 	{
 		super(bot, {
 			name: 'lockdown',
 			aliases: [],
 			description: 'Lock down a channel for a set time',
 			usage: '<prefix>lockdown <duration|clear>',
-			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t10m or 5h or 1d\n\nUse `lockdown clear` to remove the channel lockdown',
+			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown',
 			group: 'mod',
 			guildOnly: true
 		});
@@ -21,7 +21,7 @@ export default class Lockdown extends Command
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.canCallModCommand(message)) return;
 		if (args[0] !== 'clear')
 		{
 			const duration: number = Time.parseShorthand(<string> args[0]);
