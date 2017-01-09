@@ -274,6 +274,8 @@ export default class ModActions
 	{
 		if (!message.guild) return false;
 		if (!this.hasLoggingChannel(message.guild)) return false;
+		if (!message.guild.channels.get(message.guild.storage.getSetting('modlogs'))
+			.permissionsFor(this._bot.user).hasPermission('SEND_MESSAGES')) return false;
 		if (!this.hasAppealsChannel(message.guild)) return false;
 		if (!this.hasSetModRole(message.guild)) return false;
 		if (!this.hasModRole(message.member)) return false;
