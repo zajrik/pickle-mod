@@ -187,32 +187,37 @@ export default class ModActions
 		}));
 
 		// Add timer for auto-removal of expired channel lockdowns
-		this._bot.timers.add(new Timer(this._bot, 'lockdown', 5, async () =>
+		this._bot.timers.add(new Timer(this._bot, 'lockdown', 5, this._checkLockdowns));
+	}
+
+	/**
+	 * Check active lockdowns and remove any that are expired
+	 */
+	private async _checkLockdowns(): Promise<void>
+	{
+		const storage: LocalStorage = this._bot.storage;
+		storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
 		{
-			const storage: LocalStorage = this._bot.storage;
-			storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
+			const activeLockdowns: ActiveLockdowns = storage.getItem(key);
+			if (!activeLockdowns) return;
+			for (let id of Object.keys(activeLockdowns))
 			{
-				const activeLockdowns: ActiveLockdowns = storage.getItem(key);
-				if (!activeLockdowns) return;
-				for (let id of Object.keys(activeLockdowns))
-				{
-					const lockdown: LockdownObj = activeLockdowns[id];
-					const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
-					if (Time.difference(lockdown.duration, Time.now() - lockdown.timestamp).ms > 1) continue;
-					console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
-					const payload: any = {
-						id: channel.guild.roles.find('name', '@everyone').id,
-						type: 'role',
-						allow: lockdown.allow,
-						deny: lockdown.deny
-					};
-					await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
-					delete activeLockdowns[id];
-					channel.sendMessage('**The lockdown on this channel has ended.**');
-				}
-				storage.setItem(key, activeLockdowns);
-			});
-		}));
+				const lockdown: LockdownObj = activeLockdowns[id];
+				const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
+				if (Time.difference(lockdown.duration, Time.now() - lockdown.timestamp).ms > 1) continue;
+				console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
+				const payload: any = {
+					id: channel.guild.roles.find('name', '@everyone').id,
+					type: 'role',
+					allow: lockdown.allow,
+					deny: lockdown.deny
+				};
+				await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
+				delete activeLockdowns[id];
+				channel.sendMessage('**The lockdown on this channel has ended.**');
+			}
+			storage.setItem(key, activeLockdowns);
+		});
 	}
 
 	/**
@@ -362,34 +367,34 @@ export default class ModActions
 	/**
 	 * Merge two cases (ban and unban) together with a new reason
 	 */
-	public async mergeSoftban(guild: Guild, first: number, second: number, issuer: User, reason: string): Promise<Message>
-	{
-		const banCaseMessage: Message = await this.findCase(guild, first);
-		if (!banCaseMessage) return null;
-		console.log(`Found case ${first}`);
+	// public async mergeSoftban(guild: Guild, first: number, second: number, issuer: User, reason: string): Promise<Message>
+	// {
+	// 	const banCaseMessage: Message = await this.findCase(guild, first);
+	// 	if (!banCaseMessage) return null;
+	// 	console.log(`Found case ${first}`);
 
-		const banMessageEmbed: MessageEmbed = banCaseMessage.embeds[0];
-		if (banMessageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
-			&& banMessageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
-		console.log(`Issuer was valid`);
+	// 	const banMessageEmbed: MessageEmbed = banCaseMessage.embeds[0];
+	// 	if (banMessageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
+	// 		&& banMessageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
+	// 	console.log(`Issuer was valid`);
 
-		const unbanCaseMessage: Message = await this.findCase(guild, second);
-		if (!unbanCaseMessage) return null;
-		console.log(`Found case ${second}`);
+	// 	const unbanCaseMessage: Message = await this.findCase(guild, second);
+	// 	if (!unbanCaseMessage) return null;
+	// 	console.log(`Found case ${second}`);
 
-		const embed: RichEmbed = new RichEmbed()
-			.setColor(banMessageEmbed.color)
-			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
-			.setDescription(banMessageEmbed.description
-				.replace(/\*\*Action:\*\* .+/, `**Action:** Softban`)
-				.replace(/\*\*Reason:\*\*/, `**Reason:** ${reason}`))
-			.setFooter(banMessageEmbed.footer.text)
-			.setTimestamp(new Date(banMessageEmbed.createdTimestamp));
+	// 	const embed: RichEmbed = new RichEmbed()
+	// 		.setColor(banMessageEmbed.color)
+	// 		.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
+	// 		.setDescription(banMessageEmbed.description
+	// 			.replace(/\*\*Action:\*\* .+/, `**Action:** Softban`)
+	// 			.replace(/\*\*Reason:\*\*/, `**Reason:** ${reason}`))
+	// 		.setFooter(banMessageEmbed.footer.text)
+	// 		.setTimestamp(new Date(banMessageEmbed.createdTimestamp));
 
-		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		storage.setSetting('cases', storage.getSetting('cases') - 1);
-		return banCaseMessage.edit('', Object.assign({}, { embed })).then(() => unbanCaseMessage.delete());
-	}
+	// 	const storage: GuildStorage = this._bot.guildStorages.get(guild);
+	// 	storage.setSetting('cases', storage.getSetting('cases') - 1);
+	// 	return banCaseMessage.edit('', Object.assign({}, { embed })).then(() => unbanCaseMessage.delete());
+	// }
 
 	/**
 	 * Check the number of past offenses a user has had
