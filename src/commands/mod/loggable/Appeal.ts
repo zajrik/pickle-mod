@@ -20,10 +20,10 @@ export default class Appeal extends Command<ModBot>
 	{
 		if (message.channel.type !== 'dm') return;
 		const storage: LocalStorage = this.bot.storage;
-		await storage.nonConcurrentAccess('activeBans', async (key: string) =>
+		await storage.queue('activeBans', async (key: string) =>
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
-			await storage.nonConcurrentAccess('activeAppeals', async (appealsKey: string) =>
+			await storage.queue('activeAppeals', async (appealsKey: string) =>
 			{
 				const activeAppeals: ActiveAppeals = storage.getItem(appealsKey) || {};
 				const bans: BanObject[] = activeBans[message.author.id];

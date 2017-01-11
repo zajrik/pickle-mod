@@ -32,7 +32,7 @@ export default class Softban extends Command<ModBot>
 			return message.channel.send('You may not use this command on that user.');
 
 		const reason: string = args.join(' ').trim();
-		if (!reason) return message.channel.send('You must provide a reason to ban that user.');
+		if (!reason) return message.channel.send('You must provide a reason to softban that user.');
 
 		const kicking: Message = <Message> await message.channel.send(
 			`Softbanning ${user.username}#${user.discriminator}... *(Waiting for unban)*`);
@@ -41,9 +41,10 @@ export default class Softban extends Command<ModBot>
 			reason}\n\nA softban is a kick that uses ban+unban to remove your messages from `
 			+ `the server. You may rejoin momentarily.`);
 
-		await this.bot.mod.actions.softban(user, message.guild);
-		return kicking.edit(`Successfully softbanned ${user.username}#${user.discriminator}\n`
-			+ `Remember to set reasons for both the ban and unban with `
-			+ `\`${this.bot.getPrefix(message.guild)}reason <case#> <...reason>\``);
+		this.bot.mod.actions.softban(user, message.guild);
+		let cases: Message[] = <Message[]> await this.bot.mod.logger.awaitCase(message.guild, user, 'Softban');
+		this.bot.mod.logger.mergeSoftban(message.guild, cases[0], cases[1], message.author, reason);
+
+		return kicking.edit(`Successfully softbanned ${user.username}#${user.discriminator}`);
 	}
 }

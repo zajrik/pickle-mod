@@ -29,7 +29,7 @@ export default class ModScheduler
 	private async _checkMutes(): Promise<void>
 	{
 		const storage: LocalStorage = this._bot.storage;
-		storage.nonConcurrentAccess('activeMutes', async (key: string) =>
+		storage.queue('activeMutes', async (key: string) =>
 		{
 			let activeMutes: ActiveMutes = storage.getItem(key);
 			if (!activeMutes) return;
@@ -64,7 +64,7 @@ export default class ModScheduler
 	private async _checkLockdowns(): Promise<void>
 	{
 		const storage: LocalStorage = this._bot.storage;
-		storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
+		storage.queue('activeLockdowns', async (key: string) =>
 		{
 			const activeLockdowns: ActiveLockdowns = storage.getItem(key);
 			if (!activeLockdowns) return;

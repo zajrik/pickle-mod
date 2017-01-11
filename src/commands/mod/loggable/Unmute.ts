@@ -32,7 +32,7 @@ export default class Unmute extends Command<ModBot>
 		{
 			const storage: LocalStorage = this.bot.storage;
 			await this.bot.mod.actions.unmute(user, message.guild);
-			await storage.nonConcurrentAccess('activeMutes', (key: string) =>
+			await storage.queue('activeMutes', (key: string) =>
 			{
 				let activeMutes: ActiveMutes = storage.getItem(key) || {};
 				activeMutes[user.id] = activeMutes[user.id].filter((a: MuteObject) => a.guild !== message.guild.id);

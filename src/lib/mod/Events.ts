@@ -1,6 +1,6 @@
 import ModBot from '../ModBot';
 import { LocalStorage, GuildStorage, Message } from 'yamdbf';
-import { TextChannel, Guild, User, } from 'discord.js';
+import { TextChannel, Guild, User, Invite } from 'discord.js';
 
 /**
  * Handles received moderation related client events
@@ -27,7 +27,7 @@ export default class ModEvents
 		const storage: LocalStorage = this._bot.storage;
 
 		// Add the ban to storage for appealing
-		await storage.nonConcurrentAccess('activeBans', (key: string) =>
+		await storage.queue('activeBans', (key: string) =>
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
 			if (!activeBans[user.id]) activeBans[user.id] = [];
@@ -59,7 +59,7 @@ export default class ModEvents
 		const storage: LocalStorage = this._bot.storage;
 
 		// Remove the active ban in storage for the user
-		await storage.nonConcurrentAccess('activeBans', (key: string) =>
+		await storage.queue('activeBans', (key: string) =>
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
 			const bans: BanObject[] = activeBans[user.id];
@@ -82,7 +82,7 @@ export default class ModEvents
 
 		// Try to remove an active appeal for the user if there
 		// was one in the guild
-		await storage.nonConcurrentAccess('activeAppeals', async (key: string) =>
+		await storage.queue('activeAppeals', async (key: string) =>
 		{
 			const activeAppeals: ActiveAppeals = storage.getItem(key) || {};
 			const appealsChannel: TextChannel = <TextChannel> guild.channels
@@ -91,6 +91,13 @@ export default class ModEvents
 			{
 				const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
 				appeal.delete();
+				if (activeAppeals[user.id])
+				{
+					const invite: Invite = await guild.defaultChannel
+						.createInvite({ maxAge: 72 * 1000 * 60 * 60, maxUses: 1 });
+					await user.send(`Your appeal has been approved. You have been unbanned from ${
+						guild.name}. You may rejoin using this invite:\n${invite.url}`);
+				}
 				delete activeAppeals[user.id];
 				storage.setItem(key, activeAppeals);
 			}

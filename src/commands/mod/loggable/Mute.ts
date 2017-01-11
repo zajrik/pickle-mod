@@ -48,7 +48,7 @@ export default class Mute extends Command<ModBot>
 			const storage: LocalStorage = this.bot.storage;
 			await this.bot.mod.actions.mute(user, message.guild);
 			await this.bot.mod.logger.caseLog(user, message.guild, 'Mute', reason, message.author, durationString);
-			await storage.nonConcurrentAccess('activeMutes', (key: string) =>
+			await storage.queue('activeMutes', (key: string) =>
 			{
 				let activeMutes: ActiveMutes = storage.getItem(key) || {};
 				if (!activeMutes[user.id]) activeMutes[user.id] = [];

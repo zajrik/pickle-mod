@@ -1,6 +1,6 @@
 import ModBot from '../ModBot';
 import { GuildStorage, Message } from 'yamdbf';
-import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed } from 'discord.js';
+import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
 
 /**
  * Contains methods and handles functionality pertaining
@@ -57,14 +57,14 @@ export default class ModLogger
 	/**
 	 * Find the specified logged case message
 	 */
-	public async findCase(guild: Guild, num: number): Promise<Message>
+	public async findCase(guild: Guild, loggedCase: int): Promise<Message>
 	{
 		const messages: Collection<string, Message> = await (<TextChannel> guild.channels
 			.get(this._bot.guildStorages.get(guild).getSetting('modlogs')))
 			.fetchMessages({ limit: 100 });
 
 		const foundCase: Message = messages.find((msg: Message) =>
-			msg.embeds.length > 0 ? msg.embeds[0].footer.text === `Case ${num}` : false);
+			msg.embeds.length > 0 ? msg.embeds[0].footer.text === `Case ${loggedCase}` : false);
 
 		return foundCase || null;
 	}
@@ -73,13 +73,17 @@ export default class ModLogger
 	 * Edit a logged moderation case to provide or edit a reason.
 	 * Only works if the editor is the original issuer
 	 */
-	public async editCase(guild: Guild, num: number, issuer: User, reason: string): Promise<Message>
+	public async editCase(guild: Guild, loggedCase: int | Message, issuer: User, reason: string): Promise<Message>
 	{
-		const caseMessage: Message = await this.findCase(guild, num);
+		let caseMessage: Message;
+		if (typeof loggedCase !== 'number') caseMessage = <Message> loggedCase;
+		else caseMessage = await this.findCase(guild, <int> loggedCase);
 		if (!caseMessage) return null;
+
 		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
 		if (messageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`
-			&& messageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`)
+			&& messageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
+			&& !guild.member(issuer).hasPermission('MANAGE_GUILD'))
 			return null;
 
 		const embed: RichEmbed = new RichEmbed()
@@ -95,32 +99,90 @@ export default class ModLogger
 	/**
 	 * Merge two cases (ban and unban) together with a new reason
 	 */
-	public async mergeSoftban(guild: Guild, first: number, second: number, issuer: User, reason: string): Promise<Message>
+	public async mergeSoftban(guild: Guild, ban: int | Message, unban: int | Message, issuer: User, reason: string): Promise<Message>
 	{
-		const banCaseMessage: Message = await this.findCase(guild, first);
+		let banCaseMessage: Message;
+		if (typeof ban !== 'number') banCaseMessage = <Message> ban;
+		else banCaseMessage = await this.findCase(guild, <int> ban);
 		if (!banCaseMessage) return null;
-		console.log(`Found case ${first}`);
 
 		const banMessageEmbed: MessageEmbed = banCaseMessage.embeds[0];
 		if (banMessageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
 			&& banMessageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
-		console.log(`Issuer was valid`);
 
-		const unbanCaseMessage: Message = await this.findCase(guild, second);
+		let unbanCaseMessage: Message;
+		if (typeof unban !== 'number') unbanCaseMessage = <Message> unban;
+		else unbanCaseMessage = await this.findCase(guild, <int> unban);
 		if (!unbanCaseMessage) return null;
-		console.log(`Found case ${second}`);
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(banMessageEmbed.color)
 			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
 			.setDescription(banMessageEmbed.description
 				.replace(/\*\*Action:\*\* .+/, `**Action:** Softban`)
-				.replace(/\*\*Reason:\*\*/, `**Reason:** ${reason}`))
+				.replace(/\*\*Reason:\*\* .+/, `**Reason:** ${reason}`))
 			.setFooter(banMessageEmbed.footer.text)
 			.setTimestamp(new Date(banMessageEmbed.createdTimestamp));
 
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		storage.setSetting('cases', storage.getSetting('cases') - 1);
 		return banCaseMessage.edit('', Object.assign({}, { embed })).then(() => unbanCaseMessage.delete());
+	}
+
+	/**
+	 * Return a promise that resolves with a logged moderation
+	 * case or cases (softban) for bans/unbans
+	 */
+	public async awaitCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Softban'): Promise<Message | Message[]>
+	{
+		return <any> new Promise((resolve: Function) =>
+		{
+			const logs: TextChannel = <TextChannel> guild.channels.get(this._bot.guildStorages.get(guild).getSetting('modlogs'));
+			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
+			const actionRegex: RegExp = /\*\*Action:\*\* (Ban|Unban|Softban)/;
+
+			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._bot.user.id
+				&& (m.embeds && m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 120e3 });
+
+			let found: Message | Message[];
+			let softbanResult: boolean[] = [false, false];
+
+			switch (type)
+			{
+				case 'Ban':
+				case 'Unban':
+					collector.on('message', (message: Message) =>
+					{
+						if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1]))
+						{
+							found = message;
+							collector.stop('found');
+						}
+					});
+					break;
+
+				case 'Softban':
+					found = [null, null];
+					collector.on('message', (message: Message) =>
+					{
+						if (message.embeds[0].description.match(actionRegex)[1] === 'Ban')
+						{
+							found[0] = message;
+							softbanResult[0] = true;
+						}
+						else if (message.embeds[0].description.match(actionRegex)[1] === 'Unban')
+						{
+							found[1] = message;
+							softbanResult[1] = true;
+						}
+						if (softbanResult[0] && softbanResult[1]) collector.stop('found');
+					});
+			}
+
+			collector.on('end', () =>
+			{
+				return resolve(found);
+			});
+		});
 	}
 }

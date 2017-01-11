@@ -35,7 +35,7 @@ export default class Lockdown extends Command<ModBot>
 				const oldPayload: any = (<TextChannel> message.channel)
 					.permissionOverwrites.get(message.guild.roles.find('name', '@everyone').id)
 					|| { allowData: 0, denyData: 0 };
-				await storage.nonConcurrentAccess('activeLockdowns', (key: string) =>
+				await storage.queue('activeLockdowns', (key: string) =>
 				{
 					const activeLockdowns: ActiveLockdowns = storage.getItem(key) || {};
 					const channel: string = notify.channel.id;
@@ -61,7 +61,7 @@ export default class Lockdown extends Command<ModBot>
 		else
 		{
 			const storage: LocalStorage = this.bot.storage;
-			await storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
+			await storage.queue('activeLockdowns', async (key: string) =>
 			{
 				let activeLockdowns: ActiveLockdowns = storage.getItem(key) || {};
 				if (!activeLockdowns[message.channel.id])

@@ -54,7 +54,7 @@ export default class Reject extends Command<ModBot>
 				.then(() => message.delete());
 
 		const user: User = await this.bot.fetchUser(id);
-		await storage.nonConcurrentAccess('activeBans', (key: string) =>
+		await storage.queue('activeBans', (key: string) =>
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
 			const bans: BanObject[] = activeBans[user.id];
@@ -67,7 +67,7 @@ export default class Reject extends Command<ModBot>
 			storage.setItem(key, activeBans);
 		});
 
-		await storage.nonConcurrentAccess('activeAppeals', (key: string) =>
+		await storage.queue('activeAppeals', (key: string) =>
 		{
 			const activeAppeals: ActiveAppeals = storage.getItem(key) || {};
 			message.channel.fetchMessage(activeAppeals[user.id])
