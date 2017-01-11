@@ -24,9 +24,9 @@ export default class Prune extends Command<ModBot>
 		const member: User = mentions[0];
 
 		if (!quantity || quantity < 1)
-			return message.channel.sendMessage('You must enter a number of messages to prune');
+			return message.channel.send('You must enter a number of messages to prune');
 
-		if (!member) return message.channel.sendMessage('You must mention a user to prune');
+		if (!member) return message.channel.send('You must mention a user to prune');
 
 		const messages: Message[] = (await message.channel.fetchMessages(
 			{ limit: 100, before: message.id }))
@@ -39,6 +39,6 @@ export default class Prune extends Command<ModBot>
 		if (messages.length === 1) await messages[0].delete();
 		else await message.channel.bulkDelete(messages);
 
-		return message.author.sendMessage('Prune operation completed.');
+		return message.author.send('Prune operation completed.');
 	}
 }

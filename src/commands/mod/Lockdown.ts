@@ -24,14 +24,14 @@ export default class Lockdown extends Command<ModBot>
 		if (args[0] !== 'clear')
 		{
 			const duration: number = Time.parseShorthand(<string> args[0]);
-			if (!duration) return message.channel.sendMessage(
+			if (!duration) return message.channel.send(
 				'You must provide a lockdown duration. Use the help command for more information');
 
 			try
 			{
 				const storage: LocalStorage = this.bot.storage;
 				const notify: Message = <Message> await message.channel
-					.sendMessage(`***This channel is locked down. (${Time.difference(duration * 2, duration).toString()})***`);
+					.send(`***This channel is locked down. (${Time.difference(duration * 2, duration).toString()})***`);
 				const oldPayload: any = (<TextChannel> message.channel)
 					.permissionOverwrites.get(message.guild.roles.find('name', '@everyone').id)
 					|| { allowData: 0, denyData: 0 };
@@ -65,7 +65,7 @@ export default class Lockdown extends Command<ModBot>
 			{
 				let activeLockdowns: ActiveLockdowns = storage.getItem(key) || {};
 				if (!activeLockdowns[message.channel.id])
-					return message.channel.sendMessage('This channel is not locked down.');
+					return message.channel.send('This channel is not locked down.');
 				const oldPayload: any = activeLockdowns[message.channel.id];
 				const payload: any = {
 					id: message.guild.roles.find('name', '@everyone').id,
@@ -76,7 +76,7 @@ export default class Lockdown extends Command<ModBot>
 				await (<any> this.bot).rest.methods.setChannelOverwrite(message.channel, payload);
 				delete activeLockdowns[message.channel.id];
 				storage.setItem(key, activeLockdowns);
-				message.channel.sendMessage('**The lockdown on this channel has ended.**');
+				message.channel.send('**The lockdown on this channel has ended.**');
 			});
 		}
 	}

@@ -3,7 +3,7 @@ import { Bot, Command } from 'yamdbf';
 import { User, Message } from 'discord.js';
 import { execSync } from 'child_process';
 
-export default class Bash extends Command
+export default class Bash extends Command<Bot>
 {
 	public constructor(bot: Bot)
 	{
@@ -23,12 +23,12 @@ export default class Bash extends Command
 	{
 		message.delete();
 		if (!args[0])
-			return message.channel.sendMessage('You must provide a command to execute.')
+			return message.channel.send('You must provide a command to execute.')
 				.then((res: Message) => res.delete(5000));
 		if (args.includes('rm') || args.includes('sudo') || args.includes('su'))
-			return message.channel.sendMessage('Forbidden.')
+			return message.channel.send('Forbidden.')
 				.then((res: Message) => res.delete(5000));
-		const execution: Message = <Message> await message.channel.sendMessage('_Executing..._');
+		const execution: Message = <Message> await message.channel.send('_Executing..._');
 		let result: string;
 		try
 		{
@@ -41,7 +41,7 @@ export default class Bash extends Command
 		const output: string = `**INPUT:**\n\`\`\`bash\n$ ${args.join(' ')}\n\`\`\`\n**OUTPUT:**`;
 		return execution.delete().then(() =>
 		{
-			message.channel.sendMessage(output);
+			message.channel.send(output);
 			message.channel.sendCode('ts', this._clean(result), { split: true });
 		});
 	}

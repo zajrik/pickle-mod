@@ -2,9 +2,7 @@
 import { Bot, Command, Message, GuildStorage } from 'yamdbf';
 import { User, Collection, RichEmbed } from 'discord.js';
 
-type int = number;
-
-export default class Help extends Command
+export default class Help extends Command<Bot>
 {
 	public constructor(bot: Bot)
 	{
@@ -19,15 +17,15 @@ export default class Help extends Command
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
 	{
 		const dm: boolean = message.channel.type === 'dm' || message.channel.type === 'group';
 		const mentionName: string = `@${this.bot.user.username}#${this.bot.user.discriminator}`;
 		const prefix: string = !dm ? message.guild.storage.getSetting('prefix') : '';
 
-		let usableCommands: Collection<string, Command> =
-			new Collection<string, Command>(this.bot.commands.entries());
-		let command: Command;
+		let usableCommands: Collection<string, Command<any>> =
+			new Collection<string, Command<any>>(this.bot.commands.entries());
+		let command: Command<any>;
 		let output: string = '';
 		let embed: RichEmbed = new RichEmbed();
 
@@ -61,13 +59,13 @@ export default class Help extends Command
 						usableCommands.delete(name);
 			}
 
-			embed.addField('Other commands', usableCommands.map((c: Command) => c.name).join(', '))
+			embed.addField('Other commands', usableCommands.map((c: Command<any>) => c.name).join(', '))
 				.addField('\u200b', `Use \`help <command>\` ${this.bot.selfbot ? '' : `or \`${
-				mentionName} help <command>\` `}for more information.\n\n`);
+					mentionName} help <command>\` `}for more information.\n\n`);
 		}
 		else
 		{
-			const filter: Function = (c: Command) =>
+			const filter: Function = (c: Command<any>) =>
 				c.name === args[0] || c.aliases.includes(<string> args[0]);
 			if (!dm) command = this.bot.commands
 				.filterGuildUsable(this.bot, message).filter(filter).first();
@@ -91,13 +89,9 @@ export default class Help extends Command
 		embed.setColor(11854048);
 		if (output) embed.setDescription(output);
 
-		let outMessage: Message;
-		if (!dm && !this.bot.selfbot && command) message.reply(`Sent you a DM with help information.`);
-		if (!dm && !this.bot.selfbot && !command) message.reply(`Sent you a DM with information.`);
-		if (this.bot.selfbot) outMessage = <Message> await message.channel.sendEmbed(embed);
-		else message.author.sendEmbed(embed);
-
-		if (this.bot.selfbot) outMessage.delete(30e3);
+		if (!dm && command) message.reply(`Sent you a DM with help information.`);
+		if (!dm && !command) message.reply(`Sent you a DM with information.`);
+		message.author.sendEmbed(embed);
 	}
 
 	private _padRight(text: string, width: int): string

@@ -3,7 +3,7 @@ import { User, RichEmbed, Guild } from 'discord.js';
 import * as Discord from 'discord.js';
 import Time from '../lib/Time';
 
-export default class Info extends Command
+export default class Info extends Command<Bot>
 {
 	public constructor(bot: Bot)
 	{
@@ -17,7 +17,7 @@ export default class Info extends Command
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
+	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
 	{
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)

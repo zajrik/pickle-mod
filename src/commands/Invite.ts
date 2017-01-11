@@ -2,7 +2,7 @@
 import { Bot, Command } from 'yamdbf';
 import { User, Message } from 'discord.js';
 
-export default class Invite extends Command
+export default class Invite extends Command<Bot>
 {
 	public constructor(bot: Bot)
 	{
@@ -16,8 +16,8 @@ export default class Invite extends Command
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
+	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
 	{
-		message.channel.sendMessage(`You can invite me to your server with this link:\nhttps://discordapp.com/oauth2/authorize?client_id=${this.bot.user.id}&scope=bot&permissions=490826759\n\nAfter adding me to your server, I will send you a DM with instructions to prepare your server for moderation. Thanks for choosing YAMDBF Mod for your server moderation control needs! 👏`);
+		message.channel.send(`You can invite me to your server with this link:\nhttps://discordapp.com/oauth2/authorize?client_id=${this.bot.user.id}&scope=bot&permissions=490826759\n\nAfter adding me to your server, I will send you a DM with instructions to prepare your server for moderation. Thanks for choosing YAMDBF Mod for your server moderation control needs! 👏`);
 	}
 }

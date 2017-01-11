@@ -1,7 +1,7 @@
 import { Bot, Command, Message } from 'yamdbf';
 import { User, RichEmbed, TextChannel } from 'discord.js';
 
-export default class Guide extends Command
+export default class Guide extends Command<Bot>
 {
 	public constructor(bot: Bot)
 	{
@@ -15,9 +15,9 @@ export default class Guide extends Command
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
 	{
-		if (!((<any> this.bot.config).owner.includes(message.author.id)
+		if (!(this.bot.config.owner.includes(message.author.id)
 			|| (<TextChannel> message.channel).permissionsFor(message.member)
 				.hasPermission('MANAGE_GUILD')))
 			return;

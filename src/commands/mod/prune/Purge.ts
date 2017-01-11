@@ -23,7 +23,7 @@ export default class Purge extends Command<ModBot>
 		const quantity: number = <number> args[0];
 
 		if (!quantity || quantity < 1)
-			return message.channel.sendMessage('You must enter a number of messages to purge.');
+			return message.channel.send('You must enter a number of messages to purge.');
 
 		let messages: Collection<string, Message>;
 		messages = (await message.channel.fetchMessages(
@@ -31,6 +31,6 @@ export default class Purge extends Command<ModBot>
 
 		message.delete();
 		await message.channel.bulkDelete(messages);
-		return message.author.sendMessage('Purge operation completed.');
+		return message.author.send('Purge operation completed.');
 	}
 }
