@@ -18,7 +18,6 @@ export default class ModLoader
 	public logger: ModLogger;
 	private _events: ModEvents;
 
-
 	public constructor(bot: ModBot)
 	{
 		this._bot = bot;

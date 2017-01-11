@@ -1,5 +1,5 @@
 import { Command } from 'yamdbf';
-import { User, Message, Collection } from 'discord.js';
+import { User, Message } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
 export default class Prune extends Command<ModBot>
