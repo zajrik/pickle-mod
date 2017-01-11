@@ -17,10 +17,9 @@ export default class Guide extends Command<Bot>
 
 	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
 	{
-		if (!(this.bot.config.owner.includes(message.author.id)
-			|| (<TextChannel> message.channel).permissionsFor(message.member)
-				.hasPermission('MANAGE_GUILD')))
-			return;
+		if (message.channel.type !== 'dm'
+			&& !(<TextChannel> message.channel).permissionsFor(message.member).hasPermission('MANAGE_GUILD')
+			&& !this.bot.config.owner.includes(message.author.id)) return;
 
 		const prefix: string = message.guild ? this.bot.getPrefix(message.guild) : '<prefix>';
 
