@@ -5,7 +5,7 @@ import { TextChannel, Guild, User, Invite } from 'discord.js';
 /**
  * Handles received moderation related client events
  */
-export default class ModEvents
+export default class Events
 {
 	private _bot: ModBot;
 

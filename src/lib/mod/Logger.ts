@@ -6,7 +6,7 @@ import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageC
  * Contains methods and handles functionality pertaining
  * to logging moderation actions to a guild's logging channel
  */
-export default class ModLogger
+export default class Logger
 {
 	private _bot: ModBot;
 
@@ -142,7 +142,7 @@ export default class ModLogger
 			const actionRegex: RegExp = /\*\*Action:\*\* (Ban|Unban|Softban)/;
 
 			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._bot.user.id
-				&& (m.embeds && m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 120e3 });
+				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 120e3 });
 
 			let found: Message | Message[];
 			let softbanResult: boolean[] = [false, false];
@@ -184,5 +184,42 @@ export default class ModLogger
 				return resolve(found);
 			});
 		});
+	}
+
+	/**
+	 * Given a case message with a correct case number,
+	 * find the cases after it and set their case numbers
+	 * in order, setting guild cases to the final number
+	 * when finished
+	 */
+	public async fixCases(start: Message): Promise<boolean>
+	{
+		const caseRegex: RegExp = /Case (\d+)/;
+		if (start.channel.id !== start.guild.storage.getSetting('modlogs')
+			|| (start.embeds[0] && !caseRegex.test(start.embeds[0].footer.text))) return false;
+
+		const logs: TextChannel = <TextChannel> start.channel;
+		const startCase: int = parseInt(start.embeds[0].footer.text.match(caseRegex)[1]);
+		let currentCase: int = startCase;
+
+		const cases: Message[] = (await logs.fetchMessages({ limit: 100, after: start.id })).array().reverse();
+		for (const loggedCase of cases)
+		{
+			if (loggedCase.embeds.length === 0
+				|| (loggedCase.embeds[0] && !caseRegex.test(loggedCase.embeds[0].footer.text))) continue;
+
+			let messageEmbed: MessageEmbed = loggedCase.embeds[0];
+			const embed: RichEmbed = new RichEmbed()
+				.setColor(messageEmbed.color)
+				.setAuthor(messageEmbed.author.name, messageEmbed.author.iconURL)
+				.setDescription(messageEmbed.description)
+				.setFooter(`Case ${++currentCase}`)
+				.setTimestamp(new Date(messageEmbed.createdTimestamp));
+
+			await loggedCase.edit('', Object.assign({}, { embed }));
+		}
+		start.guild.storage.setSetting('cases', currentCase);
+
+		return true;
 	}
 }

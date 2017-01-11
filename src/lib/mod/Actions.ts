@@ -5,7 +5,7 @@ import { GuildMember, Guild, User } from 'discord.js';
 /**
  * Contains methods for taking moderation action
  */
-export default class ModActions
+export default class Actions
 {
 	private _bot: ModBot;
 

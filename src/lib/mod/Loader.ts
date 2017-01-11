@@ -1,7 +1,7 @@
-import ModActions from './Actions';
-import ModLogger from './Logger';
-import ModEvents from './Events';
-import ModScheduler from './Scheduler';
+import Actions from './Actions';
+import Logger from './Logger';
+import Events from './Events';
+import Scheduler from './Scheduler';
 import ModBot from '../ModBot';
 import { GuildStorage, Message } from 'yamdbf';
 import { GuildMember, Guild } from 'discord.js';
@@ -14,20 +14,20 @@ import { GuildMember, Guild } from 'discord.js';
 export default class ModLoader
 {
 	private _bot: ModBot;
+	private _events: Events;
+	private _scheduler: Scheduler;
 
-	public actions: ModActions;
-	public logger: ModLogger;
-	private _events: ModEvents;
-	private _scheduler: ModScheduler;
+	public actions: Actions;
+	public logger: Logger;
 
 	public constructor(bot: ModBot)
 	{
 		this._bot = bot;
-		this.actions = new ModActions(this._bot);
-		this.logger = new ModLogger(this._bot);
+		this.actions = new Actions(this._bot);
+		this.logger = new Logger(this._bot);
 
-		this._events = new ModEvents(this._bot);
-		this._scheduler = new ModScheduler(this._bot);
+		this._events = new Events(this._bot);
+		this._scheduler = new Scheduler(this._bot);
 	}
 
 	/** Check whether the channel for case logging has been set for a guild */

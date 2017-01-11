@@ -9,7 +9,7 @@ import { TextChannel, GuildMember, Guild } from 'discord.js';
  * Handles registering timers for running scheduled
  * moderation tasks
  */
-export default class ModScheduler
+export default class Scheduler
 {
 	private _bot: ModBot;
 	public timers: TimerCollection<string, Timer>;
