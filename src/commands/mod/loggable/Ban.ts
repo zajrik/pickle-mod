@@ -12,7 +12,8 @@ export default class Ban extends Command<ModBot>
 			description: 'Ban a user',
 			usage: '<prefix>ban <@user> <...reason>',
 			extraHelp: '',
-			group: 'mod'
+			group: 'mod',
+			guildOnly: true
 		});
 	}
 
