@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Represents a difference between two given valid Unix time signatures
  */

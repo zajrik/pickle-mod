@@ -1,7 +1,7 @@
 import { Bot, Command } from 'yamdbf';
 import { User, Message } from 'discord.js';
 
-export default class Tags extends Command
+export default class Tags extends Command<Bot>
 {
 	public constructor(bot: Bot)
 	{
@@ -19,7 +19,7 @@ export default class Tags extends Command
 	{
 		const tags: Object = this.bot.storage.getItem('tags');
 		if (!tags || Object.keys(tags).length === 0)
-			return message.channel.sendMessage('There are currently no saved tags.');
-		return message.channel.sendMessage(`**Current tags:**\n${Object.keys(tags).sort().join(', ')}`);
+			return message.channel.send('There are currently no saved tags.');
+		return message.channel.send(`**Current tags:**\n${Object.keys(tags).sort().join(', ')}`);
 	}
 };

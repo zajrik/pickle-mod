@@ -1,4 +1,3 @@
-'use strict';
 import { Bot, BotOptions } from 'yamdbf';
 import { GuildMember, TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 import ModLoader from './mod/Loader';

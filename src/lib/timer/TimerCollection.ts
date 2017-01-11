@@ -1,4 +1,3 @@
-'use strict';
 import { Collection } from 'discord.js';
 import Timer from './Timer';
 

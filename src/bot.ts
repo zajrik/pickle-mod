@@ -1,4 +1,3 @@
-'use strict';
 import * as path from 'path';
 import ModBot from './lib/ModBot';
 const config: any = require('./config.json');

@@ -1,4 +1,3 @@
-'use strict';
 import { Bot, LocalStorage } from 'yamdbf';
 
 /**
