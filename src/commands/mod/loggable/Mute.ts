@@ -1,6 +1,5 @@
 import { Command, LocalStorage, Message } from 'yamdbf';
 import { User } from 'discord.js';
-import { ActiveMutes } from '../../../lib/ModActions';
 import ModBot from '../../../lib/ModBot';
 import Time from '../../../lib/Time';
 

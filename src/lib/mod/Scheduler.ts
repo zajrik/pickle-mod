@@ -1,0 +1,87 @@
+import Time from '../Time';
+import Timer from '../timer/Timer';
+import ModBot from '../ModBot';
+import { LocalStorage } from 'yamdbf';
+import { TextChannel, GuildMember, Guild } from 'discord.js';
+
+/**
+ * Handles registering timers for running scheduled
+ * moderation tasks
+ */
+export default class ModScheduler
+{
+	private _bot: ModBot;
+
+	public constructor(bot: ModBot)
+	{
+		this._bot = bot;
+
+		this._bot.timers.add(new Timer(this._bot, 'mute', 15, this._checkMutes));
+		this._bot.timers.add(new Timer(this._bot, 'lockdown', 5, this._checkLockdowns));
+	}
+
+	/**
+	 * Check active mutes and remove any that are expired
+	 */
+	private async _checkMutes(): Promise<void>
+	{
+		const storage: LocalStorage = this._bot.storage;
+		storage.nonConcurrentAccess('activeMutes', async (key: string) =>
+		{
+			let activeMutes: ActiveMutes = storage.getItem(key);
+			if (!activeMutes) return;
+			for (let user of Object.keys(activeMutes))
+			{
+				if (activeMutes[user].length === 0) { delete activeMutes[user]; continue; };
+				for (let i: number = 0; i < activeMutes[user].length; i++)
+				{
+					const mute: MuteObj = activeMutes[user][i];
+					const mutedRole: string = this._bot.guildStorages.get(mute.guild).getSetting('mutedrole');
+					if (!mutedRole) continue;
+					const isMuted: boolean = (await this._bot.guilds.get(mute.guild)
+						.fetchMember(user)).roles.has(mutedRole);
+					if (!mute.duration && isMuted) continue;
+					else if (!mute.duration) mute.duration = 0;
+					if (Time.difference(mute.duration, Time.now() - mute.timestamp).ms > 1) continue;
+					console.log(`Removing expired mute for user '${mute.raw}'`);
+					const guild: Guild = this._bot.guilds.get(mute.guild);
+					const member: GuildMember = guild.members.get(mute.user);
+					await member.removeRole(guild.roles.get(mutedRole));
+					member.sendMessage(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
+					activeMutes[user].splice(i--, 1);
+				}
+			}
+			storage.setItem(key, activeMutes);
+		});
+	}
+
+	/**
+	 * Check active lockdowns and remove any that are expired
+	 */
+	private async _checkLockdowns(): Promise<void>
+	{
+		const storage: LocalStorage = this._bot.storage;
+		storage.nonConcurrentAccess('activeLockdowns', async (key: string) =>
+		{
+			const activeLockdowns: ActiveLockdowns = storage.getItem(key);
+			if (!activeLockdowns) return;
+			for (let id of Object.keys(activeLockdowns))
+			{
+				const lockdown: LockdownObj = activeLockdowns[id];
+				const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
+				if (Time.difference(lockdown.duration, Time.now() - lockdown.timestamp).ms > 1) continue;
+				console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
+				const payload: any = {
+					id: channel.guild.roles.find('name', '@everyone').id,
+					type: 'role',
+					allow: lockdown.allow,
+					deny: lockdown.deny
+				};
+				await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
+				delete activeLockdowns[id];
+				channel.sendMessage('**The lockdown on this channel has ended.**');
+			}
+			storage.setItem(key, activeLockdowns);
+		});
+	}
+}

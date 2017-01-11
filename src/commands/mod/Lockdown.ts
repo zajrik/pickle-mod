@@ -1,6 +1,5 @@
 import { Command, LocalStorage, Message } from 'yamdbf';
 import { User, TextChannel } from 'discord.js';
-import { ActiveLockdowns } from '../../lib/ModActions';
 import ModBot from '../../lib/ModBot';
 import Time from '../../lib/Time';
 
