@@ -1,7 +1,7 @@
 /**
  * Represents a mute entry in storage
  */
-type MuteObj = {
+type MuteObject = {
 	raw: string;
 	user: string;
 	guild: string;

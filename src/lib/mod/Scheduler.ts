@@ -1,5 +1,6 @@
 import Time from '../Time';
 import Timer from '../timer/Timer';
+import TimerCollection from '../timer/TimerCollection';
 import ModBot from '../ModBot';
 import { LocalStorage } from 'yamdbf';
 import { TextChannel, GuildMember, Guild } from 'discord.js';
@@ -11,13 +12,15 @@ import { TextChannel, GuildMember, Guild } from 'discord.js';
 export default class ModScheduler
 {
 	private _bot: ModBot;
+	public timers: TimerCollection<string, Timer>;
 
 	public constructor(bot: ModBot)
 	{
 		this._bot = bot;
+		this.timers = new TimerCollection<string, Timer>();
 
-		this._bot.timers.add(new Timer(this._bot, 'mute', 15, this._checkMutes));
-		this._bot.timers.add(new Timer(this._bot, 'lockdown', 5, this._checkLockdowns));
+		this.timers.add(new Timer(this._bot, 'mute', 15, this._checkMutes));
+		this.timers.add(new Timer(this._bot, 'lockdown', 5, this._checkLockdowns));
 	}
 
 	/**
@@ -35,7 +38,7 @@ export default class ModScheduler
 				if (activeMutes[user].length === 0) { delete activeMutes[user]; continue; };
 				for (let i: number = 0; i < activeMutes[user].length; i++)
 				{
-					const mute: MuteObj = activeMutes[user][i];
+					const mute: MuteObject = activeMutes[user][i];
 					const mutedRole: string = this._bot.guildStorages.get(mute.guild).getSetting('mutedrole');
 					if (!mutedRole) continue;
 					const isMuted: boolean = (await this._bot.guilds.get(mute.guild)
@@ -47,7 +50,7 @@ export default class ModScheduler
 					const guild: Guild = this._bot.guilds.get(mute.guild);
 					const member: GuildMember = guild.members.get(mute.user);
 					await member.removeRole(guild.roles.get(mutedRole));
-					member.sendMessage(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
+					member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
 					activeMutes[user].splice(i--, 1);
 				}
 			}
@@ -67,7 +70,7 @@ export default class ModScheduler
 			if (!activeLockdowns) return;
 			for (let id of Object.keys(activeLockdowns))
 			{
-				const lockdown: LockdownObj = activeLockdowns[id];
+				const lockdown: LockdownObject = activeLockdowns[id];
 				const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
 				if (Time.difference(lockdown.duration, Time.now() - lockdown.timestamp).ms > 1) continue;
 				console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
@@ -79,7 +82,7 @@ export default class ModScheduler
 				};
 				await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
 				delete activeLockdowns[id];
-				channel.sendMessage('**The lockdown on this channel has ended.**');
+				channel.send('**The lockdown on this channel has ended.**');
 			}
 			storage.setItem(key, activeLockdowns);
 		});

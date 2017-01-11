@@ -1,10 +1,10 @@
-import { Bot, Command, LocalStorage, GuildStorage } from 'yamdbf';
+import { Command, LocalStorage, GuildStorage } from 'yamdbf';
 import { User, Message, TextChannel, Guild, RichEmbed } from 'discord.js';
-import { ActiveAppeals, ActiveBans, BanObj } from '../../../lib/ModActions';
+import ModBot from '../../../lib/ModBot';
 
-export default class Appeal extends Command
+export default class Appeal extends Command<ModBot>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: ModBot)
 	{
 		super(bot, {
 			name: 'appeal',
@@ -26,20 +26,20 @@ export default class Appeal extends Command
 			await storage.nonConcurrentAccess('activeAppeals', async (appealsKey: string) =>
 			{
 				const activeAppeals: ActiveAppeals = storage.getItem(appealsKey) || {};
-				const bans: BanObj[] = activeBans[message.author.id];
+				const bans: BanObject[] = activeBans[message.author.id];
 
-				if (!bans) return message.channel.sendMessage('You do not have any bans eligible for appeal.');
+				if (!bans) return message.channel.send('You do not have any bans eligible for appeal.');
 				else if (activeAppeals && activeAppeals[message.author.id])
-					return message.channel.sendMessage(
+					return message.channel.send(
 						`You currently have a pending appeal and may not place another until it has been reviewed.`);
 
-				const ban: BanObj = bans.slice(-1)[0];
+				const ban: BanObject = bans.slice(-1)[0];
 				const reason: string = args.join(' ');
 
-				if (!reason) return message.channel.sendMessage(
+				if (!reason) return message.channel.send(
 					'You must provide an appeal message if you want to appeal a ban. Please limit the message to 1,000 characters or less.');
 
-				if (reason.length > 1000) return message.channel.sendMessage(
+				if (reason.length > 1000) return message.channel.send(
 					'You must limit your appeal message to 1,000 characters or less.');
 
 				const guild: Guild = this.bot.guilds.get(ban.guild);
@@ -58,7 +58,7 @@ export default class Appeal extends Command
 
 				activeAppeals[message.author.id] = appeal.id;
 				storage.setItem(appealsKey, activeAppeals);
-				message.channel.sendMessage(
+				message.channel.send(
 					'Your appeal has been received. You will be notified when it is approved or rejected.');
 			});
 		});

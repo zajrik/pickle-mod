@@ -1,7 +1,7 @@
 /**
  * Represents a ban entry in storage
  */
-type BanObj = {
+type BanObject = {
 	user: string;
 	raw: string;
 	guild: string;

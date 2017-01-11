@@ -2,18 +2,14 @@
 import { Bot, BotOptions } from 'yamdbf';
 import { GuildMember, TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 import ModLoader from './mod/Loader';
-import TimerCollection from './timer/TimerCollection';
-import Timer from './timer/Timer';
 
 export default class ModBot extends Bot
 {
-	public timers: TimerCollection<string, Timer>;
 	public mod: ModLoader;
 
 	public constructor(botOptions: BotOptions)
 	{
 		super(botOptions);
-		this.timers = new TimerCollection<string, Timer>();
 		this.mod = new ModLoader(this);
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.logMember(member, true, 8450847));

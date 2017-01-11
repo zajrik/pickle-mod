@@ -62,7 +62,7 @@ export default class ModEvents
 		await storage.nonConcurrentAccess('activeBans', (key: string) =>
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
-			const bans: BanObj[] = activeBans[user.id];
+			const bans: BanObject[] = activeBans[user.id];
 			if (!bans) return;
 			for (let i: number = 0; i < bans.length; i++)
 			{

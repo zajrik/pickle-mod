@@ -1,10 +1,10 @@
-import { Bot, Command, Message } from 'yamdbf';
+import { Command, Message } from 'yamdbf';
 import { User } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
-export default class Kick extends Command
+export default class Kick extends Command<ModBot>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: ModBot)
 	{
 		super(bot, {
 			name: 'kick',
@@ -19,24 +19,24 @@ export default class Kick extends Command
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!(<ModBot> this.bot).mod.canCallModCommand(message)) return;
-		if (!mentions[0]) return message.channel.sendMessage('You must mention a user to kick.');
+		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!mentions[0]) return message.channel.send('You must mention a user to kick.');
 		const user: User = mentions[0];
 
 		if (user.id === message.author.id)
-			return message.channel.sendMessage(`I don't think you want to kick yourself.`);
+			return message.channel.send(`I don't think you want to kick yourself.`);
 
 		const modRole: string = message.guild.storage.getSetting('modrole');
 		if (message.guild.member(user.id).roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
-			return message.channel.sendMessage('You may not use this command on that user.');
+			return message.channel.send('You may not use this command on that user.');
 
 		const reason: string = args.join(' ').trim();
-		if (!reason) return message.channel.sendMessage('You must provide a reason to kick that user.');
+		if (!reason) return message.channel.send('You must provide a reason to kick that user.');
 
-		await (<ModBot> this.bot).mod.kick(user, message.guild);
-		await (<ModBot> this.bot).mod.caseLog(user, message.guild, 'Kick', reason, message.author);
+		await this.bot.mod.actions.kick(user, message.guild);
+		await this.bot.mod.logger.caseLog(user, message.guild, 'Kick', reason, message.author);
 		console.log(`Kicked ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
-		user.sendMessage(`You have been kicked from ${message.guild.name}\n\n**Reason:** ${reason}`);
-		message.channel.sendMessage(`Kicked ${user.username}#${user.discriminator}`);
+		user.send(`You have been kicked from ${message.guild.name}\n\n**Reason:** ${reason}`);
+		message.channel.send(`Kicked ${user.username}#${user.discriminator}`);
 	}
 }
