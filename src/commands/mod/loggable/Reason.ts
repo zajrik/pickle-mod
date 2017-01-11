@@ -1,4 +1,4 @@
-import { Bot, Command, Message } from 'yamdbf';
+import { Command, Message } from 'yamdbf';
 import { User, MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
