@@ -12,15 +12,11 @@ const bot: ModBot = new ModBot({ // tslint:disable-line
 	readyText: 'Ready\u0007',
 	commandsDir: path.join(__dirname, 'commands'),
 	disableBase: [
-		'disablegroup',
-		'enablegroup',
-		'listgroups',
 		'version',
 		'reload'
 	]
 })
-.removeDefaultSetting('disabledGroups')
 .setDefaultSetting('prefix', '?')
 .setDefaultSetting('cases', 0)
 .start()
-.on('disconnect', () => process.exit());
+.on('disconnect', () => process.exit(100));
