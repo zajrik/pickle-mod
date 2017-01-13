@@ -44,6 +44,7 @@ export default class ClearLogs extends Command<ModBot>
 		{
 			const newChannel: TextChannel = <TextChannel> await channel.clone(channel.name, true);
 			message.guild.storage.setSetting('modlogs', newChannel.id);
+			message.guild.storage.setSetting('cases', 0);
 
 			await channel.delete();
 			await newChannel.setPosition(channel.position);

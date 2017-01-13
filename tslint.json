@@ -62,7 +62,7 @@
 		],
 		"typedef": [
 			"parameter",
-			"arrow-parameter",
+			// "arrow-parameter",
 			"call-signature",
 			"member-variable-declaration",
 			"property-declaration",
