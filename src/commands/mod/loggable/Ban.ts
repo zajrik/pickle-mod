@@ -43,7 +43,7 @@ export default class Ban extends Command<ModBot>
 		await message.channel.send(
 			`Are you sure you want issue this ban? (__y__es | __n__o)`,	Object.assign({}, { embed }));
 		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
-			a.author.id === message.author.id, { max: 1, time: 20000 })).first();
+			a.author.id === message.author.id, { max: 1, time: 20e3 })).first();
 
 		if (!confirmation) return message.channel.send('Command timed out, aborting ban.');
 

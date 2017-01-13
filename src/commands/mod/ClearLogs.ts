@@ -26,12 +26,12 @@ export default class ClearLogs extends Command<ModBot>
 		const channelName: string = (<TextChannel> message.channel).name;
 		if (channelName === message.guild.channels.get(message.guild.storage.getSetting('modlogs')).name)
 			return message.channel.send('You may not use that command in this channel.')
-				.then((res: Message) => message.delete().then(() => res.delete())); 
+				.then((res: Message) => message.delete().then(() => res.delete()));
 
 		await message.channel.send(
 			`Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)`);
 		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
-			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
+			a.author.id === message.author.id, { max: 1, time: 20e3 })).first();
 
 		if (!confirmation) return message.channel.send('Command timed out, aborting mod logs reset.');
 
