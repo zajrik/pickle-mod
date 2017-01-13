@@ -25,7 +25,7 @@ export default class Unban extends Command<ModBot>
 		if (!id) return message.channel.send('You must provide an ID to unban.');
 
 		const reason: string = args.join(' ').trim();
-		if (!reason) return message.channel.send('You must provide a reason to ban that user.');
+		if (!reason) return message.channel.send('You must provide a reason to unban that user.');
 
 		let user: User;
 		const unbanning: Message = <Message> await message.channel.send(`Unbanning \`${id}\`...`);
