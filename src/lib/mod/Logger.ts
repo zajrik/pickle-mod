@@ -1,6 +1,6 @@
 import ModBot from '../ModBot';
 import { GuildStorage, Message } from 'yamdbf';
-import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
+import { TextChannel, Guild, Collection, User, GuildMember, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
 
 /**
  * Contains methods and handles functionality pertaining
@@ -83,7 +83,7 @@ export default class Logger
 		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
 		if (messageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`
 			&& messageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
-			&& !guild.member(issuer).hasPermission('MANAGE_GUILD'))
+			&& !(await guild.fetchMember(issuer)).hasPermission('MANAGE_GUILD'))
 			return null;
 
 		const embed: RichEmbed = new RichEmbed()

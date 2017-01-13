@@ -20,7 +20,7 @@ export default class ClearLogs extends Command<ModBot>
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		if (!this.bot.mod.canCallModCommand(message)) return;
-		if (!message.guild.member(this.bot.user).hasPermission('MANAGE_CHANNELS'))
+		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_CHANNELS'))
 			return message.channel.send(`I don't have permission to do that on this server.`);
 
 		const channelName: string = (<TextChannel> message.channel).name;

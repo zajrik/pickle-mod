@@ -1,5 +1,5 @@
 import { Command, LocalStorage, Message } from 'yamdbf';
-import { User } from 'discord.js';
+import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import Time from '../../../lib/Time';
 
@@ -29,7 +29,8 @@ export default class Mute extends Command<ModBot>
 			return message.channel.send(`I don't think you want to mute yourself.`);
 
 		const modRole: string = message.guild.storage.getSetting('modrole');
-		if (message.guild.member(user.id).roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
+		const member: GuildMember = await message.guild.fetchMember(user);
+		if (member.roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
 		const durationString: string = <string> args[0];
@@ -40,7 +41,7 @@ export default class Mute extends Command<ModBot>
 		if (!reason) return message.channel.send('You must provide a reason to mute that user.');
 
 		const mutedRole: string = message.guild.storage.getSetting('mutedrole');
-		if (message.guild.member(user.id).roles.has(mutedRole))
+		if (member.roles.has(mutedRole))
 			return message.channel.send(`That user is already muted`);
 
 		try

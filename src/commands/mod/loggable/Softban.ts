@@ -1,5 +1,5 @@
 import { Command, Message } from 'yamdbf';
-import { User } from 'discord.js';
+import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
 export default class Softban extends Command<ModBot>
@@ -28,7 +28,8 @@ export default class Softban extends Command<ModBot>
 			return message.channel.send(`I don't think you want to softban yourself.`);
 
 		const modRole: string = message.guild.storage.getSetting('modrole');
-		if (message.guild.member(user.id).roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
+		const member: GuildMember = await message.guild.fetchMember(user);
+		if (member.roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
 		const reason: string = args.join(' ').trim();

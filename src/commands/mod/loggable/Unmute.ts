@@ -1,5 +1,5 @@
 import { Command, LocalStorage, Message } from 'yamdbf';
-import { User } from 'discord.js';
+import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
 export default class Unmute extends Command<ModBot>
@@ -25,8 +25,8 @@ export default class Unmute extends Command<ModBot>
 		const user: User = mentions[0];
 
 		const mutedRole: string = message.guild.storage.getSetting('mutedrole');
-		if (!message.guild.member(user.id).roles.has(mutedRole))
-			return message.channel.send(`That user is not muted`);
+		const member: GuildMember = await message.guild.fetchMember(user);
+		if (!member.roles.has(mutedRole)) return message.channel.send(`That user is not muted`);
 
 		try
 		{

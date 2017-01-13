@@ -18,7 +18,7 @@ export default class Actions
 	 * Increment the number of times the given user has
 	 * received a given type of formal moderation action
 	 */
-	private _count(user: User | string,
+	private _count(user: GuildMember | User | string,
 					guild: Guild | string,
 					type: 'warnings' | 'mutes' | 'kicks' | 'softbans' | 'bans'): void
 	{
@@ -36,7 +36,7 @@ export default class Actions
 	/**
 	 * Check the number of past offenses a user has had
 	 */
-	public checkUserHistory(guild: Guild, user: User): { toString: () => string, color: number, values: number[]}
+	public checkUserHistory(guild: Guild, user: GuildMember | User): { toString: () => string, color: number, values: number[]}
 	{
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		const [warns, mutes, kicks, softbans, bans]: number[] = ['warnings', 'mutes', 'kicks', 'softbans', 'bans']
@@ -64,7 +64,7 @@ export default class Actions
 	/**
 	 * Increment a user's warnings
 	 */
-	public async warn(user: User | string, guild: Guild): Promise<User | string>
+	public async warn(user: GuildMember | User | string, guild: Guild): Promise<GuildMember | User | string>
 	{
 		this._count(user, guild, 'warnings');
 		return user;
@@ -73,10 +73,10 @@ export default class Actions
 	/**
 	 * Mute a user in a guild
 	 */
-	public async mute(user: User | string, guild: Guild): Promise<GuildMember>
+	public async mute(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
 	{
 		this._count(user, guild, 'mutes');
-		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
+		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		return await member.addRole(guild.roles.get(storage.getSetting('mutedrole')));
 	}
@@ -84,9 +84,9 @@ export default class Actions
 	/**
 	 * Unmute a user in a guild
 	 */
-	public async unmute(user: User | string, guild: Guild): Promise<GuildMember>
+	public async unmute(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
 	{
-		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
+		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		return await member.removeRole(guild.roles.get(storage.getSetting('mutedrole')));
 	}
@@ -94,20 +94,20 @@ export default class Actions
 	/**
 	 * Kick a user from a guild
 	 */
-	public async kick(user: User | string, guild: Guild): Promise<GuildMember>
+	public async kick(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
 	{
 		this._count(user, guild, 'kicks');
-		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
+		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
 		return await member.kick();
 	}
 
 	/**
 	 * Ban a user from a guild
 	 */
-	public async ban(user: User | string, guild: Guild): Promise<GuildMember>
+	public async ban(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
 	{
 		this._count(user, guild, 'bans');
-		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
+		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
 		return <GuildMember> await guild.ban(member, 7);
 	}
 
@@ -122,10 +122,10 @@ export default class Actions
 	/**
 	 * Softban a user from a guild, removing the past 7 days of their messages
 	 */
-	public async softban(user: User | string, guild: Guild): Promise<User>
+	public async softban(user: GuildMember | User | string, guild: Guild): Promise<User>
 	{
 		this._count(user, guild, 'softbans');
-		const member: GuildMember = guild.members.get((<User> user).id || <string> user);
+		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
 		await guild.ban(member, 7);
 		await new Promise((r: any) => setTimeout(r, 5e3));
 		return await guild.unban(member.id);
