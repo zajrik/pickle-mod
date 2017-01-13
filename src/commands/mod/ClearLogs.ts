@@ -1,5 +1,5 @@
-import { Command, Message, GuildStorage } from 'yamdbf';
-import { User, Collection, TextChannel } from 'discord.js';
+import { Command, Message } from 'yamdbf';
+import { User, TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';
 
 export default class ClearLogs extends Command<ModBot>
