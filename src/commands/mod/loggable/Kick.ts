@@ -33,10 +33,10 @@ export default class Kick extends Command<ModBot>
 		const reason: string = args.join(' ').trim();
 		if (!reason) return message.channel.send('You must provide a reason to kick that user.');
 
+		await user.send(`You have been kicked from ${message.guild.name}\n\n**Reason:** ${reason}`);
 		await this.bot.mod.actions.kick(user, message.guild);
 		await this.bot.mod.logger.caseLog(user, message.guild, 'Kick', reason, message.author);
 		console.log(`Kicked ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
-		user.send(`You have been kicked from ${message.guild.name}\n\n**Reason:** ${reason}`);
 		message.channel.send(`Kicked ${user.username}#${user.discriminator}`);
 	}
 }
