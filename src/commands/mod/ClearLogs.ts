@@ -20,36 +20,38 @@ export default class ClearLogs extends Command<ModBot>
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!message.guild.member(this.bot.user).hasPermission('MANAGE_CHANNELS'))
+			return message.channel.send(`I don't have permission to do that on this server.`);
+
 		const channelName: string = (<TextChannel> message.channel).name;
 		if (channelName === message.guild.channels.get(message.guild.storage.getSetting('modlogs')).name)
-			return message.channel.send('You may not use that command in this channel.');
+			return message.channel.send('You may not use that command in this channel.')
+				.then((res: Message) => message.delete().then(() => res.delete())); 
 
 		await message.channel.send(
 			`Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)`);
 		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
 			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
 
-		if (!confirmation) return message.channel.send('Command timed out, aborting mod-logs reset.');
+		if (!confirmation) return message.channel.send('Command timed out, aborting mod logs reset.');
 
 		if (!/^(?:yes|y)$/.test(confirmation.content))
-			return message.channel.send('Okay, aborting mod-logs reset.');
+			return message.channel.send('Okay, aborting mod logs reset.');
 
-		message.channel.send('Okay, clearing mod logs.');
-		let storage: GuildStorage = message.guild.storage;
-		storage.setSetting('cases', 0);
-
-		const logsChannelId: string = storage.getSetting('modlogs');
-		const logsChannel: TextChannel = <TextChannel> message.guild.channels.get(logsChannelId);
-		const purgeMessage: Message = <Message> await logsChannel.send('Mod log reset in progress...');
-		while (true)
+		message.channel.send('Okay, resetting mod logs.');
+		const channel: TextChannel = <TextChannel> message.guild.channels.get(message.guild.storage.getSetting('modlogs'));
+		try
 		{
-			let messages: Collection<string, Message>;
-			messages = (await logsChannel.fetchMessages({ limit: 100, before: purgeMessage.id }));
-			if (messages.size === 0) break;
-			await logsChannel.bulkDelete(messages);
-		}
+			const newChannel: TextChannel = <TextChannel> await channel.clone(channel.name, true);
+			message.guild.storage.setSetting('modlogs', newChannel.id);
 
-		return purgeMessage.delete()
-			.then(() => message.channel.send('Mod log reset completed.'));
+			await channel.delete();
+			await newChannel.setPosition(channel.position);
+			return message.channel.send('Mod logs successfully reset.');
+		}
+		catch (err)
+		{
+			return message.channel.send('There was an error while resetting mod logs.');
+		}
 	}
 }
