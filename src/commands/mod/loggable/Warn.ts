@@ -12,6 +12,7 @@ export default class Warn extends Command<ModBot>
 			description: 'Give a formal warning to a user',
 			usage: '<prefix>warn <@user> <reason>',
 			extraHelp: '',
+			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});

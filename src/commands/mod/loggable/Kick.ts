@@ -12,6 +12,7 @@ export default class Kick extends Command<ModBot>
 			description: 'Kick a user',
 			usage: '<prefix>kick <@user> <...reason>',
 			extraHelp: '',
+			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});

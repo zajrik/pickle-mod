@@ -12,6 +12,7 @@ export default class Unmute extends Command<ModBot>
 			description: 'Unmute a user',
 			usage: '<prefix>unmute <@user>',
 			extraHelp: '',
+			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});

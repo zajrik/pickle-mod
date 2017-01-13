@@ -12,6 +12,7 @@ export default class History extends Command<ModBot>
 			description: 'Check a user\'s offense history',
 			usage: '<prefix>history <@user>',
 			extraHelp: '',
+			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});

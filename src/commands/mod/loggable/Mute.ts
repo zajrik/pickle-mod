@@ -13,6 +13,7 @@ export default class Mute extends Command<ModBot>
 			description: 'Mute a user',
 			usage: '<prefix>mute <@user> <duration> <reason>',
 			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d',
+			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});

@@ -12,6 +12,7 @@ export default class Appeal extends Command<ModBot>
 			description: 'Appeal a ban',
 			usage: '<prefix>appeal <message>',
 			extraHelp: '',
+			argOpts: { stringArgs: true },
 			group: 'mod'
 		});
 	}
