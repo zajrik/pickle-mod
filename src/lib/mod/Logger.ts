@@ -145,7 +145,6 @@ export default class Logger
 				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 120e3 });
 
 			let found: Message | Message[];
-			let softbanResult: boolean[] = [false, false];
 
 			switch (type)
 			{
@@ -162,6 +161,7 @@ export default class Logger
 					break;
 
 				case 'Softban':
+					let softbanResult: boolean[] = [false, false];
 					found = [null, null];
 					collector.on('message', (message: Message) =>
 					{
