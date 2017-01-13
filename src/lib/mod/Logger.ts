@@ -142,9 +142,10 @@ export default class Logger
 			const actionRegex: RegExp = /\*\*Action:\*\* (Ban|Unban|Softban)/;
 
 			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._bot.user.id
-				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 120e3 });
+				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 60e3 });
 
 			let found: Message | Message[];
+			collector.on('end', () => resolve(found));
 
 			switch (type)
 			{
@@ -152,11 +153,8 @@ export default class Logger
 				case 'Unban':
 					collector.on('message', (message: Message) =>
 					{
-						if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1]))
-						{
-							found = message;
-							collector.stop('found');
-						}
+						if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
+						if (found) collector.stop('found');
 					});
 					break;
 
@@ -165,24 +163,14 @@ export default class Logger
 					found = [null, null];
 					collector.on('message', (message: Message) =>
 					{
-						if (message.embeds[0].description.match(actionRegex)[1] === 'Ban')
-						{
-							found[0] = message;
-							softbanResult[0] = true;
-						}
-						else if (message.embeds[0].description.match(actionRegex)[1] === 'Unban')
-						{
-							found[1] = message;
-							softbanResult[1] = true;
-						}
-						if (softbanResult[0] && softbanResult[1]) collector.stop('found');
+						const caseType: string = message.embeds[0].description.match(actionRegex)[1];
+						const index: int = caseType === 'Ban' ? 0 : caseType === 'Unban' ? 1 : null;
+						if (typeof index !== 'number') return;
+						found[index] = message;
+						softbanResult[index] = true;
+						if (softbanResult.reduce((a, b) => a && b)) collector.stop('found');
 					});
 			}
-
-			collector.on('end', () =>
-			{
-				return resolve(found);
-			});
 		});
 	}
 
