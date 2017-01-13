@@ -1,6 +1,6 @@
 import ModBot from '../ModBot';
 import { GuildStorage, Message } from 'yamdbf';
-import { TextChannel, Guild, Collection, User, GuildMember, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
+import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
 
 /**
  * Contains methods and handles functionality pertaining
