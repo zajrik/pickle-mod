@@ -11,8 +11,8 @@ export default class Config extends Command<ModBot>
 			name: 'config',
 			aliases: [],
 			description: 'Configure options for the server',
-			usage: '<prefix>config <mod|mute|logs|appeals|status|reset> [...args]',
-			extraHelp: '',
+			usage: '<prefix>config <option> [...args]\nOptions: mod | mute | logs | appeals | status | reset',
+			extraHelp: 'Uses a fuzzy-ish search to find channels and roles. For example, if you want to set your logging channel to a channel called "mod-logs" you can do:\n\n\t<prefix>config mod mod logs',
 			group: 'mod',
 			guildOnly: true,
 			argOpts: { stringArgs: true, separator: ' ' }
