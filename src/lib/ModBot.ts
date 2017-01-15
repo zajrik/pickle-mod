@@ -1,10 +1,12 @@
 import { Bot, BotOptions } from 'yamdbf';
 import { GuildMember, TextChannel, RichEmbed, Message, Guild } from 'discord.js';
+import { DMManager } from 'yamdbf-addon-dm-manager';
 import ModLoader from './mod/Loader';
 
 export default class ModBot extends Bot
 {
 	public mod: ModLoader;
+	private dmManager: DMManager;
 
 	public constructor(botOptions: BotOptions)
 	{
@@ -17,6 +19,11 @@ export default class ModBot extends Bot
 		this.on('guildDelete', (guild: Guild) => this.logGuild(guild, false, 13091073));
 		this.on('command', (name: string, args: any, original: string, execTime: number, message: Message) =>
 			this.logCommand(name, args, original, execTime, message));
+
+		this.once('ready', () =>
+		{
+			this.dmManager = new DMManager(this, this.config.DMManager);
+		});
 	}
 
 	/**

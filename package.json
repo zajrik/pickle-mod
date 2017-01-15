@@ -2,7 +2,7 @@
   "name": "modbot",
   "version": "3.0.0",
   "description": "Discord bot for server moderation purposes",
-  "main": "bot.js",
+  "main": "bin/bot.js",
   "scripts": {
     "lint": "tslint './src/**/*.ts'"
   },
@@ -25,7 +25,8 @@
   "homepage": "https://github.com/zajrik/modbot#readme",
   "dependencies": {
     "discord.js": "^11.0.0",
-    "yamdbf": "^2.5.7"
+    "yamdbf": "^2.6.0",
+    "yamdbf-addon-dm-manager": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^6.0.46",
