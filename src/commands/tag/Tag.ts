@@ -1,5 +1,5 @@
-import { Bot, Command } from 'yamdbf';
-import { User, Message } from 'discord.js';
+import { Bot, Command, Message, GuildStorage } from 'yamdbf';
+import { User } from 'discord.js';
 
 export default class Tag extends Command<Bot>
 {
@@ -11,44 +11,46 @@ export default class Tag extends Command<Bot>
 			description: 'Create/recall/update/delete tags',
 			usage: '<prefix>tag [add|del|update] <name> [details]',
 			extraHelp: '',
-			group: 'tag'
+			group: 'tag',
+			guildOnly: true
 		});
 	}
 
 	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
 	{
 		const action: string = <string> args[0];
-		if (!this.bot.storage.exists('tags')) this.bot.storage.setItem('tags', {});
+		const storage: GuildStorage = message.guild.storage;
+		if (!storage.exists('tags')) storage.setItem('tags', {});
 		switch (action)
 		{
 			case 'add':
 				if (!message.member.roles.find('name', 'Mod')) return;
-				if (this.bot.storage.exists(`tags/${args[1]}`))
+				if (storage.exists(`tags/${args[1]}`))
 					return message.channel.send(
 						`Tag "${args[1]}" already exists. Use \`tag update ${args[1]}\` to update it.`);
-				this.bot.storage.setItem(`tags/${args[1]}`, args.slice(2).join(' '));
+				storage.setItem(`tags/${args[1]}`, args.slice(2).join(' '));
 				return message.channel.send(
 					`Created tag "${args[1]}"`);
 
 			case 'del':
 				if (!message.member.roles.find('name', 'Mod')) return;
-				if (!this.bot.storage.exists(`tags/${args[1]}`))
+				if (!storage.exists(`tags/${args[1]}`))
 					return message.channel.send(`Tag "${args[1]}" does not exist.`);
-				this.bot.storage.removeItem(`tags/${args[1]}`);
+				storage.removeItem(`tags/${args[1]}`);
 				return message.channel.send(`Tag "${args[1]}" deleted`);
 
 			case 'update':
 				if (!message.member.roles.find('name', 'Mod')) return;
-				if (!this.bot.storage.exists(`tags/${args[1]}`))
+				if (!storage.exists(`tags/${args[1]}`))
 					return message.channel.send(`Tag "${args[1]}" does not exist.`);
-				this.bot.storage.setItem(`tags/${args[1]}`, args.slice(2).join(' '));
+				storage.setItem(`tags/${args[1]}`, args.slice(2).join(' '));
 				return message.channel.send(`Tag "${args[1]}" updated`);
 
 			default:
 				if (!args[0]) return message.channel.send('You must provide an option or a tag');
-				if (!this.bot.storage.exists(`tags/${args[0]}`))
+				if (!storage.exists(`tags/${args[0]}`))
 					return message.channel.send(`Tag "${args[0]}" does not exist.`);
-				return message.channel.send(this.bot.storage.getItem(`tags/${args[0]}`));
+				return message.channel.send(storage.getItem(`tags/${args[0]}`));
 		}
 	}
 };
