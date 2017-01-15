@@ -33,9 +33,9 @@ export default class Info extends Command<Bot>
 			.addField('Discord.js', `v${Discord.version}`, true)
 			.addField('\u200b', '\u200b', true)
 			.addField('Modbot Source', '[Available on GitHub](https://github.com/zajrik/modbot)', true)
-			.addField('YAMDBF Info', 'https://yamdbf.js.org', true)
+			.addField('Modbot Support', '[Channel Invite](https://discord.gg/ZYZuKsW)', true)
 			.addField('Bot Invite', `[Click here](https://discordapp.com/oauth2/authorize`
-				+ `?permissions=490826759&scope=bot&client_id=${this.bot.user.id})`, true)
+				+ `?permissions=297888791&scope=bot&client_id=${this.bot.user.id})`, true)
 			.addField('\u200b', `Be sure to use the \`guide\` command for information `
 				+ `on setting up your server for moderation! The default prefix for commands is \`?\`. `
 				+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
