@@ -11,7 +11,7 @@ export default class Lockdown extends Command<ModBot>
 			name: 'lockdown',
 			aliases: [],
 			description: 'Lock down a channel for a set time',
-			usage: '<prefix>lockdown <duration|clear>',
+			usage: '<prefix>lockdown [#channel] <duration|clear>',
 			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown',
 			group: 'mod',
 			guildOnly: true
