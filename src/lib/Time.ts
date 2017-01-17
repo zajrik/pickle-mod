@@ -55,6 +55,15 @@ export default class Time extends Date
 	}
 
 	/**
+	 * Return a difference object (for convenience) measuring the
+	 * duration of the given MS
+	 */
+	public static duration(time: int): Difference
+	{
+		return this.difference(time * 2, time);
+	}
+
+	/**
 	 * Parse a duration shorthand and return the duration in ms
 	 * 
 	 * Shorthand examples: 10m, 5h, 1d

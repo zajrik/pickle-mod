@@ -17,7 +17,7 @@ export default class Scheduler
 	public constructor(bot: ModBot)
 	{
 		this._bot = bot;
-		this.timers = new TimerCollection<string, Timer>();
+		this.timers = new TimerCollection();
 
 		this.timers.add(new Timer(this._bot, 'mute', 15, this._checkMutes));
 		this.timers.add(new Timer(this._bot, 'lockdown', 5, this._checkLockdowns));

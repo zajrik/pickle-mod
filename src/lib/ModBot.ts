@@ -1,17 +1,20 @@
 import { Bot, BotOptions } from 'yamdbf';
 import { GuildMember, TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 import { DMManager } from 'yamdbf-addon-dm-manager';
+import RateLimiter from './mod/RateLimiter';
 import ModLoader from './mod/Loader';
 
 export default class ModBot extends Bot
 {
 	public mod: ModLoader;
+	private rateLimiter: RateLimiter;
 	private dmManager: DMManager;
 
 	public constructor(botOptions: BotOptions)
 	{
 		super(botOptions);
 		this.mod = new ModLoader(this);
+		this.rateLimiter = new RateLimiter(this);
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.logMember(member, true, 8450847));
 		this.on('guildMemberRemove', (member: GuildMember) => this.logMember(member, false, 16039746));
@@ -34,12 +37,15 @@ export default class ModBot extends Bot
 	private logMember(member: GuildMember, joined: boolean, color: number): Promise<Message>
 	{
 		if (!member.guild.channels.exists('name', 'member-log')) return;
+		const type: 'join' | 'leave' = joined ? 'join' : 'leave';
+		if (this.rateLimiter.memberLog(member, type)) return;
 		const memberLog: TextChannel = <TextChannel> member.guild.channels.find('name', 'member-log');
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(color)
 			.setAuthor(`${member.user.username}#${member.user.discriminator} (${member.id})`, member.user.avatarURL)
 			.setFooter(joined ? 'User joined' : 'User left' , '')
 			.setTimestamp();
+		this.rateLimiter.memberLog(member, type, true);
 		return memberLog.sendEmbed(embed);
 	}
 
