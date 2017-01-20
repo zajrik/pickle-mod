@@ -8,7 +8,7 @@ export default class Ban extends Command<ModBot>
 	{
 		super(bot, {
 			name: 'ban',
-			aliases: [],
+			aliases: ['b&', 'banne'],
 			description: 'Ban a user',
 			usage: '<prefix>ban <@user> <...reason>',
 			extraHelp: '',
