@@ -21,3 +21,8 @@ const bot: ModBot = new ModBot({ // tslint:disable-line
 .setDefaultSetting('cases', 0)
 .start()
 .on('disconnect', () => process.exit(100));
+
+process.on('unhandledRejection', (reason) => {
+	if (/ETIMEDOUT|getaddrinfo/.test(reason)) process.exit(200);
+	else console.error(reason);
+});
