@@ -22,7 +22,7 @@ export default class Unmute extends Command<ModBot>
 	{
 		if (!this.bot.mod.canCallModCommand(message)) return;
 		if (!this.bot.mod.hasSetMutedRole(message.guild)) return;
-		if (!mentions[0]) return message.channel.send('You must mention a user to mute.');
+		if (!mentions[0]) return message.channel.send('You must mention a user to unmute.');
 		const user: User = mentions[0];
 
 		const mutedRole: string = message.guild.storage.getSetting('mutedrole');
