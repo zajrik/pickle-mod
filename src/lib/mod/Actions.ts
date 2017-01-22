@@ -73,10 +73,9 @@ export default class Actions
 	/**
 	 * Mute a user in a guild
 	 */
-	public async mute(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
+	public async mute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this._count(user, guild, 'mutes');
-		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
+		this._count(member, guild, 'mutes');
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		return await member.addRole(guild.roles.get(storage.getSetting('mutedrole')));
 	}
@@ -84,9 +83,8 @@ export default class Actions
 	/**
 	 * Unmute a user in a guild
 	 */
-	public async unmute(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
+	public async unmute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		return await member.removeRole(guild.roles.get(storage.getSetting('mutedrole')));
 	}

@@ -45,7 +45,8 @@ export default class Kick extends Command<ModBot>
 		const reason: string = args.join(' ').trim();
 		if (!reason) return message.channel.send('You must provide a reason to kick that user.');
 
-		const kicking: Message = <Message> await message.channel.send(`Kicking ${user.username}#${user.discriminator}...`);
+		const kicking: Message = <Message> await message.channel.send(
+			`Kicking ${user.username}#${user.discriminator}...`);
 
 		try
 		{
