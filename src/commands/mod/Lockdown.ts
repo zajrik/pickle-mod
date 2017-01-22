@@ -48,7 +48,7 @@ export default class Lockdown extends Command<ModBot>
 					`***This channel is locked down. (${durationString})***`);
 				const oldPayload: any = channel.permissionOverwrites
 					.get(message.guild.roles.find('name', '@everyone').id)
-					|| { allowData: 0, denyData: 0 };
+					|| { allow: 0, deny: 0 };
 				await storage.queue('activeLockdowns', (key: string) =>
 				{
 					const activeLockdowns: ActiveLockdowns = storage.getItem(key) || {};
@@ -56,8 +56,8 @@ export default class Lockdown extends Command<ModBot>
 					if (!activeLockdowns[channelID]) activeLockdowns[channelID] = {
 						message: notify.id,
 						channel: channel.id,
-						allow: oldPayload.allowData,
-						deny: oldPayload.denyData,
+						allow: oldPayload.allow,
+						deny: oldPayload.deny,
 						duration: duration,
 						timestamp: message.createdTimestamp
 					};
