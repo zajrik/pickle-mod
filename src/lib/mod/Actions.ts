@@ -107,8 +107,7 @@ export default class Actions
 	public async ban(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
 	{
 		this._count(user, guild, 'bans');
-		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
-		return <GuildMember> await guild.ban(member, 7);
+		return <GuildMember> await guild.ban((<User> user).id || <any> user, 7);
 	}
 
 	/**

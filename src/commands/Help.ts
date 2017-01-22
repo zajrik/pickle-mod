@@ -39,7 +39,7 @@ export default class Help extends Command<Bot>
 				.addField(`${prefix}unmute <@user>`, `Unmute a user`, true)
 				.addField(`${prefix}kick <@user> <...reason>`, `Kick a user from the server`)
 				.addField(`${prefix}softban <@user>`, `Kick a user from the server, removing 7 days of their messages`)
-				.addField(`${prefix}ban <@user> <...reason>`, `Ban a user from the server.`, true)
+				.addField(`${prefix}ban <@user|id> <...reason>`, `Ban a user from the server.`, true)
 				.addField(`${prefix}unban <id> <...reason>`, `Unban a user by ID.`, true)
 				.addField(`${prefix}reason <#|#-#|latest> <...reason>`, `Set the reason for a moderation case`)
 				.addField(`${prefix}lockdown [#channel] <duration>`,
