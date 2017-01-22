@@ -65,11 +65,12 @@ export default class Ban extends Command<ModBot>
 
 		try
 		{
-			await user.send(`You have been banned from ${message.guild.name}.\n**Reason:** ${reason}\n\nYou can appeal your ban by DMing me the command \`appeal <message>\`, where \`'<message>'\` is a message detailing why you think you deserve to have your ban lifted. You must send this command without a prefix or I won't recognize it. If you are currently banned from more than one server that I serve, you may only appeal the most recent ban until that appeal is approved or rejected.\n\nAfter you have sent your appeal it will be passed to the server moderators for review. You will be notified when your appeal has been approved or rejected. If your appeal is rejected, you may not appeal again.\n\nIf you are unable to DM me because we do not have any mutual servers, you may use this invite to gain a mutual server and then DM me your appeal.\nhttps://discord.gg/TEXjY6e\n\nYou will want to remain in this mutual server until after your appeal has been approved so that you can be notified of the appeal result.`, { split: true });
+			await user.send(`**You have been banned from ${message.guild.name}.**\n\n**Reason:** ${reason}\n\nYou can appeal your ban by DMing me the command \`appeal <message>\`, where \`'<message>'\` is a message detailing why you think you deserve to have your ban lifted. You must send this command without a prefix or I won't recognize it. If you are currently banned from more than one server that I serve, you may only appeal the most recent ban until that appeal is approved or rejected.\n\nAfter you have sent your appeal it will be passed to the server moderators for review. You will be notified when your appeal has been approved or rejected. If your appeal is rejected, you may not appeal again.\n\nIf you are unable to DM me because we do not have any mutual servers, you may use this invite to gain a mutual server and then DM me your appeal.\nhttps://discord.gg/TEXjY6e\n\nYou will want to remain in this mutual server until after your appeal has been approved so that you can be notified of the appeal result.`, { split: true });
 		}
 		catch (err) { console.log(`Failed to send ban DM to ${user.username}#${user.discriminator}`); }
 
-		const banning: Message = <Message> await message.channel.send(`Banning ${user.username}#${user.discriminator}...`);
+		const banning: Message = <Message> await message.channel.send(
+			`Banning ${user.username}#${user.discriminator}...`);
 
 		this.bot.mod.actions.ban(user, message.guild);
 		let banCase: Message = <Message> await this.bot.mod.logger.awaitCase(message.guild, user, 'Ban');
