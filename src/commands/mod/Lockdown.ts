@@ -12,7 +12,7 @@ export default class Lockdown extends Command<ModBot>
 			aliases: [],
 			description: 'Lock down a channel for a set time',
 			usage: '<prefix>lockdown [#channel] <duration|clear>',
-			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown',
+			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown.\n\nCalling the lockdown command when a channel is already locked down will restart the lockdown with the new duration.',
 			group: 'mod',
 			guildOnly: true
 		});
@@ -39,7 +39,7 @@ export default class Lockdown extends Command<ModBot>
 			if (!duration) return message.channel.send(
 				'You must provide a lockdown duration. Use the help command for more information');
 
-			const durationString: string = Time.difference(duration * 2, duration).toString();
+			const durationString: string = Time.duration(duration).toString();
 
 			try
 			{
@@ -47,13 +47,12 @@ export default class Lockdown extends Command<ModBot>
 				const notify: Message = <Message> await channel.send(
 					`***This channel is locked down. (${durationString})***`);
 				const oldPayload: any = channel.permissionOverwrites
-					.get(message.guild.roles.find('name', '@everyone').id)
-					|| { allow: 0, deny: 0 };
+					.get(message.guild.id) || { allow: 0, deny: 0 };
 				await storage.queue('activeLockdowns', (key: string) =>
 				{
 					const activeLockdowns: ActiveLockdowns = storage.getItem(key) || {};
 					const channelID: string = notify.channel.id;
-					if (!activeLockdowns[channelID]) activeLockdowns[channelID] = {
+					activeLockdowns[channelID] = {
 						message: notify.id,
 						channel: channel.id,
 						allow: oldPayload.allow,
@@ -65,7 +64,7 @@ export default class Lockdown extends Command<ModBot>
 					console.log(`Locked down channel '${channel.name}' in guild '${message.guild.name}'`);
 				});
 				channel.overwritePermissions(
-					message.guild.roles.find('name', '@everyone'), <any> { SEND_MESSAGES: false });
+					message.guild.roles.get(message.guild.id), <any> { SEND_MESSAGES: false });
 
 				if (message.channel.id !== channel.id)
 					message.channel.send(`***Locked down ${channel}. (${durationString})***`);
@@ -78,14 +77,20 @@ export default class Lockdown extends Command<ModBot>
 		else
 		{
 			const storage: LocalStorage = this.bot.storage;
+			const checkLockdowns: ActiveLockdowns = storage.getItem('activeLockdowns') || {};
+			const lockdown: LockdownObject = checkLockdowns[channel.id];
+			if (!lockdown) return message.channel.send('The channel is not locked down.');
+
+			if ((lockdown.duration - (Time.now() - lockdown.timestamp)) < 10e3)
+				return message.channel.send(
+					'The lockdown on the channel is about to expire. Just wait it out.');
+
 			await storage.queue('activeLockdowns', async (key: string) =>
 			{
 				let activeLockdowns: ActiveLockdowns = storage.getItem(key) || {};
-				if (!activeLockdowns[channel.id])
-					return message.channel.send('The channel is not locked down.');
 				const oldPayload: any = activeLockdowns[channel.id];
 				const payload: any = {
-					id: message.guild.roles.find('name', '@everyone').id,
+					id: message.guild.roles.get(message.guild.id).id,
 					type: 'role',
 					allow: oldPayload.allow,
 					deny: oldPayload.deny

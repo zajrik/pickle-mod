@@ -45,7 +45,7 @@ export default class Scheduler
 						.fetchMember(user)).roles.has(mutedRole);
 					if (!mute.duration && isMuted) continue;
 					else if (!mute.duration) mute.duration = 0;
-					if (Time.difference(mute.duration, Time.now() - mute.timestamp).ms > 1) continue;
+					if ((mute.duration - (Time.now() - mute.timestamp)) > 1) continue;
 					console.log(`Removing expired mute for user '${mute.raw}'`);
 					const guild: Guild = this._bot.guilds.get(mute.guild);
 					const member: GuildMember = await guild.fetchMember(mute.user);
@@ -72,10 +72,10 @@ export default class Scheduler
 			{
 				const lockdown: LockdownObject = activeLockdowns[id];
 				const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
-				if (Time.difference(lockdown.duration, Time.now() - lockdown.timestamp).ms > 1) continue;
+				if ((lockdown.duration - (Time.now() - lockdown.timestamp)) > 1) continue;
 				console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
 				const payload: any = {
-					id: channel.guild.roles.find('name', '@everyone').id,
+					id: channel.guild.roles.get(channel.guild.id).id,
 					type: 'role',
 					allow: lockdown.allow,
 					deny: lockdown.deny
