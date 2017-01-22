@@ -37,7 +37,7 @@ export default class Help extends Command<Bot>
 					`Mute a user for a specified duration.\n`
 					+ 'Duration format examples: `30m`, `2h`, `1d`', true)
 				.addField(`${prefix}unmute <@user>`, `Unmute a user`, true)
-				.addField(`${prefix}kick <@user> <...reason>`, `Kick a user from the server`)
+				.addField(`${prefix}kick <@user|id> <...reason>`, `Kick a user from the server`)
 				.addField(`${prefix}softban <@user>`, `Kick a user from the server, removing 7 days of their messages`)
 				.addField(`${prefix}ban <@user|id> <...reason>`, `Ban a user from the server.`, true)
 				.addField(`${prefix}unban <id> <...reason>`, `Unban a user by ID.`, true)

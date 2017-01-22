@@ -94,10 +94,9 @@ export default class Actions
 	/**
 	 * Kick a user from a guild
 	 */
-	public async kick(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
+	public async kick(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this._count(user, guild, 'kicks');
-		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
+		this._count(member, guild, 'kicks');
 		return await member.kick();
 	}
 

@@ -18,7 +18,7 @@ export default class Logger
 	/**
 	 * Post the moderation case to the mod-logs channel
 	 */
-	public caseLog(user: User | string,
+	public caseLog(user: User,
 					guild: Guild,
 					type: 'Warn' | 'Mute' | 'Kick' | 'Softban' | 'Ban' | 'Unban',
 					reason: string,
@@ -44,7 +44,7 @@ export default class Logger
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(colors[type])
 			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
-			.setDescription(`**Member:** ${(<User> user).username}#${(<User> user).discriminator} (${(<User> user).id})\n`
+			.setDescription(`**Member:** ${user.username}#${user.discriminator} (${user.id})\n`
 				+ `**Action:** ${type}\n`
 				+ `${duration ? `**Length:** ${duration}\n` : ''}`
 				+ `**Reason:** ${reason}`)
