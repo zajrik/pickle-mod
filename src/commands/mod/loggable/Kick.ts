@@ -21,6 +21,7 @@ export default class Kick extends Command<ModBot>
 	public async action(message: Message, [], mentions: User[], original: string): Promise<any>
 	{
 		if (!this.bot.mod.canCallModCommand(message)) return;
+
 		const args: string[] = original.split(' ').slice(1);
 		const idRegex: RegExp = /^(?:<@!?)?(\d+)>?$/;
 		if (!idRegex.test(args[0])) return message.channel.send(
