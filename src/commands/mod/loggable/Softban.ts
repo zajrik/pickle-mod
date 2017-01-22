@@ -18,18 +18,29 @@ export default class Softban extends Command<ModBot>
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [], mentions: User[], original: string): Promise<any>
 	{
 		if (!this.bot.mod.canCallModCommand(message)) return;
-		if (!mentions[0]) return message.channel.send('You must mention a user to softban.');
-		const user: User = mentions[0];
+
+		const args: string[] = original.split(' ').slice(1);
+		const idRegex: RegExp = /^(?:<@!?)?(\d+)>?$/;
+		if (!idRegex.test(args[0])) return message.channel.send(
+			'You must mention a user or provide an ID to softban.');
+		const id: string = args.shift().match(idRegex)[1];
+
+		let user: User;
+		try { user = await this.bot.fetchUser(id); }
+		catch (err) { return message.channel.send('Failed to fetch a user with that ID.'); }
 
 		if (user.id === message.author.id)
 			return message.channel.send(`I don't think you want to softban yourself.`);
 
+		let member: GuildMember;
+		try { member = await message.guild.fetchMember(user); }
+		catch (err) {}
+
 		const modRole: string = message.guild.storage.getSetting('modrole');
-		const member: GuildMember = await message.guild.fetchMember(user);
-		if (member.roles.has(modRole) || user.id === message.guild.ownerID || user.bot)
+		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
 		const reason: string = args.join(' ').trim();
@@ -38,9 +49,13 @@ export default class Softban extends Command<ModBot>
 		const kicking: Message = <Message> await message.channel.send(
 			`Softbanning ${user.username}#${user.discriminator}... *(Waiting for unban)*`);
 
-		user.send(`You have been softbanned from ${message.guild.name}\n\n**Reason:** ${
-			reason}\n\nA softban is a kick that uses ban+unban to remove your messages from `
-			+ `the server. You may rejoin momentarily.`);
+		try
+		{
+			await user.send(`You have been softbanned from ${message.guild.name}\n\n**Reason:** ${
+				reason}\n\nA softban is a kick that uses ban+unban to remove your messages from `
+				+ `the server. You may rejoin momentarily.`);
+		}
+		catch (err) { console.log(`Failed to send softban DM to ${user.username}#${user.discriminator}`); }
 
 		this.bot.mod.actions.softban(user, message.guild);
 		let cases: Message[] = <Message[]> await this.bot.mod.logger.awaitCase(message.guild, user, 'Softban');

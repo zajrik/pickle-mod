@@ -118,11 +118,10 @@ export default class Actions
 	/**
 	 * Softban a user from a guild, removing the past 7 days of their messages
 	 */
-	public async softban(user: GuildMember | User | string, guild: Guild): Promise<User>
+	public async softban(member: GuildMember | User, guild: Guild): Promise<User>
 	{
-		this._count(user, guild, 'softbans');
-		const member: GuildMember = await guild.fetchMember((<User> user).id || <string> user);
-		await guild.ban(member, 7);
+		this._count(member, guild, 'softbans');
+		await guild.ban(<GuildMember> member, 7);
 		await new Promise((r: any) => setTimeout(r, 5e3));
 		return await guild.unban(member.id);
 	}
