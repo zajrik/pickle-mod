@@ -26,12 +26,13 @@
   "dependencies": {
     "discord.js": "^11.0.0",
     "yamdbf": "^2.6.0",
-    "yamdbf-addon-dm-manager": "^0.1.0"
+    "yamdbf-addon-dm-manager": "^0.1.3"
   },
   "devDependencies": {
     "@types/node": "^6.0.46",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^2.4.0",
     "gulp-typescript": "^3.1.0",
     "tslint": "^3.15.1",
     "typescript": "^2.1.4"
