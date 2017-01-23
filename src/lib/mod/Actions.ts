@@ -18,7 +18,7 @@ export default class Actions
 	 * Increment the number of times the given user has
 	 * received a given type of formal moderation action
 	 */
-	private _count(user: GuildMember | User | string,
+	public count(user: GuildMember | User | string,
 					guild: Guild | string,
 					type: 'warnings' | 'mutes' | 'kicks' | 'softbans' | 'bans'): void
 	{
@@ -66,7 +66,7 @@ export default class Actions
 	 */
 	public async warn(user: GuildMember | User | string, guild: Guild): Promise<GuildMember | User | string>
 	{
-		this._count(user, guild, 'warnings');
+		this.count(user, guild, 'warnings');
 		return user;
 	}
 
@@ -75,7 +75,7 @@ export default class Actions
 	 */
 	public async mute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this._count(member, guild, 'mutes');
+		this.count(member, guild, 'mutes');
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		return await member.addRole(guild.roles.get(storage.getSetting('mutedrole')));
 	}
@@ -94,7 +94,7 @@ export default class Actions
 	 */
 	public async kick(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this._count(member, guild, 'kicks');
+		this.count(member, guild, 'kicks');
 		return await member.kick();
 	}
 
@@ -103,7 +103,7 @@ export default class Actions
 	 */
 	public async ban(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
 	{
-		this._count(user, guild, 'bans');
+		this.count(user, guild, 'bans');
 		return <GuildMember> await guild.ban((<User> user).id || <any> user, 7);
 	}
 
@@ -120,7 +120,7 @@ export default class Actions
 	 */
 	public async softban(member: GuildMember | User, guild: Guild): Promise<User>
 	{
-		this._count(member, guild, 'softbans');
+		this.count(member, guild, 'softbans');
 		await guild.ban(<GuildMember> member, 7);
 		await new Promise((r: any) => setTimeout(r, 5e3));
 		return await guild.unban(member.id);

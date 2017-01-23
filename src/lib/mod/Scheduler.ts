@@ -44,7 +44,7 @@ export default class Scheduler
 					const isMuted: boolean = (await this._bot.guilds.get(mute.guild)
 						.fetchMember(user)).roles.has(mutedRole);
 					if (!mute.duration && isMuted) continue;
-					else if (!mute.duration) mute.duration = 0;
+					else if (!mute.duration || !isMuted) mute.duration = 0;
 					if ((mute.duration - (Time.now() - mute.timestamp)) > 1) continue;
 					console.log(`Removing expired mute for user '${mute.raw}'`);
 					const guild: Guild = this._bot.guilds.get(mute.guild);

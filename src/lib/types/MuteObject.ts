@@ -5,6 +5,6 @@ type MuteObject = {
 	raw: string;
 	user: string;
 	guild: string;
-	duration: number;
+	duration?: number;
 	timestamp: number;
 }

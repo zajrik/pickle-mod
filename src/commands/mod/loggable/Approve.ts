@@ -36,7 +36,7 @@ export default class Approve extends Command<ModBot>
 			.then((res: Message) => res.delete(5e3));
 
 		const user: User = await this.bot.mod.actions.unban(id, message.guild);
-		const unbanCase: Message = <Message> await this.bot.mod.logger.awaitCase(message.guild, user, 'Unban');
+		const unbanCase: Message = <Message> await this.bot.mod.logger.awaitBanCase(message.guild, user, 'Unban');
 		this.bot.mod.logger.editCase(message.guild, unbanCase, message.author, 'Approved appeal');
 
 		message.channel.send(`Approved appeal \`${id}\`. Unbanned ${user.username}#${user.discriminator}`)

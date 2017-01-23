@@ -32,7 +32,7 @@ export default class Unban extends Command<ModBot>
 		try
 		{
 			user = await this.bot.mod.actions.unban(id, message.guild);
-			const unbanCase: Message = <Message> await this.bot.mod.logger.awaitCase(message.guild, user, 'Unban');
+			const unbanCase: Message = <Message> await this.bot.mod.logger.awaitBanCase(message.guild, user, 'Unban');
 			this.bot.mod.logger.editCase(message.guild, unbanCase, message.author, reason);
 
 			return unbanning.edit(`Successfully unbanned ${user.username}#${user.discriminator}`);

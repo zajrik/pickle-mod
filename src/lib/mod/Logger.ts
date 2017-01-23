@@ -131,11 +131,37 @@ export default class Logger
 
 	/**
 	 * Return a promise that resolves with a logged moderation
+	 * case for a mute
+	 */
+	public async awaitMuteCase(guild: Guild, user: User): Promise<Message>
+	{
+		return <any> new Promise(resolve =>
+		{
+			const logs: TextChannel = <TextChannel> guild.channels.get(this._bot.guildStorages.get(guild).getSetting('modlogs'));
+			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
+			const actionRegex: RegExp = /\*\*Action:\*\* (Mute)/;
+
+			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._bot.user.id
+				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 60e3 });
+
+			let found: Message;
+			collector.on('end', () => resolve(found));
+
+			collector.on('message', (message: Message) =>
+			{
+				if (/Mute/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
+				if (found) collector.stop('found');
+			});
+		});
+	}
+
+	/**
+	 * Return a promise that resolves with a logged moderation
 	 * case or cases (softban) for bans/unbans
 	 */
-	public async awaitCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Softban'): Promise<Message | Message[]>
+	public async awaitBanCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Softban'): Promise<Message | Message[]>
 	{
-		return <any> new Promise((resolve: Function) =>
+		return <any> new Promise(resolve =>
 		{
 			const logs: TextChannel = <TextChannel> guild.channels.get(this._bot.guildStorages.get(guild).getSetting('modlogs'));
 			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;

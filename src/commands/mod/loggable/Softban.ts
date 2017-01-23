@@ -58,7 +58,7 @@ export default class Softban extends Command<ModBot>
 		catch (err) { console.log(`Failed to send softban DM to ${user.username}#${user.discriminator}`); }
 
 		this.bot.mod.actions.softban(user, message.guild);
-		let cases: Message[] = <Message[]> await this.bot.mod.logger.awaitCase(message.guild, user, 'Softban');
+		let cases: Message[] = <Message[]> await this.bot.mod.logger.awaitBanCase(message.guild, user, 'Softban');
 		this.bot.mod.logger.mergeSoftban(message.guild, cases[0], cases[1], message.author, reason);
 
 		return kicking.edit(`Successfully softbanned ${user.username}#${user.discriminator}`);

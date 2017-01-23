@@ -73,7 +73,7 @@ export default class Ban extends Command<ModBot>
 			`Banning ${user.username}#${user.discriminator}...`);
 
 		this.bot.mod.actions.ban(user, message.guild);
-		let banCase: Message = <Message> await this.bot.mod.logger.awaitCase(message.guild, user, 'Ban');
+		let banCase: Message = <Message> await this.bot.mod.logger.awaitBanCase(message.guild, user, 'Ban');
 		this.bot.mod.logger.editCase(message.guild, banCase, message.author, reason);
 
 		console.log(`Banned ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);

@@ -1,6 +1,6 @@
 import ModBot from '../ModBot';
 import { LocalStorage, GuildStorage, Message } from 'yamdbf';
-import { TextChannel, Guild, User, Invite } from 'discord.js';
+import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 
 /**
  * Handles received moderation related client events
@@ -15,6 +15,49 @@ export default class Events
 
 		this._bot.on('guildBanAdd', (guild: Guild, user: User) => this._onGuildBanAdd(guild, user));
 		this._bot.on('guildBanRemove', async (guild: Guild, user: User) => this._onGuildBanRemove(guild, user));
+		this._bot.on('guildMemberUpdate', async (oldMember: GuildMember, newMember: GuildMember) =>
+		{
+			const storage: GuildStorage = this._bot.guildStorages.get(oldMember.guild.id);
+			if (!storage.settingExists('mutedrole')) return;
+			const mutedRole: string = storage.getSetting('mutedrole');
+			if (!oldMember.roles.has(mutedRole) && newMember.roles.has(mutedRole))
+				this._onGuildMuteAdd(newMember.guild, newMember);
+		});
+	}
+
+	/**
+	 * Handle guildmember being muted
+	 */
+	private async _onGuildMuteAdd(guild: Guild, member: GuildMember): Promise<void>
+	{
+		const settings: GuildStorage = this._bot.guildStorages.get(guild);
+		if (!this._bot.mod.hasLoggingChannel(guild)) return;
+		const storage: LocalStorage = this._bot.storage;
+		const user: User = member.user;
+
+		await storage.queue('activeMutes', (key: string) =>
+		{
+			let activeMutes: ActiveMutes = storage.getItem(key) || {};
+			if (!activeMutes[user.id]) activeMutes[user.id] = [];
+			const activeIndex: int = activeMutes[user.id].findIndex(a => a.guild === guild.id);
+			const mute: MuteObject = {
+				raw: `${user.username}#${user.discriminator}`,
+				user: user.id,
+				guild: guild.id,
+				timestamp: Date.now()
+			};
+			if (activeIndex > -1) activeMutes[user.id][activeIndex] = mute;
+			else activeMutes[user.id].push(mute);
+			storage.setItem(key, activeMutes);
+			console.log(`Muted user '${user.username}#${user.discriminator}' in ${guild.name}`);
+		});
+
+		await this._bot.mod.logger.caseLog(
+			user,
+			guild,
+			'Mute',
+			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this mute`,
+			this._bot.user);
 	}
 
 	/**
