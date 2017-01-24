@@ -13,7 +13,6 @@ export default class Duration extends Command<ModBot>
 			description: 'Set a duration for an active mute',
 			usage: '<prefix>duration <case#> <duration>',
 			extraHelp: 'This will restart a mute with an already set duration.',
-			argOpts: { stringArgs: false },
 			group: 'mod',
 			guildOnly: true
 		});
@@ -22,12 +21,8 @@ export default class Duration extends Command<ModBot>
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
 		if (!this.bot.mod.canCallModCommand(message)) return;
-		console.log(args);
-		const caseNum: int = <int> args.shift();
-		const durationString: string = <string> args.shift();
-		const duration: int = Time.parseShorthand(durationString);
-		if (!duration) return message.channel.send('You must provide a valid duration.');
 
+		const caseNum: int = <int> args.shift();
 		const caseMessage: Message = await this.bot.mod.logger.findCase(message.guild, caseNum);
 		if (!caseMessage) return message.channel.send('Failed to fetch case.');
 		if (caseMessage.author.id !== this.bot.user.id) return message.channel.send(`I didn't post that case.`);
@@ -38,17 +33,36 @@ export default class Duration extends Command<ModBot>
 			&& !message.member.hasPermission('MANAGE_GUILD'))
 			return message.channel.send('That is not your case to edit.');
 
+		const caseTypeRegex: RegExp = /\*\*Action:\*\* (.+)/;
+		if (caseTypeRegex.test(messageEmbed.description)
+			&& messageEmbed.description.match(caseTypeRegex)[1] !== 'Mute')
+			return message.channel.send('That is not a Mute case.');
+
+		const durationRegex: RegExp = /\*\*Length:\*\* (.+)/;
+		if (durationRegex.test(messageEmbed.description))
+		{
+			const timestamp: int = Time.parse(<any> messageEmbed.createdTimestamp);
+			const currentDur: int = Time.parseShorthand(messageEmbed.description.match(durationRegex)[1]);
+			if ((currentDur - (Time.now() - timestamp)) < 1)
+				return message.channel.sendMessage('That mute has expired.');
+		}
+
+		const durationString: string = <string> args.shift();
+		const duration: int = Time.parseShorthand(durationString);
+		if (!duration) return message.channel.send('You must provide a valid duration.');
+
+		const started: Message = <Message> await message.channel.send('Setting mute duration...');
 		const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
 		const member: GuildMember = await message.guild.fetchMember(messageEmbed.description.match(memberIDRegex)[1]);
 		if (!member.roles.has(message.guild.storage.getSetting('mutedrole')))
-			return message.channel.send(`That member is no longer muted.`);
+			return started.edit(`That member is no longer muted.`);
 
 		const durationSet: boolean = await this.bot.mod.actions.setMuteDuration(member, message.guild, duration);
-		if (!durationSet) return message.channel.send('Failed to set duration.');
+		if (!durationSet) return started.edit('Failed to set duration.');
 
 		const editedCase: Message = await this.bot.mod.logger.editCase(message.guild, caseMessage, message.author, null, durationString);
-		if (!editedCase) return message.channel.send('Failed to edit case.');
+		if (!editedCase) return started.edit('Failed to edit case.');
 
-		return message.channel.send(`Set mute duration for ${member.user.username}#${member.user.discriminator}`);
+		return started.edit(`Set mute duration for ${member.user.username}#${member.user.discriminator}`);
 	}
 }

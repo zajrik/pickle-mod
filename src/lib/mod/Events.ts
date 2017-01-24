@@ -32,6 +32,7 @@ export default class Events
 	{
 		const settings: GuildStorage = this._bot.guildStorages.get(guild);
 		if (!this._bot.mod.hasLoggingChannel(guild)) return;
+		if (member.roles.has(settings.getSetting('modrole'))) return;
 		const storage: LocalStorage = this._bot.storage;
 		const user: User = member.user;
 

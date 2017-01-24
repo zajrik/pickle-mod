@@ -13,7 +13,6 @@ export default class ModBot extends Bot
 	public constructor(botOptions: BotOptions)
 	{
 		super(botOptions);
-		this.mod = new ModLoader(this);
 		this.rateLimiter = new RateLimiter(this);
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.logMember(member, true, 8450847));
@@ -25,6 +24,7 @@ export default class ModBot extends Bot
 
 		this.once('ready', () =>
 		{
+			this.mod = new ModLoader(this);
 			this.dmManager = new DMManager(this, this.config.DMManager);
 		});
 	}
