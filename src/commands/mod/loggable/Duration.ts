@@ -12,7 +12,7 @@ export default class Duration extends Command<ModBot>
 			aliases: ['dur'],
 			description: 'Set a duration for an active mute',
 			usage: '<prefix>duration <case#> <duration>',
-			extraHelp: 'This will restart a mute with an already set duration.',
+			extraHelp: 'This will restart a mute with an already set duration, applying the new duration.',
 			group: 'mod',
 			guildOnly: true
 		});
