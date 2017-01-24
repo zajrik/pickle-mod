@@ -68,7 +68,8 @@ export default class Reason extends Command<ModBot>
 
 			const messageEmbed: MessageEmbed = caseMessage.embeds[0];
 			if (messageEmbed.author.name !== `${message.author.username}#${message.author.discriminator}`
-				&& messageEmbed.author.name !== `${this.bot.user.username}#${this.bot.user.discriminator}`)
+				&& messageEmbed.author.name !== `${this.bot.user.username}#${this.bot.user.discriminator}`
+				&& !message.member.hasPermission('MANAGE_GUILD'))
 				errors.set(i, 'That is not your case to edit.');
 
 			cases.set(i, caseMessage);

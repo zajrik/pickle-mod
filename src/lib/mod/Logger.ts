@@ -73,7 +73,7 @@ export default class Logger
 	 * Edit a logged moderation case to provide or edit a reason.
 	 * Only works if the editor is the original issuer
 	 */
-	public async editCase(guild: Guild, loggedCase: int | Message, issuer: User, reason: string): Promise<Message>
+	public async editCase(guild: Guild, loggedCase: int | Message, issuer: User, reason?: string, duration?: string): Promise<Message>
 	{
 		let caseMessage: Message;
 		if (typeof loggedCase !== 'number') caseMessage = <Message> loggedCase;
@@ -86,12 +86,26 @@ export default class Logger
 			&& !(await guild.fetchMember(issuer)).hasPermission('MANAGE_GUILD'))
 			return null;
 
+		const durationRegex: RegExp = /\*\*Length:\*\* (.+)*/;
+		if (!durationRegex.test(messageEmbed.description) && duration)
+			messageEmbed.description = messageEmbed.description
+				.replace(/(\*\*Action:\*\* Mute)/, `$1\n${`**Length:** ${duration}`}`);
+
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(messageEmbed.color)
-			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
-			.setDescription(messageEmbed.description.replace(/\*\*Reason:\*\* .+/, `**Reason:** ${reason}`))
-			.setFooter(messageEmbed.footer.text)
-			.setTimestamp(new Date(messageEmbed.createdTimestamp));
+			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL);
+
+		if (reason) messageEmbed.description = messageEmbed.description
+			.replace(/\*\*Reason:\*\* [\s\S]+/, `**Reason:** ${reason}`);
+
+		if (duration) messageEmbed.description = messageEmbed.description
+			.replace(/\*\*Length:\*\* (.+)*/, `**Length:** ${duration}`);
+
+		embed.setDescription(messageEmbed.description)
+			.setFooter(messageEmbed.footer.text);
+
+		if (duration) embed.setTimestamp(new Date());
+		else embed.setTimestamp(new Date(messageEmbed.createdTimestamp));
 
 		return caseMessage.edit('', Object.assign({}, { embed }));
 	}

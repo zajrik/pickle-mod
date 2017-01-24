@@ -59,31 +59,12 @@ export default class Mute extends Command<ModBot>
 		const muting: Message = <Message> await message.channel.send(
 			`Muting ${user.username}#${user.discriminator}...`);
 
-		try
-		{
-			const storage: LocalStorage = this.bot.storage;
-			await this.bot.mod.actions.mute(member, message.guild);
-			await this.bot.mod.logger.caseLog(user, message.guild, 'Mute', reason, message.author, durationString);
-			await storage.queue('activeMutes', (key: string) =>
-			{
-				let activeMutes: ActiveMutes = storage.getItem(key) || {};
-				if (!activeMutes[user.id]) activeMutes[user.id] = [];
-				activeMutes[user.id].push({
-					raw: `${user.username}#${user.discriminator}`,
-					user: user.id,
-					guild: message.guild.id,
-					duration: duration,
-					timestamp: message.createdTimestamp
-				});
-				storage.setItem(key, activeMutes);
-				console.log(`Muted user '${user.username}#${user.discriminator}'`);
-				user.send(`You've been muted in ${message.guild.name}`);
-			});
-			return muting.edit(`Muted ${user.username}#${user.discriminator}`);
-		}
-		catch (err)
-		{
-			return message.channel.send(`There was an error while muting the user:\n${err}`);
-		}
+		this.bot.mod.actions.mute(member, message.guild);
+		let muteCase: Message = <Message> await this.bot.mod.logger.awaitMuteCase(message.guild, user);
+		const durationSet: boolean = await this.bot.mod.actions.setMuteDuration(member, message.guild, duration);
+		if (!durationSet) message.channel.send(`Failed to set duration for mute.`);
+		this.bot.mod.logger.editCase(message.guild, muteCase, message.author, reason, durationString);
+
+		return muting.edit(`Muted ${user.username}#${user.discriminator}`);
 	}
 }

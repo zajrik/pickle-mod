@@ -49,6 +49,7 @@ export default class Events
 			if (activeIndex > -1) activeMutes[user.id][activeIndex] = mute;
 			else activeMutes[user.id].push(mute);
 			storage.setItem(key, activeMutes);
+			user.send(`You've been muted in ${guild.name}`);
 			console.log(`Muted user '${user.username}#${user.discriminator}' in ${guild.name}`);
 		});
 
