@@ -22,7 +22,12 @@ export default class Duration extends Command<ModBot>
 	{
 		if (!this.bot.mod.canCallModCommand(message)) return;
 
-		const caseNum: int = <int> args.shift();
+		const toSelect: string | int = args.shift();
+		if (typeof toSelect === 'string' && toSelect !== 'latest')
+			return message.channel.send(`You must provide a case number or 'latest'`);
+
+		const caseNum: int = typeof toSelect === 'string' ?
+			message.guild.storage.getSetting('cases') : toSelect;
 		const caseMessage: Message = await this.bot.mod.logger.findCase(message.guild, caseNum);
 		if (!caseMessage) return message.channel.send('Failed to fetch case.');
 		if (caseMessage.author.id !== this.bot.user.id) return message.channel.send(`I didn't post that case.`);
