@@ -56,9 +56,18 @@ export default class Duration extends Command<ModBot>
 		const duration: int = Time.parseShorthand(durationString);
 		if (!duration) return message.channel.send('You must provide a valid duration.');
 
-		const started: Message = <Message> await message.channel.send('Setting mute duration...');
 		const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
-		const member: GuildMember = await message.guild.fetchMember(messageEmbed.description.match(memberIDRegex)[1]);
+		let member: GuildMember;
+		try
+		{
+			member = await message.guild.fetchMember(messageEmbed.description.match(memberIDRegex)[1]);
+		}
+		catch (err)
+		{
+			return message.channel.send(`Failed to fetch the muted member.`);
+		}
+
+		const started: Message = <Message> await message.channel.send('Setting mute duration...');
 		if (!member.roles.has(message.guild.storage.getSetting('mutedrole')))
 			return started.edit(`That member is no longer muted.`);
 

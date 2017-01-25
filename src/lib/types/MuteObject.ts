@@ -7,4 +7,5 @@ type MuteObject = {
 	guild: string;
 	duration?: number;
 	timestamp: number;
+	leftGuild?: boolean;
 }

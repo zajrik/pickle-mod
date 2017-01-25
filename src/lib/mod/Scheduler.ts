@@ -40,15 +40,20 @@ export default class Scheduler
 				{
 					const mute: MuteObject = activeMutes[user][i];
 					const mutedRole: string = this._bot.guildStorages.get(mute.guild).getSetting('mutedrole');
-					if (!mutedRole) continue;
-					const isMuted: boolean = (await this._bot.guilds.get(mute.guild)
-						.fetchMember(user)).roles.has(mutedRole);
+					if (!mutedRole || mute.leftGuild) continue;
+
+					const guild: Guild = this._bot.guilds.get(mute.guild);
+					let member: GuildMember;
+					try { member = await guild.fetchMember(mute.user); }
+					catch (err) { continue; }
+
+					const isMuted: boolean = member.roles.has(mutedRole);
 					if (!mute.duration && isMuted) continue;
 					else if (!mute.duration || !isMuted) mute.duration = 0;
+
 					if ((mute.duration - (Time.now() - mute.timestamp)) > 1) continue;
+
 					console.log(`Removing expired mute for user '${mute.raw}'`);
-					const guild: Guild = this._bot.guilds.get(mute.guild);
-					const member: GuildMember = await guild.fetchMember(mute.user);
 					await member.removeRole(guild.roles.get(mutedRole));
 					member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
 					activeMutes[user].splice(i--, 1);

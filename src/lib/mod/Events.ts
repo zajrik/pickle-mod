@@ -23,6 +23,8 @@ export default class Events
 			if (!oldMember.roles.has(mutedRole) && newMember.roles.has(mutedRole))
 				this._onGuildMuteAdd(newMember.guild, newMember);
 		});
+		this._bot.on('guildMemberRemove', (member: GuildMember) => this._onGuildMemberRemove(member));
+		this._bot.on('guildMemberAdd', (member: GuildMember) => this._onGuildMemberAdd(member));
 	}
 
 	/**
@@ -60,6 +62,56 @@ export default class Events
 			'Mute',
 			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this mute`,
 			this._bot.user);
+	}
+
+	/**
+	 * Handle potential mute evasion
+	 */
+	private async _onGuildMemberRemove(member: GuildMember): Promise<void>
+	{
+		const settings: GuildStorage = this._bot.guildStorages.get(member.guild);
+		if (!member.roles.has(settings.getSetting('mutedrole'))) return;
+
+		const storage: LocalStorage = this._bot.storage;
+		const user: User = member.user;
+
+		await storage.queue('activeMutes', (key: string) =>
+		{
+			let activeMutes: ActiveMutes = storage.getItem('activeMutes') || {};
+			if (!activeMutes[user.id]) return;
+			const activeIndex: int = activeMutes[user.id].findIndex(a => a.guild === member.guild.id);
+			if (activeIndex === -1) return;
+
+			activeMutes[user.id][activeIndex].leftGuild = true;
+			storage.setItem(key, activeMutes);
+			console.log(`Potential mute evasion: '${user.username}#${user.discriminator}' in ${member.guild.name}`);
+		});
+	}
+
+	/**
+	 * Handle member joining, check if they left the guild
+	 * while muted and reassign the muted role if so
+	 */
+	private async _onGuildMemberAdd(member: GuildMember): Promise<void>
+	{
+		const settings: GuildStorage = this._bot.guildStorages.get(member.guild);
+		const storage: LocalStorage = this._bot.storage;
+		const user: User = member.user;
+
+		await storage.queue('activeMutes', (key: string) =>
+		{
+			let activeMutes: ActiveMutes = storage.getItem('activeMutes') || {};
+			if (!activeMutes[user.id]) return;
+			const activeIndex: int = activeMutes[user.id].findIndex(a => a.guild === member.guild.id);
+			if (activeIndex === -1) return;
+			if (!activeMutes[user.id][activeIndex].leftGuild) return;
+
+			const mutedRole: string = settings.getSetting('mutedrole');
+			(<any> member)._roles.push(mutedRole);
+			member.addRoles([member.guild.roles.get(mutedRole)]);
+			delete activeMutes[user.id][activeIndex].leftGuild;
+			storage.setItem(key, activeMutes);
+		});
 	}
 
 	/**
