@@ -161,10 +161,8 @@ export default class Events
 			const activeBans: ActiveBans = storage.getItem(key) || {};
 			const bans: BanObject[] = activeBans[user.id];
 			if (!bans) return;
-			for (let i: number = 0; i < bans.length; i++)
-			{
-				if (bans[i].guild === guild.id) bans.splice(i--, 1);
-			}
+			const activeIndex: int = bans.findIndex(ban => ban.guild === guild.id);
+			bans.splice(activeIndex, 1);
 			if (bans.length === 0) delete activeBans[user.id];
 			else activeBans[user.id] = bans;
 			storage.setItem(key, activeBans);
