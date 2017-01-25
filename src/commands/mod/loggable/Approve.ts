@@ -41,9 +41,5 @@ export default class Approve extends Command<ModBot>
 
 		message.channel.send(`Approved appeal \`${id}\`. Unbanned ${user.username}#${user.discriminator}`)
 			.then((res: Message) => res.delete(5e3));
-		const invite: Invite = await message.guild.defaultChannel
-			.createInvite({ maxAge: 72 * 1000 * 60 * 60, maxUses: 1 });
-		await user.send(`Your appeal has been approved. You have been unbanned from ${
-			message.guild.name}. You may rejoin using this invite:\n${invite.url}`);
 	}
 }
