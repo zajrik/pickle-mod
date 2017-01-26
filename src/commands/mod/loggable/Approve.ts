@@ -1,5 +1,5 @@
 import { Command, LocalStorage, Message } from 'yamdbf';
-import { User, Invite } from 'discord.js';
+import { User } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
 export default class Approve extends Command<ModBot>
