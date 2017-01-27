@@ -1,6 +1,7 @@
 import { Command, LocalStorage, Message } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
+import { parseArgs } from '../../../lib/Util';
 
 export default class Unmute extends Command<ModBot>
 {
@@ -23,7 +24,7 @@ export default class Unmute extends Command<ModBot>
 		if (!this.bot.mod.hasSetMutedRole(message.guild)) return message.channel.send(
 			`This server doesn't have a role set for muting.`);
 
-		const args: string[] = original.split(' ').slice(1);
+		const args: string[] = parseArgs(original);
 		const idRegex: RegExp = /^(?:<@!?)?(\d+)>?$/;
 		if (!idRegex.test(args[0])) return message.channel.send(
 			'You must mention a user or provide an ID to unmute.');
