@@ -23,6 +23,6 @@ const bot: ModBot = new ModBot({ // tslint:disable-line
 .on('disconnect', () => process.exit(100));
 
 process.on('unhandledRejection', (reason) => {
-	if (/ETIMEDOUT|getaddrinfo/.test(reason)) process.exit(200);
+	if (/ETIMEDOUT|getaddrinfo|Something took too long to do/.test(reason)) process.exit(200);
 	else console.error(reason);
 });
