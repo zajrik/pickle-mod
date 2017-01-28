@@ -227,10 +227,22 @@ export default class Logger
 			|| (start.embeds[0] && !caseRegex.test(start.embeds[0].footer.text))) return false;
 
 		const logs: TextChannel = <TextChannel> start.channel;
-		const startCase: int = parseInt(start.embeds[0].footer.text.match(caseRegex)[1]);
-		let currentCase: int = startCase;
+		let currentCase: int = parseInt(start.embeds[0].footer.text.match(caseRegex)[1]);
 
-		const cases: Message[] = (await logs.fetchMessages({ limit: 100, after: start.id })).array().reverse();
+		let cases: Message[] = [];
+		while (true)
+		{
+			let fetched: Message[] = (await logs.fetchMessages({
+				limit: 100,
+				after: cases.length > 0 ? cases[cases.length - 1].id : start.id 
+			})).array().reverse();
+			cases.push(...fetched);
+			if (fetched.length < 100) break;
+		}
+
+		if (cases.find(c => c.author.id !== this._bot.user.id))
+			throw `Operation failed: Found at least one case that cannot be edited.`;
+
 		for (const loggedCase of cases)
 		{
 			if (loggedCase.embeds.length === 0
