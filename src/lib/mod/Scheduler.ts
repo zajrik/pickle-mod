@@ -54,7 +54,7 @@ export default class Scheduler
 					if ((mute.duration - (Time.now() - mute.timestamp)) > 1) continue;
 
 					console.log(`Removing expired mute for user '${mute.raw}'`);
-					await member.removeRole(guild.roles.get(mutedRole));
+					if (isMuted) await member.removeRole(guild.roles.get(mutedRole));
 					member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
 					activeMutes[user].splice(i--, 1);
 				}
