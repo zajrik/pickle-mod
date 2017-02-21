@@ -92,15 +92,17 @@ export default class ModLoader
 				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`
 		};
 
-		let error: string;
-		if (!message.guild) error = errors.NO_GUILD;
-		if (!this.hasLoggingChannel(message.guild)) error = errors.NO_LOGGING;
+		if (!message.guild) return await message.channel.send(`Error: ${errors.NO_GUILD}`);
+		if (!this.hasLoggingChannel(message.guild))
+			return await message.channel.send(`Error: ${errors.NO_LOGGING}`);
 		if (!message.guild.channels.get(message.guild.storage.getSetting('modlogs'))
-			.permissionsFor(this._bot.user).hasPermission('SEND_MESSAGES')) error = errors.NO_LOG_PERMS;
-		if (!this.hasAppealsChannel(message.guild)) error = errors.NO_APPEALS;
-		if (!this.hasSetModRole(message.guild)) error = errors.NO_SET_MOD_ROLE;
-		if (!this.hasModRole(message.member)) error = errors.NO_MOD_ROLE;
-
-		return await message.channel.send(`Error: ${error}`);
+			.permissionsFor(this._bot.user).hasPermission('SEND_MESSAGES'))
+			return await message.channel.send(`Error: ${errors.NO_LOG_PERMS}`);
+		if (!this.hasAppealsChannel(message.guild))
+			return await message.channel.send(`Error: ${errors.NO_APPEALS}`);
+		if (!this.hasSetModRole(message.guild))
+			return await message.channel.send(`Error: ${errors.NO_SET_MOD_ROLE}`);
+		if (!this.hasModRole(message.member))
+			return await message.channel.send(`Error: ${errors.NO_MOD_ROLE}`);
 	}
 }
