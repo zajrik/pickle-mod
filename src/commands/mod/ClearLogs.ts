@@ -24,8 +24,7 @@ export default class ClearLogs extends Command<ModBot>
 		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_CHANNELS'))
 			return message.channel.send(`I don't have permission to do that on this server.`);
 
-		const channelName: string = (<TextChannel> message.channel).name;
-		if (channelName === message.guild.channels.get(message.guild.storage.getSetting('modlogs')).name)
+		if (message.channel.id === message.guild.storage.getSetting('modlogs'))
 			return message.channel.send('You may not use that command in this channel.')
 				.then((res: Message) => message.delete().then(() => res.delete()));
 
