@@ -47,7 +47,8 @@ export default class Reject extends Command<ModBot>
 		if (result === PromptResult.TIMEOUT)
 			return message.channel.send('Command timed out, aborting reject.')
 				.then((res: Message) => res.delete(5e3))
-				.then(<any> ask.delete());
+				.then(<any> ask.delete())
+				.then(() => message.delete());
 
 		if (result === PromptResult.FAILURE)
 			return message.channel.send('Okay, aborting reject.')
