@@ -1,6 +1,7 @@
 import { Command, LocalStorage, Message } from 'yamdbf';
 import { User } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
+import { prompt, PromptResult } from '../../../lib/Util';
 
 export default class Reject extends Command<ModBot>
 {
@@ -38,15 +39,15 @@ export default class Reject extends Command<ModBot>
 		if (!reason) return message.channel.send('You must provide a reason for this rejection.')
 			.then((res: Message) => res.delete(5e3));
 
-		const ask: Message = <Message> await message.channel.send(
-			`Are you sure you want to reject appeal \`${id}\` with this reason? (__y__es|__n__o)`);
-		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
-			a.author.id === message.author.id, { max: 1, time: 10000 })).first();
+		const [result, ask, confirmation]: [PromptResult, Message, Message] = await prompt(
+			message, `Are you sure you want to reject appeal \`${id}\` with this reason? (__y__es|__n__o)`, /^(?:yes|y)$/i);
 
-		if (!confirmation) return message.channel.send('Command timed out, aborting reject.')
-			.then((res: Message) => res.delete(5e3)).then(<any> ask.delete());
+		if (result === PromptResult.TIMEOUT)
+			return message.channel.send('Command timed out, aborting reject.')
+				.then((res: Message) => res.delete(5e3))
+				.then(<any> ask.delete());
 
-		if (!/^(?:yes|y)$/.test(confirmation.content))
+		if (result === PromptResult.FAILURE)
 			return message.channel.send('Okay, aborting reject.')
 				.then((res: Message) => res.delete(5e3))
 				.then(() => ask.delete())

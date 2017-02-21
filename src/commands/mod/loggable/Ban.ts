@@ -1,7 +1,7 @@
 import { Command, Message } from 'yamdbf';
 import { User, GuildMember, RichEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
-import { parseArgs } from '../../../lib/Util';
+import { parseArgs, prompt, PromptResult } from '../../../lib/Util';
 
 export default class Ban extends Command<ModBot>
 {
@@ -54,15 +54,11 @@ export default class Ban extends Command<ModBot>
 			.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
 			.setFooter(offenses.toString());
 
-		await message.channel.send(
-			`Are you sure you want issue this ban? (__y__es | __n__o)`,	Object.assign({}, { embed }));
-		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
-			a.author.id === message.author.id, { max: 1, time: 20e3 })).first();
-
-		if (!confirmation) return message.channel.send('Command timed out, aborting ban.');
-
-		if (!/^(?:yes|y)$/.test(confirmation.content))
-			return message.channel.send('Okay, aborting ban.');
+		const [result]: [PromptResult] = <[PromptResult]> await prompt(
+			message, 'Are you sure you want issue this ban? (__y__es | __n__o)', /^(?:yes|y)$/i, { embed });
+		console.log(result);
+		if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting ban.');
+		if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting ban.');
 
 		try
 		{

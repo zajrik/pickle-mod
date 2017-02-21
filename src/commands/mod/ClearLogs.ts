@@ -1,6 +1,7 @@
 import { Command, Message } from 'yamdbf';
 import { User, TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';
+import { prompt, PromptResult } from '../../lib/Util';
 
 export default class ClearLogs extends Command<ModBot>
 {
@@ -28,15 +29,10 @@ export default class ClearLogs extends Command<ModBot>
 			return message.channel.send('You may not use that command in this channel.')
 				.then((res: Message) => message.delete().then(() => res.delete()));
 
-		await message.channel.send(
-			`Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)`);
-		const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
-			a.author.id === message.author.id, { max: 1, time: 20e3 })).first();
-
-		if (!confirmation) return message.channel.send('Command timed out, aborting mod logs reset.');
-
-		if (!/^(?:yes|y)$/.test(confirmation.content))
-			return message.channel.send('Okay, aborting mod logs reset.');
+		const [result]: [PromptResult] = <[PromptResult]> await prompt(
+			message, 'Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)', /^(?:yes|y)$/i);
+		if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting mod logs reset.');
+		if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting mod logs reset.');
 
 		message.channel.send('Okay, resetting mod logs.');
 		const channel: TextChannel = <TextChannel> message.guild.channels.get(message.guild.storage.getSetting('modlogs'));
