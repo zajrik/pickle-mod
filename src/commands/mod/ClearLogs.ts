@@ -13,8 +13,7 @@ export default class ClearLogs extends Command<ModBot>
 			description: 'Clear the moderation logs channel, resetting cases to 0',
 			usage: '<prefix>clearlogs',
 			extraHelp: '',
-			group: 'mod',
-			permissions: ['MANAGE_GUILD']
+			group: 'mod'
 		});
 	}
 
