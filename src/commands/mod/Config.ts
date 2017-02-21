@@ -24,7 +24,7 @@ export default class Config extends Command<ModBot>
 		if (!(this.bot.config.owner.includes(message.author.id)
 			|| (<TextChannel> message.channel).permissionsFor(message.member)
 				.hasPermission('MANAGE_GUILD')))
-			return;
+			return message.channel.send('You must have `Manage Server` permissions to use this command.');
 
 		const option: string = <string> args.shift();
 		if (!option) return message.channel.send('You must provide an option.');

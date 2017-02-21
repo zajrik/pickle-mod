@@ -20,7 +20,9 @@ export default class Unmute extends Command<ModBot>
 
 	public async action(message: Message, [], mentions: User[], original: string): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.canCallModCommand(message))
+			return this.bot.mod.sendModError(message);
+
 		if (!this.bot.mod.hasSetMutedRole(message.guild)) return message.channel.send(
 			`This server doesn't have a role set for muting.`);
 

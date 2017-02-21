@@ -20,7 +20,9 @@ export default class Unban extends Command<ModBot>
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.canCallModCommand(message))
+			return this.bot.mod.sendModError(message);
+
 		const id: string = <string> args.shift();
 		if (!id || !/\d+/.test(id)) return message.channel.send('You must provide an ID to unban.');
 

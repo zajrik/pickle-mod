@@ -77,4 +77,30 @@ export default class ModLoader
 		if (!this.hasModRole(message.member)) return false;
 		return true;
 	}
+
+	/** Send an error message for why a mod command cannot be called */
+	public async sendModError(message: Message): Promise<Message | Message[]>
+	{
+		const errors: any = {
+			NO_GUILD: 'Command cannot be called from DM.',
+			NO_LOGGING: 'Server does not have a set logging channel.',
+			NO_LOG_PERMS: `I don't have permission to send messages in ${
+				message.guild.channels.get(message.guild.storage.getSetting('modlogs'))}`,
+			NO_APPEALS: 'Server does not have a set ban appeals channel.',
+			NO_SET_MOD_ROLE: 'Server does not have a set Mod role.',
+			NO_MOD_ROLE: `You must have the \`${message.guild.roles.get(
+				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`
+		};
+
+		let error: string;
+		if (!message.guild) error = errors.NO_GUILD;
+		if (!this.hasLoggingChannel(message.guild)) error = errors.NO_LOGGING;
+		if (!message.guild.channels.get(message.guild.storage.getSetting('modlogs'))
+			.permissionsFor(this._bot.user).hasPermission('SEND_MESSAGES')) error = errors.NO_LOG_PERMS;
+		if (!this.hasAppealsChannel(message.guild)) error = errors.NO_APPEALS;
+		if (!this.hasSetModRole(message.guild)) error = errors.NO_SET_MOD_ROLE;
+		if (!this.hasModRole(message.member)) error = errors.NO_MOD_ROLE;
+
+		return await message.channel.send(`Error: ${error}`);
+	}
 }

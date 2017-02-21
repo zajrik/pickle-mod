@@ -21,7 +21,6 @@ export default class Bash extends Command<Bot>
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		message.delete();
 		if (!args[0])
 			return message.channel.send('You must provide a command to execute.')
 				.then((res: Message) => res.delete(5000));

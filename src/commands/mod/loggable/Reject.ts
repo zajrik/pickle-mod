@@ -21,7 +21,9 @@ export default class Reject extends Command<ModBot>
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.canCallModCommand(message))
+			return this.bot.mod.sendModError(message);
+
 		const appealsChannel: string = message.guild.storage.getSetting('appeals');
 		if (message.channel.id !== appealsChannel)
 			return message.channel.send('Reject command may only be run in the appeals channel.');

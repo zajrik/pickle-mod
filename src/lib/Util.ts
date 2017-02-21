@@ -23,7 +23,7 @@ export function parseArgs(text: string): string[]
  */
 export async function prompt(message: Message, prompt: string, condition: RegExp, options?: MessageOptions): Promise<[PromptResult, Message, Message]>
 {
-	const ask: Message = <Message> await message.channel.send(prompt,	options);
+	const ask: Message = <Message> await message.channel.send(prompt, options);
 	const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
 		a.author.id === message.author.id, { max: 1, time: 20e3 })).first();
 

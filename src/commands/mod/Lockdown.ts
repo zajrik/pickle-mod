@@ -20,7 +20,12 @@ export default class Lockdown extends Command<ModBot>
 
 	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.hasModRole(message.member))
+			return message.channel.send(`You must have the \`${message.guild.roles.get(
+				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`);
+
+		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_CHANNELS'))
+			return message.channel.send(`I need to have \`Manage Channels\` permissions to do that on this server.`);
 
 		let channel: TextChannel;
 		const parseChannel: RegExp = /<#(\d+)>/;

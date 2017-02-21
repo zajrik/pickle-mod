@@ -20,7 +20,9 @@ export default class History extends Command<ModBot>
 
 	public async action(message: Message, [], mentions: User[], original: string): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message)) return;
+		if (!this.bot.mod.hasModRole(message.member))
+			return message.channel.send(`You must have the \`${message.guild.roles.get(
+				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`);
 
 		const args: string[] = parseArgs(original);
 		const idRegex: RegExp = /^(?:<@!?)?(\d+)>?$/;
