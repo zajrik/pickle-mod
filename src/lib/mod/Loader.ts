@@ -81,6 +81,8 @@ export default class ModLoader
 	/** Send an error message for why a mod command cannot be called */
 	public async sendModError(message: Message): Promise<Message | Message[]>
 	{
+		const modRoleName: string = message.guild.storage.getSetting('modrole') ?
+			`\`${message.guild.roles.get(message.guild.storage.getSetting('modrole')).name}\`` : 'configured mod';
 		const errors: any = {
 			NO_GUILD: 'Command cannot be called from DM.',
 			NO_LOGGING: 'Server does not have a set logging channel.',
@@ -88,8 +90,7 @@ export default class ModLoader
 				message.guild.channels.get(message.guild.storage.getSetting('modlogs'))}`,
 			NO_APPEALS: 'Server does not have a set ban appeals channel.',
 			NO_SET_MOD_ROLE: 'Server does not have a set Mod role.',
-			NO_MOD_ROLE: `You must have the \`${message.guild.roles.get(
-				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`
+			NO_MOD_ROLE: `You must have the ${modRoleName} role to use Mod commands.`
 		};
 
 		if (!message.guild) return await message.channel.send(`Error: ${errors.NO_GUILD}`);
