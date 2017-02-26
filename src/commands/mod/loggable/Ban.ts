@@ -1,7 +1,8 @@
-import { Command, Message } from 'yamdbf';
+import { Command, Message, Middleware } from 'yamdbf';
 import { User, GuildMember, RichEmbed } from 'discord.js';
+import { prompt, PromptResult } from '../../../lib/Util';
+import { modCommand } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
-import { parseArgs, prompt, PromptResult } from '../../../lib/Util';
 
 export default class Ban extends Command<ModBot>
 {
@@ -11,29 +12,20 @@ export default class Ban extends Command<ModBot>
 			name: 'ban',
 			aliases: ['b&', 'banne'],
 			description: 'Ban a user',
-			usage: '<prefix>ban <@user|id> <...reason>',
-			extraHelp: '',
-			argOpts: { stringArgs: true },
+			usage: '<prefix>ban <user> <...reason>',
 			group: 'mod',
 			guildOnly: true
 		});
+
+		this.use(modCommand);
+
+		const { resolveArgs, expect } = Middleware;
+		this.use(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }));
+		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
-	public async action(message: Message, [], mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message))
-			return this.bot.mod.sendModError(message);
-
-		const args: string[] = parseArgs(original);
-		const idRegex: RegExp = /^(?:<@!?)?(\d+)>?$/;
-		if (!idRegex.test(args[0])) return message.channel.send(
-			'You must mention a user or provide an ID to ban.');
-		const id: string = args.shift().match(idRegex)[1];
-
-		let user: User;
-		try { user = await this.bot.fetchUser(id); }
-		catch (err) { return message.channel.send('Failed to fetch a user with that ID.'); }
-
 		if (user.id === message.author.id)
 			return message.channel.send(`I don't think you want to ban yourself.`);
 
@@ -45,9 +37,6 @@ export default class Ban extends Command<ModBot>
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
-		const reason: string = args.join(' ').trim();
-		if (!reason) return message.channel.send('You must provide a reason to ban that user.');
-
 		const offenses: any = this.bot.mod.actions.checkUserHistory(message.guild, user);
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)
@@ -57,7 +46,6 @@ export default class Ban extends Command<ModBot>
 
 		const [result]: [PromptResult] = <[PromptResult]> await prompt(
 			message, 'Are you sure you want issue this ban? (__y__es | __n__o)', /^(?:yes|y)$/i, { embed });
-		console.log(result);
 		if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting ban.');
 		if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting ban.');
 

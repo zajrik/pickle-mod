@@ -1,4 +1,6 @@
 import { Message, MessageOptions } from 'discord.js';
+import { Command } from 'yamdbf';
+import ModBot from '../lib/ModBot';
 
 /**
  * Parse command args from a given string including
@@ -40,4 +42,15 @@ export enum PromptResult
 	SUCCESS,
 	FAILURE,
 	TIMEOUT
+}
+
+/**
+ * Cancel a mod command if the caller cannot call it,
+ * sending the appropriate error to the channel
+ */
+export function modCommand(message, args): any
+{
+	if (!(<Command<ModBot>> this).bot.mod.canCallModCommand(message))
+		return (<Command<ModBot>> this).bot.mod.sendModError(message);
+	return [message, args];
 }
