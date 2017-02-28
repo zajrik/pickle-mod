@@ -19,8 +19,8 @@ export default class ModBot extends Bot
 		this.on('guildMemberRemove', (member: GuildMember) => this.logMember(member, false, 16039746));
 		this.on('guildCreate', (guild: Guild) => this.logGuild(guild, true, 8450847));
 		this.on('guildDelete', (guild: Guild) => this.logGuild(guild, false, 13091073));
-		this.on('command', (name: string, args: any, original: string, execTime: number, message: Message) =>
-			this.logCommand(name, args, original, execTime, message));
+		this.on('command', (name: string, args: any, execTime: number, message: Message) =>
+			this.logCommand(name, args, execTime, message));
 
 		this.once('ready', () =>
 		{
@@ -52,7 +52,7 @@ export default class ModBot extends Bot
 	/**
 	 * Log command usage to command logging channel
 	 */
-	private logCommand(name: string, args: any, original: string, execTime: number, message: Message): Promise<Message>
+	private logCommand(name: string, args: any, execTime: number, message: Message): Promise<Message>
 	{
 		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.commands);
 		const embed: RichEmbed = new RichEmbed()
@@ -61,7 +61,7 @@ export default class ModBot extends Bot
 				message.author.avatarURL);
 		if (message.guild) embed.addField('Guild', message.guild.name, true);
 		embed.addField('Exec time', `${execTime.toFixed(2)}ms`, true)
-			.addField('Command content', original)
+			.addField('Command content', message.content)
 			.setFooter(message.channel.type.toUpperCase(), this.user.avatarURL)
 			.setTimestamp();
 		return logChannel.sendEmbed(embed);
@@ -76,7 +76,7 @@ export default class ModBot extends Bot
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(color)
 			.setAuthor(`${guild.name} (${guild.id})`, guild.iconURL)
-			.setFooter(joined ? 'Joined guild' : 'Left guild' , '')
+			.setFooter(joined ? 'Joined guild' : 'Left guild')
 			.setTimestamp();
 		return logChannel.sendEmbed(embed);
 	}
