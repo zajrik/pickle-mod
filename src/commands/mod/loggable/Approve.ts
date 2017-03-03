@@ -13,12 +13,11 @@ export default class Approve extends Command<ModBot>
 			usage: '<prefix>approve <id>',
 			extraHelp: '',
 			group: 'mod',
-			argOpts: { stringArgs: true },
 			guildOnly: true
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, args: string[]): Promise<any>
 	{
 		if (!this.bot.mod.canCallModCommand(message))
 			return this.bot.mod.sendModError(message);

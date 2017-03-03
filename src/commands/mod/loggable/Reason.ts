@@ -1,5 +1,6 @@
-import { Command, Message } from 'yamdbf';
-import { User, MessageEmbed } from 'discord.js';
+import { modCommand } from '../../../lib/Util';
+import { Command, Message, Middleware } from 'yamdbf';
+import { MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
 export default class Reason extends Command<ModBot>
@@ -13,42 +14,40 @@ export default class Reason extends Command<ModBot>
 			usage: '<prefix>reason <#|#-#|latest> <...reason>',
 			extraHelp: 'Can be used to edit your own cases or to set a reason for a ban/unban case that was posted by the bot',
 			group: 'mod',
-			guildOnly: true,
-			argOpts: { stringArgs: true }
+			guildOnly: true
 		});
+
+		this.use(modCommand);
+
+		const { resolveArgs, expect } = Middleware;
+		this.use(resolveArgs({ '<case(s)>': 'String', '<...reason>': 'String' }));
+		this.use(expect({ '<case(s)>': 'Any', '<...reason>': 'String' }));
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [caseString, reason]: string[]): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message))
-			return this.bot.mod.sendModError(message);
-
 		const parseRange: RegExp = /(\d+)\-(\d+)/;
 		let firstID: int;
 		let secondID: int;
 
-		if (parseRange.test(<string> args[0]))
+		if (parseRange.test(caseString))
 		{
-			const parsedRange: RegExpMatchArray = (<string> args.shift()).match(parseRange);
+			const parsedRange: RegExpMatchArray = caseString.match(parseRange);
 			firstID = parseInt(parsedRange[1]);
 			secondID = parseInt(parsedRange[2]);
 		}
-		else if (<string> args[0] === 'latest')
+		else if (caseString === 'latest')
 		{
 			firstID = message.guild.storage.getSetting('cases');
 			secondID = firstID;
-			args.splice(0, 1);
 		}
 		else
 		{
-			firstID = parseInt(<string> args.shift());
+			firstID = parseInt(caseString);
 			secondID = firstID;
 		}
 		if (!firstID || isNaN(firstID)) return message.channel.send('You must provide a case number.');
 		if (secondID < firstID) return message.channel.send('Upper range cannot be below lower range.');
-
-		const reason: string = args.join(' ');
-		if (!reason) return message.channel.send('You must provide a reason to set.');
 
 		const working: Message = <Message> await message.channel.send('Indexing cases...');
 

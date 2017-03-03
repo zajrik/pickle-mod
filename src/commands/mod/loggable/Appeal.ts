@@ -12,12 +12,11 @@ export default class Appeal extends Command<ModBot>
 			description: 'Appeal a ban',
 			usage: '<prefix>appeal <message>',
 			extraHelp: '',
-			argOpts: { stringArgs: true },
 			group: 'mod'
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, args: string[]): Promise<any>
 	{
 		if (message.channel.type !== 'dm') return;
 		const storage: LocalStorage = this.bot.storage;

@@ -1,8 +1,8 @@
-import { Command, Message } from 'yamdbf';
-import { User, GuildMember } from 'discord.js';
-import ModBot from '../../../lib/ModBot';
 import Time from '../../../lib/Time';
-import { parseArgs } from '../../../lib/Util';
+import { modCommand } from '../../../lib/Util';
+import { GuildMember, User } from 'discord.js';
+import { Command, Message, Middleware } from 'yamdbf';
+import ModBot from '../../../lib/ModBot';
 
 export default class Mute extends Command<ModBot>
 {
@@ -11,49 +11,34 @@ export default class Mute extends Command<ModBot>
 		super(bot, {
 			name: 'mute',
 			description: 'Mute a user',
-			usage: '<prefix>mute <@user> <duration> <reason>',
+			usage: '<prefix>mute <member> <duration> <...reason>',
 			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d',
-			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});
+
+		this.use(modCommand);
+
+		const { resolveArgs, expect } = Middleware;
+		this.use(resolveArgs({ '<member>': 'Member', '<duration>': 'String', '<...reason>': 'String' }));
+		this.use(expect({ '<member>': 'Member', '<duration>': 'String', '<...reason>': 'String' }));
 	}
 
-	public async action(message: Message, [], mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [member, durationString, reason]: [GuildMember, string, string]): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message))
-			return this.bot.mod.sendModError(message);
-
 		if (!this.bot.mod.hasSetMutedRole(message.guild)) return message.channel.send(
 			`This server doesn't have a role set for muting.`);
 
-		const args: string[] = parseArgs(original);
-		const idRegex: RegExp = /^(?:<@!?)?(\d+)>?$/;
-		if (!idRegex.test(args[0])) return message.channel.send(
-			'You must mention a user or provide an ID to mute.');
-		const id: string = args.shift().match(idRegex)[1];
-
-		let user: User;
-		try { user = await this.bot.fetchUser(id); }
-		catch (err) { return message.channel.send('Failed to fetch a user with that ID.'); }
-
+		const user: User = member.user;
 		if (user.id === message.author.id)
 			return message.channel.send(`I don't think you want to mute yourself.`);
-
-		let member: GuildMember;
-		try { member = await message.guild.fetchMember(user); }
-		catch (err) { return message.channel.send('Failed to fetch a member with that ID.'); }
 
 		const modRole: string = message.guild.storage.getSetting('modrole');
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
-		const durationString: string = args.shift();
 		const duration: number = Time.parseShorthand(durationString);
-		if (!duration) return message.channel.send('You must provide a duration. (example: `30m`, `1h`, `2d`)');
-
-		const reason: string = args.join(' ').trim();
-		if (!reason) return message.channel.send('You must provide a reason to mute that user.');
+		if (!duration) return message.channel.send('You must provide a proper duration. (example: `30m`, `1h`, `2d`)');
 
 		const mutedRole: string = message.guild.storage.getSetting('mutedrole');
 		if (member.roles.has(mutedRole))

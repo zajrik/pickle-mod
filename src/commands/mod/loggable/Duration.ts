@@ -1,5 +1,5 @@
 import { Command, Message } from 'yamdbf';
-import { User, GuildMember, MessageEmbed } from 'discord.js';
+import { GuildMember, MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import Time from '../../../lib/Time';
 
@@ -18,12 +18,13 @@ export default class Duration extends Command<ModBot>
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, args: string[]): Promise<any>
 	{
 		if (!this.bot.mod.canCallModCommand(message))
 			return this.bot.mod.sendModError(message);
 
-		const toSelect: string | int = args.shift();
+		let toSelect: string | int = args.shift();
+		if (!isNaN(parseInt(toSelect))) toSelect = parseInt(toSelect);
 		if (typeof toSelect === 'string' && toSelect !== 'latest')
 			return message.channel.send(`You must provide a case number or 'latest'`);
 
