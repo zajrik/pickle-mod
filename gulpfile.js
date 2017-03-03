@@ -11,8 +11,9 @@ gulp.task('default', () =>
 		.pipe(ts({
 			noImplicitAny: true,
 			outDir: 'bin',
-			target: 'ES6',
+			target: 'es6',
 			module: 'commonjs',
+			lib: ['es7'],
 			moduleResolution: 'node',
 			sourceMap: true
 		}))

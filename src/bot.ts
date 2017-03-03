@@ -13,8 +13,8 @@ const bot: ModBot = new ModBot({ // tslint:disable-line
 	readyText: 'Ready\u0007',
 	commandsDir: path.join(__dirname, 'commands'),
 	disableBase: [
-		'version',
-		'reload'
+		// 'version',
+		// 'reload'
 	]
 })
 .setDefaultSetting('prefix', '?')

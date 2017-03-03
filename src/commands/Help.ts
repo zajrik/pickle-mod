@@ -1,6 +1,5 @@
-'use strict';
-import { Bot, Command, Message, GuildStorage } from 'yamdbf';
-import { User, Collection, RichEmbed } from 'discord.js';
+import { Collection, RichEmbed } from 'discord.js';
+import { Bot, Command, GuildStorage, Message } from 'yamdbf';
 
 export default class Help extends Command<Bot>
 {
@@ -17,7 +16,7 @@ export default class Help extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
+	public action(message: Message, args: string[]): void
 	{
 		const dm: boolean = message.channel.type === 'dm' || message.channel.type === 'group';
 		const mentionName: string = `@${this.bot.user.username}#${this.bot.user.discriminator}`;

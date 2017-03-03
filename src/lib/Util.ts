@@ -48,7 +48,7 @@ export enum PromptResult
  * Cancel a mod command if the caller cannot call it,
  * sending the appropriate error to the channel
  */
-export function modCommand(message, args): any
+export function modCommand(message: Message, args: any[]): any
 {
 	if (!(<Command<ModBot>> this).bot.mod.canCallModCommand(message))
 		return (<Command<ModBot>> this).bot.mod.sendModError(message);

@@ -1,6 +1,6 @@
 'use strict';
 import { Bot, Command } from 'yamdbf';
-import { User, Message } from 'discord.js';
+import { Message } from 'discord.js';
 import { execSync } from 'child_process';
 
 export default class Bash extends Command<Bot>
@@ -14,12 +14,11 @@ export default class Bash extends Command<Bot>
 			usage: '<prefix>$ <command> [...args]',
 			extraHelp: '',
 			group: 'system',
-			argOpts: { stringArgs: true },
 			ownerOnly: true
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, args: string[]): Promise<any>
 	{
 		if (!args[0])
 			return message.channel.send('You must provide a command to execute.')
