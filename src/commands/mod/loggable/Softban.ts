@@ -1,7 +1,7 @@
-import { Command, Message } from 'yamdbf';
+import { Command, Message, Middleware } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
-import { parseArgs } from '../../../lib/Util';
+import { modCommand } from '../../../lib/Util';
 
 export default class Softban extends Command<ModBot>
 {
@@ -11,29 +11,21 @@ export default class Softban extends Command<ModBot>
 			name: 'softban',
 			aliases: [],
 			description: 'Softban a user',
-			usage: '<prefix>softban <@user> <...reason>',
+			usage: '<prefix>softban <user> <...reason>',
 			extraHelp: '',
-			argOpts: { stringArgs: true },
 			group: 'mod',
 			guildOnly: true
 		});
+
+		this.use(modCommand);
+
+		const { resolveArgs, expect } = Middleware;
+		this.use(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }));
+		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
-	public async action(message: Message, [], mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message))
-			return this.bot.mod.sendModError(message);
-
-		const args: string[] = parseArgs(original);
-		const idRegex: RegExp = /^(?:<@!?)?(\d+)>?$/;
-		if (!idRegex.test(args[0])) return message.channel.send(
-			'You must mention a user or provide an ID to softban.');
-		const id: string = args.shift().match(idRegex)[1];
-
-		let user: User;
-		try { user = await this.bot.fetchUser(id); }
-		catch (err) { return message.channel.send('Failed to fetch a user with that ID.'); }
-
 		if (user.id === message.author.id)
 			return message.channel.send(`I don't think you want to softban yourself.`);
 
@@ -44,9 +36,6 @@ export default class Softban extends Command<ModBot>
 		const modRole: string = message.guild.storage.getSetting('modrole');
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
-
-		const reason: string = args.join(' ').trim();
-		if (!reason) return message.channel.send('You must provide a reason to softban that user.');
 
 		const kicking: Message = <Message> await message.channel.send(
 			`Softbanning ${user.username}#${user.discriminator}... *(Waiting for unban)*`);

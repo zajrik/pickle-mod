@@ -1,5 +1,6 @@
-import { Command, Message } from 'yamdbf';
-import { User } from 'discord.js';
+import { modCommand } from '../../../lib/Util';
+import { Command, Message, Middleware } from 'yamdbf';
+import { GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
 export default class Prune extends Command<ModBot>
@@ -15,19 +16,17 @@ export default class Prune extends Command<ModBot>
 			group: 'prune',
 			guildOnly: true
 		});
+
+		this.use(modCommand);
+
+		this.use(Middleware.resolveArgs({ '<quantity>': 'Number', '<member>': 'Member' }));
+		this.use(Middleware.expect({ '<quantity>': 'Number', '<member>': 'Member' }));
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [quantity, member]: [int, GuildMember]): Promise<any>
 	{
-		if (!this.bot.mod.hasModRole(message.member))
-			return message.channel.send(`You must have the \`${message.guild.roles.get(
-				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`);
-
-		const quantity: number = <number> args[0];
-		const member: User = mentions[0];
-
 		if (!quantity || quantity < 1)
-			return message.channel.send('You must enter a number of messages to prune');
+			return message.channel.send('You must enter a valid number of messages to prune');
 
 		if (!member) return message.channel.send('You must mention a user to prune');
 

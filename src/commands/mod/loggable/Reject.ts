@@ -1,7 +1,7 @@
-import { Command, LocalStorage, Message } from 'yamdbf';
 import { User } from 'discord.js';
+import { Command, LocalStorage, Message } from 'yamdbf';
+import { prompt, PromptResult, modCommand } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
-import { prompt, PromptResult } from '../../../lib/Util';
 
 export default class Reject extends Command<ModBot>
 {
@@ -14,16 +14,14 @@ export default class Reject extends Command<ModBot>
 			usage: '<prefix>reject <id> <...reason>',
 			extraHelp: '',
 			group: 'mod',
-			argOpts: { stringArgs: true },
 			guildOnly: true
 		});
+
+		this.use(modCommand);
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, args: string[]): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message))
-			return this.bot.mod.sendModError(message);
-
 		const appealsChannel: string = message.guild.storage.getSetting('appeals');
 		if (message.channel.id !== appealsChannel)
 			return message.channel.send('Reject command may only be run in the appeals channel.');
@@ -47,7 +45,7 @@ export default class Reject extends Command<ModBot>
 		if (result === PromptResult.TIMEOUT)
 			return message.channel.send('Command timed out, aborting reject.')
 				.then((res: Message) => res.delete(5e3))
-				.then(<any> ask.delete())
+				.then(() => ask.delete())
 				.then(() => message.delete());
 
 		if (result === PromptResult.FAILURE)
@@ -58,7 +56,7 @@ export default class Reject extends Command<ModBot>
 				.then(() => message.delete());
 
 		const user: User = await this.bot.fetchUser(id);
-		await storage.queue('activeBans', (key: string) =>
+		await storage.queue('activeBans', key =>
 		{
 			const activeBans: ActiveBans = storage.getItem(key) || {};
 			const bans: BanObject[] = activeBans[user.id];
@@ -71,7 +69,7 @@ export default class Reject extends Command<ModBot>
 			storage.setItem(key, activeBans);
 		});
 
-		await storage.queue('activeAppeals', (key: string) =>
+		await storage.queue('activeAppeals', key =>
 		{
 			const activeAppeals: ActiveAppeals = storage.getItem(key) || {};
 			message.channel.fetchMessage(activeAppeals[user.id])
@@ -82,8 +80,8 @@ export default class Reject extends Command<ModBot>
 
 		message.channel.send(`Rejected appeal \`${id}\``)
 			.then((res: Message) => res.delete(5000))
-			.then(<any> ask.delete())
-			.then(<any> confirmation.delete())
+			.then(() => ask.delete())
+			.then(() => confirmation.delete())
 			.then(() => message.delete());
 
 		user.send(`Your ban appeal for ${
