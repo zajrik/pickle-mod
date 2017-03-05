@@ -1,5 +1,6 @@
-import { Command, LocalStorage, Message } from 'yamdbf';
-import { User, TextChannel } from 'discord.js';
+import { modCommand } from '../../lib/Util';
+import { Command, LocalStorage, Message, Middleware } from 'yamdbf';
+import { TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';
 import Time from '../../lib/Time';
 
@@ -11,38 +12,31 @@ export default class Lockdown extends Command<ModBot>
 			name: 'lockdown',
 			aliases: [],
 			description: 'Lock down a channel for a set time',
-			usage: '<prefix>lockdown [#channel] <duration|clear>',
+			usage: '<prefix>lockdown <duration|\'clear\'> [#channel]',
 			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown.\n\nCalling the lockdown command when a channel is already locked down will restart the lockdown with the new duration.',
 			group: 'mod',
 			guildOnly: true
 		});
+
+		this.use(modCommand);
+		this.use(Middleware.resolveArgs({ '<duration|clear>': 'String', '[#channel]': 'Channel' }));
+		this.use(Middleware.expect({ '<duration|clear>': 'String' }));
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{
-		if (!this.bot.mod.hasModRole(message.member))
-			return message.channel.send(`You must have the \`${message.guild.roles.get(
-				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`);
-
 		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_CHANNELS'))
 			return message.channel.send(`I need to have \`Manage Channels\` permissions to do that on this server.`);
 
-		let channel: TextChannel;
-		const parseChannel: RegExp = /<#(\d+)>/;
-		const channelIndex: int = args.findIndex(a => parseChannel.test(<string> a));
-
-		if (channelIndex > -1) channel = <TextChannel> this.bot.channels.get(
-			(<string> args.splice(channelIndex, 1)[0]).match(parseChannel)[1]);
-		else channel = <TextChannel> message.channel;
-
+		if (!channel) channel = <TextChannel> message.channel;
 		if (channel.guild.id !== message.guild.id)
 			return message.channel.send('You may not lock down channels in other guilds.');
 
-		if (args[0] !== 'clear')
+		if (durationOrClear !== 'clear')
 		{
-			const duration: number = Time.parseShorthand(<string> args[0]);
+			const duration: number = Time.parseShorthand(durationOrClear);
 			if (!duration) return message.channel.send(
-				'You must provide a lockdown duration. Use the help command for more information');
+				'You must provide a valid lockdown duration. Use the help command for more information');
 
 			const durationString: string = Time.duration(duration).toString();
 

@@ -1,3 +1,4 @@
+import { modCommand } from '../../../lib/Util';
 import { Command, Message } from 'yamdbf';
 import { GuildMember, MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
@@ -16,13 +17,12 @@ export default class Duration extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
+
+		this.use(modCommand);
 	}
 
 	public async action(message: Message, args: string[]): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message))
-			return this.bot.mod.sendModError(message);
-
 		let toSelect: string | int = args.shift();
 		if (!isNaN(parseInt(toSelect))) toSelect = parseInt(toSelect);
 		if (typeof toSelect === 'string' && toSelect !== 'latest')
@@ -54,7 +54,7 @@ export default class Duration extends Command<ModBot>
 				return message.channel.sendMessage('That mute has expired.');
 		}
 
-		const durationString: string = <string> args.shift();
+		const durationString: string = args.shift();
 		const duration: int = Time.parseShorthand(durationString);
 		if (!duration) return message.channel.send('You must provide a valid duration.');
 

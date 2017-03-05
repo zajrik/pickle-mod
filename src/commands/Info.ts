@@ -1,5 +1,5 @@
 import { Bot, Command, version, Message } from 'yamdbf';
-import { User, RichEmbed, Guild } from 'discord.js';
+import { RichEmbed, Guild } from 'discord.js';
 import * as Discord from 'discord.js';
 import Time from '../lib/Time';
 
@@ -17,7 +17,7 @@ export default class Info extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
+	public action(message: Message, args: string[]): void
 	{
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)

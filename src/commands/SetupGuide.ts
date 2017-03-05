@@ -1,5 +1,5 @@
+import { RichEmbed, TextChannel } from 'discord.js';
 import { Bot, Command, Message } from 'yamdbf';
-import { User, RichEmbed, TextChannel } from 'discord.js';
 
 export default class Guide extends Command<Bot>
 {
@@ -15,7 +15,7 @@ export default class Guide extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
+	public action(message: Message, args: string[]): void
 	{
 		if (message.channel.type !== 'dm'
 			&& !(<TextChannel> message.channel).permissionsFor(message.member).hasPermission('MANAGE_GUILD')

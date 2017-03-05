@@ -1,6 +1,6 @@
 'use strict';
 import { Bot, Command } from 'yamdbf';
-import { User, Message } from 'discord.js';
+import { Message } from 'discord.js';
 
 export default class Invite extends Command<Bot>
 {
@@ -16,7 +16,7 @@ export default class Invite extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): void
+	public action(message: Message, args: string[]): void
 	{
 		message.channel.send(`You can invite me to your server with this link:\n`
 			+ `https://discordapp.com/oauth2/authorize?client_id=${this.bot.user.id}&scope=bot&permissions=297888791\n\n`

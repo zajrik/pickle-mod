@@ -17,7 +17,7 @@ export default class ClearLogs extends Command<ModBot>
 		});
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, args: any[]): Promise<any>
 	{
 		if (!(this.bot.config.owner.includes(message.author.id)
 			|| (<TextChannel> message.channel).permissionsFor(message.member)

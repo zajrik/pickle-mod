@@ -1,5 +1,4 @@
-import { Bot, Command, Message, GuildStorage } from 'yamdbf';
-import { User } from 'discord.js';
+import { Bot, Command, GuildStorage, Message } from 'yamdbf';
 
 export default class Tag extends Command<Bot>
 {
@@ -16,9 +15,9 @@ export default class Tag extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
+	public action(message: Message, args: string[]): any
 	{
-		const action: string = <string> args[0];
+		const action: string = args[0];
 		const storage: GuildStorage = message.guild.storage;
 		if (!storage.exists('tags')) storage.setItem('tags', {});
 		switch (action)

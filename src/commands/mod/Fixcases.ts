@@ -1,6 +1,7 @@
 'use strict';
-import { Command, Message, GuildStorage } from 'yamdbf';
-import { User, TextChannel } from 'discord.js';
+import { modCommand } from '../../lib/Util';
+import { Command, Message, GuildStorage, Middleware } from 'yamdbf';
+import { TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';
 
 export default class Fixcases extends Command<ModBot>
@@ -14,28 +15,27 @@ export default class Fixcases extends Command<ModBot>
 			extraHelp: 'Must be given the message ID of a case that is known to have a correct number. All the cases after the provided case will be re-indexed in ascending order.',
 			group: 'mod',
 			guildOnly: true,
-			argOpts: { stringArgs: true },
 			ownerOnly: false
 		});
+
+		this.use(modCommand);
+		this.use(Middleware.expect({ '<case msg id>': 'String' }));
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [id]: [string]): Promise<any>
 	{
-		if (!this.bot.mod.canCallModCommand(message)) return message.channel.send('uhhhh');
-
-		if (!/\d+/.test(<string> args[0]))
+		if (!/\d+/.test(id))
 			return message.channel.send('You must provide a valid case message ID.');
 
 		const storage: GuildStorage = message.guild.storage;
 		const logsChannel: TextChannel = <TextChannel> message.guild.channels
 			.get(storage.getSetting('modlogs'));
-		if (!logsChannel) return message.channel.send('This guild does not have a logs channel.');
 
 		const caseRegex: RegExp = /Case (\d+)/;
 		let startCase: Message;
 		try
 		{
-			startCase = await logsChannel.fetchMessage(<string> args[0]);
+			startCase = await logsChannel.fetchMessage(id);
 		}
 		catch (err)
 		{

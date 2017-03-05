@@ -31,18 +31,18 @@ export default class Help extends Command<Bot>
 		if (!args[0])
 		{
 			embed.setAuthor('Moderation commands', this.bot.user.avatarURL)
-				.addField(`${prefix}warn <@user|id> <...reason>`, 'Give a formal warning to a user')
-				.addField(`${prefix}mute <@user|id> <duration> <...reason>`,
-					`Mute a user for a specified duration.\n`
+				.addField(`${prefix}warn <member> <...reason>`, 'Give a formal warning to a user')
+				.addField(`${prefix}mute <member> <duration> <...reason>`,
+					`Mute a user for a specified duration\n`
 					+ 'Duration format examples: `30m`, `2h`, `1d`', true)
-				.addField(`${prefix}unmute <@user|id>`, `Unmute a user`, true)
-				.addField(`${prefix}kick <@user|id> <...reason>`, `Kick a user from the server`)
-				.addField(`${prefix}softban <@user|id>`, `Kick a user from the server, removing 7 days of their messages`)
-				.addField(`${prefix}ban <@user|id> <...reason>`, `Ban a user from the server.`, true)
-				.addField(`${prefix}unban <id> <...reason>`, `Unban a user by ID.`, true)
+				.addField(`${prefix}unmute <member>`, `Unmute a user`, true)
+				.addField(`${prefix}kick <member> <...reason>`, `Kick a user from the server`)
+				.addField(`${prefix}softban <user> <...reason>`, `Kick a user from the server, removing 7 days of their messages`)
+				.addField(`${prefix}ban <user> <...reason>`, `Ban a user from the server`, true)
+				.addField(`${prefix}unban <user> <...reason>`, `Unban a banned user`, true)
 				.addField(`${prefix}reason <#|#-#|latest> <...reason>`, `Set the reason for a moderation case`)
-				.addField(`${prefix}lockdown [#channel] <duration>`,
-					`Lock down the channel the command is called in, or the provided channel for a specified duration.\n`
+				.addField(`${prefix}lockdown <duration> [#channel]`,
+					`Lock down the channel the command is called in, or the provided channel for a specified duration\n`
 					+ 'Duration format examples: `30m`, `2h`, `1d`');
 
 			for (const cmd of ['warn', 'mute', 'unmute', 'kick', 'softban',

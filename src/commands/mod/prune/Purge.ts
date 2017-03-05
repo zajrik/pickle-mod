@@ -1,6 +1,7 @@
-import { Command, Message } from 'yamdbf';
+import { Command, Message, Middleware } from 'yamdbf';
 import { User, Collection } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
+import { modCommand } from '../../../lib/Util';
 
 export default class Purge extends Command<ModBot>
 {
@@ -15,16 +16,15 @@ export default class Purge extends Command<ModBot>
 			group: 'prune',
 			guildOnly: true
 		});
+
+		this.use(modCommand);
+
+		this.use(Middleware.resolveArgs({ '<quantity>': 'Number' }));
+		this.use(Middleware.expect({ '<quantity>': 'Number' }));
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [quantity]: [int]): Promise<any>
 	{
-		if (!this.bot.mod.hasModRole(message.member))
-			return message.channel.send(`You must have the \`${message.guild.roles.get(
-				message.guild.storage.getSetting('modrole')).name}\` role to use Mod commands.`);
-
-		const quantity: number = <number> args[0];
-
 		if (!quantity || quantity < 1)
 			return message.channel.send('You must enter a number of messages to purge.');
 

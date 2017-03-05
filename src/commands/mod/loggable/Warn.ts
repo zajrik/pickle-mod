@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
-import { parseArgs, modCommand } from '../../../lib/Util';
+import { modCommand } from '../../../lib/Util';
 
 export default class Warn extends Command<ModBot>
 {

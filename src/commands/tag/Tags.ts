@@ -1,5 +1,4 @@
-import { Bot, Command, Message, GuildStorage } from 'yamdbf';
-import { User } from 'discord.js';
+import { Bot, Command, GuildStorage, Message } from 'yamdbf';
 
 export default class Tags extends Command<Bot>
 {
@@ -16,10 +15,10 @@ export default class Tags extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: Array<string | number>, mentions: User[], original: string): any
+	public action(message: Message, args: string[]): any
 	{
 		const storage: GuildStorage = message.guild.storage;
-		const tags: Object = storage.getItem('tags');
+		const tags: object = storage.getItem('tags');
 		if (!tags || Object.keys(tags).length === 0)
 			return message.channel.send('There are currently no saved tags.');
 		return message.channel.send(`**Current tags:**\n${Object.keys(tags).sort().join(', ')}`);

@@ -175,7 +175,7 @@ export default class Logger
 	 */
 	public async awaitBanCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Softban'): Promise<Message | Message[]>
 	{
-		return <any> new Promise(resolve =>
+		return new Promise<Message | Message[]>(resolve =>
 		{
 			const logs: TextChannel = <TextChannel> guild.channels.get(this._bot.guildStorages.get(guild).getSetting('modlogs'));
 			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
@@ -206,7 +206,7 @@ export default class Logger
 						const caseType: string = message.embeds[0].description.match(actionRegex)[1];
 						const index: int = caseType === 'Ban' ? 0 : caseType === 'Unban' ? 1 : null;
 						if (typeof index !== 'number') return;
-						found[index] = message;
+						(<Message[]> found)[index] = message;
 						softbanResult[index] = true;
 						if (softbanResult.reduce((a, b) => a && b)) collector.stop('found');
 					});
@@ -234,7 +234,7 @@ export default class Logger
 		{
 			let fetched: Message[] = (await logs.fetchMessages({
 				limit: 100,
-				after: cases.length > 0 ? cases[cases.length - 1].id : start.id 
+				after: cases.length > 0 ? cases[cases.length - 1].id : start.id
 			})).array().reverse();
 			cases.push(...fetched);
 			if (fetched.length < 100) break;

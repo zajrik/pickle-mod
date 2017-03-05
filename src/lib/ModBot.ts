@@ -12,7 +12,6 @@ export default class ModBot extends Bot
 
 	public constructor(botOptions: BotOptions)
 	{
-		console.log(botOptions);
 		super(botOptions);
 		this.rateLimiter = new RateLimiter(this);
 

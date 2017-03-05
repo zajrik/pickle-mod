@@ -1,7 +1,8 @@
-import { Command, Message, GuildStorage } from 'yamdbf';
-import { User, TextChannel, GuildChannel, Role, RichEmbed } from 'discord.js';
+import { Command, Message, Middleware } from 'yamdbf';
+import { TextChannel, GuildChannel, Role, RichEmbed } from 'discord.js';
 import ModLoader from '../../lib/mod/Loader';
 import ModBot from '../../lib/ModBot';
+import { prompt, PromptResult } from '../../lib/Util';
 
 export default class Config extends Command<ModBot>
 {
@@ -11,25 +12,26 @@ export default class Config extends Command<ModBot>
 			name: 'config',
 			aliases: [],
 			description: 'Configure options for the server',
-			usage: '<prefix>config <option> [...args]\nOptions: mod | mute | logs | appeals | status | reset',
+			usage: '<prefix>config <option> [...value]\nOptions: mod | mute | logs | appeals | status | reset',
 			extraHelp: 'Uses a fuzzy-ish search to find channels and roles. For example, if you want to set your logging channel to a channel called "mod-logs" you can do:\n\n\t<prefix>config mod mod logs',
 			group: 'mod',
 			guildOnly: true,
-			argOpts: { stringArgs: true, separator: ' ' }
+			argOpts: { separator: ' ' }
 		});
+
+		this.use(Middleware.resolveArgs({ '<option>': 'String', '[...value]': 'String' }));
+		this.use(Middleware.expect({ '<option>': 'String' }));
 	}
 
-	public async action(message: Message, args: Array<string | number>, mentions: User[], original: string): Promise<any>
+	public async action(message: Message, [option, value]: string[]): Promise<any>
 	{
 		if (!(this.bot.config.owner.includes(message.author.id)
 			|| (<TextChannel> message.channel).permissionsFor(message.member)
 				.hasPermission('MANAGE_GUILD')))
 			return message.channel.send('You must have `Manage Server` permissions to use this command.');
 
-		const option: string = <string> args.shift();
-		if (!option) return message.channel.send('You must provide an option.');
 		if (!/^(?:mod|mute|logs|appeals|status|reset)$/i.test(option))
-			return message.channel.send(`Invalid option: \`${option}\``);
+			return message.channel.send(`Invalid option: \`${option}\`\nUsage: \`${this.usage}\``);
 
 		const mod: ModLoader = this.bot.mod;
 		let [modRoleSet, logs, appeals, mute]: boolean[] = [
@@ -49,7 +51,6 @@ export default class Config extends Command<ModBot>
 			return text.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
 		}
 
-		const value: string = args.join(' ');
 		switch (option.toLowerCase())
 		{
 			case 'mod':
@@ -89,18 +90,13 @@ export default class Config extends Command<ModBot>
 				return message.channel.sendEmbed(embed);
 
 			case 'reset':
-				await message.channel.send(`Are you sure you want to reset config? (__y__es | __n__o)`);
-				const confirmation: Message = (await message.channel.awaitMessages((a: Message) =>
-					a.author.id === message.author.id, { max: 1, time: 20000 })).first();
+				const [result]: [PromptResult] = <[PromptResult]> await prompt(
+					message, 'Are you sure you want to reset config? (__y__es | __n__o)', /^(?:yes|y)$/i);
+				if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting config reset.');
+				if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting config reset.');
 
-				if (!confirmation) return message.channel.send('Command timed out, aborting config reset.');
-
-				if (!/^(?:yes|y)$/.test(confirmation.content))
-					return message.channel.send('Okay, aborting config reset.');
-
-				const storage: GuildStorage = message.guild.storage;
 				for (const setting of ['modrole', 'mutedrole', 'modlogs', 'appeals'])
-					storage.removeSetting(setting);
+					message.guild.storage.removeSetting(setting);
 
 				return message.channel.send(
 					`Server config reset. You'll need to reconfigure to be able to use mod commands again.`);
