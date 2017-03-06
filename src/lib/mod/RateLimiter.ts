@@ -1,8 +1,8 @@
 import { Bot } from 'yamdbf';
 import { GuildMember } from 'discord.js';
-import TimerCollection from '../timer/TimerCollection';
 import Timer from '../timer/Timer';
 import Time from '../Time';
+
 /**
  * Contains methods to funnel events through and prevent
  * potential abuse
@@ -10,16 +10,14 @@ import Time from '../Time';
 export default class RateLimiter
 {
 	private bot: Bot;
-	private rl: { [guild: string]: { [member: string]: { [type: string]: int } } };
-	private rlTimers: TimerCollection<string, Timer>;
+	private _rl: { [guild: string]: { [member: string]: { [type: string]: int } } };
+	private _rlTimer: Timer;
 
 	public constructor(bot: Bot)
 	{
 		this.bot = bot;
-		this.rl = {};
-		this.rlTimers = new TimerCollection();
-
-		this.rlTimers.add(new Timer(this.bot, 'memberlog-ratelimit', 5, async () => this.checkMemberLogLimits()));
+		this._rl = {};
+		this._rlTimer = new Timer(this.bot, 'memberlog-ratelimit', 5, async () => this._checkMemberLogLimits());
 	}
 
 	/**
@@ -27,9 +25,9 @@ export default class RateLimiter
 	 * abruptly and can have a value assigned to the final
 	 * property in the path
 	 */
-	private validatePath(obj: any, props: string[]): boolean
+	private _validatePath(obj: object, props: string[]): boolean
 	{
-		let prev: any = obj;
+		let prev: { [prop: string]: any } = obj;
 		let valid: boolean = false;
 		let lastProp: string;
 		for (const prop of props)
@@ -51,6 +49,19 @@ export default class RateLimiter
 	}
 
 	/**
+	 * Check current ratelimits and remove any expired
+	 */
+	private async _checkMemberLogLimits(): Promise<void>
+	{
+		for (const guild of Object.keys(this._rl))
+			for (const member of Object.keys(this._rl[guild]))
+				for (const type of ['join', 'leave'])
+					if (this._rl[guild][member][type]
+						&& Time.difference(this._rl[guild][member][type], Time.now()).ms < 1)
+						delete this._rl[guild][member][type];
+	}
+
+	/**
 	 * Handle rate limiting for server member logs,
 	 * preventing server spam via join/leave abuse
 	 * and return whether or not the GuildMember is
@@ -61,26 +72,13 @@ export default class RateLimiter
 		const path: string[] = [member.guild.id, member.id, type];
 		if (set)
 		{
-			if (!this.rl[member.guild.id]) this.rl[member.guild.id] = {};
-			if (!this.rl[member.guild.id][member.id]) this.rl[member.guild.id][member.id] = {};
-			this.rl[member.guild.id][member.id][type] = Time.now() + (5 * 60e3);
+			if (!this._rl[member.guild.id]) this._rl[member.guild.id] = {};
+			if (!this._rl[member.guild.id][member.id]) this._rl[member.guild.id][member.id] = {};
+			this._rl[member.guild.id][member.id][type] = Time.now() + (5 * 60e3);
 			return true;
 		}
-		if (this.validatePath(this.rl, path)
-			&& this.rl[member.guild.id][member.id][type]) return true;
+		if (this._validatePath(this._rl, path)
+			&& this._rl[member.guild.id][member.id][type]) return true;
 		return false;
-	}
-
-	/**
-	 * Check current ratelimits and remove any expired
-	 */
-	private checkMemberLogLimits(): void
-	{
-		for (const guild of Object.keys(this.rl))
-			for (const member of Object.keys(this.rl[guild]))
-				for (const type of ['join', 'leave'])
-					if (this.rl[guild][member][type]
-						&& Time.difference(this.rl[guild][member][type], Time.now()).ms < 1)
-						delete this.rl[guild][member][type];
 	}
 }

@@ -8,15 +8,15 @@ import { Bot, LocalStorage } from 'yamdbf';
 export default class Timer
 {
 	private _bot: Bot;
-	private _interval: number;
+	private _interval: int;
 	/** Must be async */
 	private _callback: () => Promise<void>;
 	private _storage: LocalStorage;
-	private _ticks: number;
+	private _ticks: int;
 	private _timer: NodeJS.Timer;
 	public name: string;
 
-	public constructor(bot: Bot, name: string, interval: number, callback: () => Promise<void>)
+	public constructor(bot: Bot, name: string, interval: int, callback: () => Promise<void>)
 	{
 		this.name = name;
 		this._storage = new LocalStorage(`storage/timers/${this.name}`);

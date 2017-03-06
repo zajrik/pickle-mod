@@ -19,8 +19,8 @@ export default class Scheduler
 		this._bot = bot;
 		this.timers = new TimerCollection();
 
-		this.timers.add(new Timer(this._bot, 'mute', 15, this._checkMutes));
-		this.timers.add(new Timer(this._bot, 'lockdown', 5, this._checkLockdowns));
+		this.timers.add(new Timer(this._bot, 'mute', 15, async () => this._checkMutes()));
+		this.timers.add(new Timer(this._bot, 'lockdown', 5, async () => this._checkLockdowns()));
 	}
 
 	/**

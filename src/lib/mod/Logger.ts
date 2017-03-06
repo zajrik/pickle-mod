@@ -149,7 +149,7 @@ export default class Logger
 	 */
 	public async awaitMuteCase(guild: Guild, user: User): Promise<Message>
 	{
-		return <any> new Promise(resolve =>
+		return new Promise<Message>(resolve =>
 		{
 			const logs: TextChannel = <TextChannel> guild.channels.get(this._bot.guildStorages.get(guild).getSetting('modlogs'));
 			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
