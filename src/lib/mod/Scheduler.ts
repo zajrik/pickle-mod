@@ -3,7 +3,8 @@ import Timer from '../timer/Timer';
 import TimerCollection from '../timer/TimerCollection';
 import ModBot from '../ModBot';
 import { LocalStorage } from 'yamdbf';
-import { TextChannel, GuildMember, Guild } from 'discord.js';
+import { GuildMember, Guild } from 'discord.js';
+import { LockdownManager } from './managers/LockdownManager';
 
 /**
  * Handles registering timers for running scheduled
@@ -68,28 +69,13 @@ export default class Scheduler
 	 */
 	private async _checkLockdowns(): Promise<void>
 	{
-		const storage: LocalStorage = this._bot.storage;
-		storage.queue('activeLockdowns', async (key: string) =>
+		let lockdownManager: LockdownManager = this._bot.mod.managers.lockdown;
+		for (const channel of lockdownManager.getLockedChannels().values())
 		{
-			const activeLockdowns: ActiveLockdowns = storage.getItem(key);
-			if (!activeLockdowns) return;
-			for (let id of Object.keys(activeLockdowns))
-			{
-				const lockdown: LockdownObject = activeLockdowns[id];
-				const channel: TextChannel = <TextChannel> this._bot.channels.get(lockdown.channel);
-				if ((lockdown.duration - (Time.now() - lockdown.timestamp)) > 1) continue;
-				console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
-				const payload: any = {
-					id: channel.guild.roles.get(channel.guild.id).id,
-					type: 'role',
-					allow: lockdown.allow,
-					deny: lockdown.deny
-				};
-				await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
-				delete activeLockdowns[id];
-				channel.send('**The lockdown on this channel has ended.**');
-			}
-			storage.setItem(key, activeLockdowns);
-		});
+			if (!lockdownManager.isExpired(channel)) continue;
+			console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
+			await lockdownManager.remove(channel);
+			channel.send('**The lockdown on this channel has ended.**');
+		}
 	}
 }

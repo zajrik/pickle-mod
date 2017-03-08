@@ -3,10 +3,8 @@
  * for later removal of the channel lockdown
  */
 type LockdownObject = {
-	message: string;
 	channel: string;
 	allow: number;
 	deny: number;
-	duration: number;
-	timestamp: number;
+	expires: number;
 }
