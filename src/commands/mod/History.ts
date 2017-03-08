@@ -11,7 +11,7 @@ export default class History extends Command<ModBot>
 			name: 'history',
 			description: 'Check a member\'s offense history',
 			usage: '<prefix>history [member] [\'reset\']',
-			extraHelp: `To reset a member's history, just add the word 'reset' after the member to look up`,
+			extraHelp: `To reset a member's history, just add the word 'reset' after the member to look up. If no member is provided, or you do not have permission to use mod commands, you will be DM'd your own history.`,
 			group: 'mod',
 			guildOnly: true
 		});
