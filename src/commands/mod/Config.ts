@@ -1,5 +1,5 @@
 import { Command, Message, Middleware } from 'yamdbf';
-import { TextChannel, GuildChannel, Role, RichEmbed } from 'discord.js';
+import { TextChannel, Role, RichEmbed } from 'discord.js';
 import ModLoader from '../../lib/mod/Loader';
 import ModBot from '../../lib/ModBot';
 import { prompt, PromptResult } from '../../lib/Util';
@@ -19,11 +19,30 @@ export default class Config extends Command<ModBot>
 			argOpts: { separator: ' ' }
 		});
 
-		this.use(Middleware.resolveArgs({ '<option>': 'String', '[...value]': 'String' }));
-		this.use(Middleware.expect({ '<option>': 'String' }));
+		const { resolveArgs, expect } = Middleware;
+		this.use(resolveArgs({ '<option>': 'String', '[...value]': 'String' }));
+		this.use((message, [option, value]: string[]) => {
+			if (!['reset', 'status'].includes(option.toLowerCase()))
+				return expect({ '<option>': 'String', '[...value]': 'Any' })
+					.call(this, message, [option, value]);
+
+			else return expect({ '<option>': 'String' }).call(this, message, [option, value]);
+		});
+
+		this.use((message, [option, value]: string[]) => {
+			if (['logs', 'appeals'].includes(option.toLowerCase()))
+				return resolveArgs({ '<option>': 'String', '[value]': 'Channel' })
+					.call(this, message, [option, value]);
+
+			else if (['mod', 'mute'].includes(option.toLowerCase()))
+				return resolveArgs({ '<option>': 'String', '[value]': 'Role' })
+					.call(this, message, [option, value]);
+
+			else return [message, [option, value]];
+		});
 	}
 
-	public async action(message: Message, [option, value]: string[]): Promise<any>
+	public async action(message: Message, [option, value]: [string, Role | TextChannel | string]): Promise<any>
 	{
 		if (!(this.bot.config.owner.includes(message.author.id)
 			|| (<TextChannel> message.channel).permissionsFor(message.member)
@@ -46,40 +65,23 @@ export default class Config extends Command<ModBot>
 			return bool ? '\\✅' : '\\❌';
 		}
 
-		function normalize(text: string): string
-		{
-			return text.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-		}
-
 		switch (option.toLowerCase())
 		{
 			case 'mod':
-				const modRole: Role = message.guild.roles.find((role: Role) =>
-					normalize(role.name) === normalize(value));
-				if (!modRole) return message.channel.send(`Couldn't find role \`${value}\``);
-				message.guild.storage.setSetting('modrole', modRole.id);
-				return message.channel.send(`Set mod role to ${modRole}`);
+				message.guild.storage.setSetting('modrole', (<Role> value).id);
+				return message.channel.send(`Set mod role to ${value}`);
 
 			case 'mute':
-				const mutedRole: Role = message.guild.roles.find((role: Role) =>
-					normalize(role.name) === normalize(value));
-				if (!mutedRole) return message.channel.send(`Couldn't find role \`${value}\``);
-				message.guild.storage.setSetting('mutedrole', mutedRole.id);
-				return message.channel.send(`Set muted role to ${mutedRole}`);
+				message.guild.storage.setSetting('mutedrole', (<Role> value).id);
+				return message.channel.send(`Set muted role to ${value}`);
 
 			case 'logs':
-				const logsChannel: GuildChannel = message.guild.channels.find((channel: GuildChannel) =>
-					normalize(channel.name) === normalize(value));
-				if (!logsChannel) return message.channel.send(`Couldn't find channel \`${value}\``);
-				message.guild.storage.setSetting('modlogs', logsChannel.id);
-				return message.channel.send(`Set logs channel to ${logsChannel}`);
+				message.guild.storage.setSetting('modlogs', (<TextChannel> value).id);
+				return message.channel.send(`Set logs channel to ${value}`);
 
 			case 'appeals':
-				const appealsChannel: GuildChannel = message.guild.channels.find((channel: GuildChannel) =>
-					normalize(channel.name) === normalize(value));
-				if (!appealsChannel) return message.channel.send(`Couldn't find channel \`${value}\``);
-				message.guild.storage.setSetting('appeals', appealsChannel.id);
-				return message.channel.send(`Set appeals channel to ${appealsChannel}`);
+				message.guild.storage.setSetting('appeals', (<TextChannel> value).id);
+				return message.channel.send(`Set appeals channel to ${value}`);
 
 			case 'status':
 				const embed: RichEmbed = new RichEmbed()
