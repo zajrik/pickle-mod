@@ -44,8 +44,9 @@ export default class Ban extends Command<ModBot>
 			.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
 			.setFooter(offenses.toString());
 
-		const [result]: [PromptResult] = <[PromptResult]> await prompt(
-			message, 'Are you sure you want to issue this ban? (__y__es | __n__o)', /^(?:yes|y)$/i, { embed });
+		const [result]: [PromptResult] = <[PromptResult]> await prompt(message,
+			'Are you sure you want to issue this ban? (__y__es | __n__o)',
+			/^(?:yes|y)$/i, /^(?:no|n)$/i, { embed });
 		if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting ban.');
 		if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting ban.');
 

@@ -38,8 +38,9 @@ export default class History extends Command<ModBot>
 			if (!message.member.hasPermission('MANAGE_GUILD'))
 				return message.channel.send(`You don't have permission to reset member history.`);
 
-			const [result]: [PromptResult] = <[PromptResult]> await prompt(
-				message, 'Are you sure you want to reset this member\'s history? (__y__es | __n__o)', /^(?:yes|y)$/i, { embed });
+			const [result]: [PromptResult] = <[PromptResult]> await prompt(message,
+				'Are you sure you want to reset this member\'s history? (__y__es | __n__o)',
+				/^(?:yes|y)$/i, /^(?:no|n)$/i, { embed });
 			if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting history reset.');
 			if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting history reset.');
 

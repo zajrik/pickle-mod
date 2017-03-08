@@ -31,8 +31,9 @@ export default class ClearLogs extends Command<ModBot>
 			return message.channel.send('You may not use that command in this channel.')
 				.then((res: Message) => message.delete().then(() => res.delete()));
 
-		const [result]: [PromptResult] = <[PromptResult]> await prompt(
-			message, 'Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)', /^(?:yes|y)$/i);
+		const [result]: [PromptResult] = <[PromptResult]> await prompt(message,
+			'Are you sure you want to reset the mod logs in this guild? (__y__es | __n__o)',
+			/^(?:yes|y)$/i, /^(?:no|n)$/i);
 		if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting mod logs reset.');
 		if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting mod logs reset.');
 

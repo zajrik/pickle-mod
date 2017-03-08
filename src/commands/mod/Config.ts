@@ -90,8 +90,9 @@ export default class Config extends Command<ModBot>
 				return message.channel.sendEmbed(embed);
 
 			case 'reset':
-				const [result]: [PromptResult] = <[PromptResult]> await prompt(
-					message, 'Are you sure you want to reset config? (__y__es | __n__o)', /^(?:yes|y)$/i);
+				const [result]: [PromptResult] = <[PromptResult]> await prompt(message,
+					'Are you sure you want to reset config? (__y__es | __n__o)',
+					/^(?:yes|y)$/i, /^(?:no|n)$/i);
 				if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting config reset.');
 				if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting config reset.');
 
