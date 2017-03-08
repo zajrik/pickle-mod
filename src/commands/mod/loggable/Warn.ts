@@ -47,7 +47,7 @@ export default class Warn extends Command<ModBot>
 				`Logged case but failed to send warning DM to ${user.username}#${user.discriminator}.`);
 		}
 
-		await this.bot.mod.actions.warn(user, message.guild);
+		await this.bot.mod.actions.warn(member, message.guild);
 		await this.bot.mod.logger.caseLog(user, message.guild, 'Warn', reason, message.author);
 		console.log(`Warned ${user.username}#${user.discriminator} in guild '${message.guild.name}'`);
 		warning.edit(`Warned ${user.username}#${user.discriminator}`);

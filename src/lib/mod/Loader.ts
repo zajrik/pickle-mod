@@ -5,6 +5,7 @@ import Scheduler from './Scheduler';
 import ModBot from '../ModBot';
 import { GuildStorage, Message } from 'yamdbf';
 import { GuildMember, Guild } from 'discord.js';
+import { HistoryManager } from './managers/HistoryManager';
 
 /**
  * Handles loading the different moderation controllers
@@ -19,12 +20,19 @@ export default class ModLoader
 
 	public actions: Actions;
 	public logger: Logger;
+	public managers: {
+		history: HistoryManager
+	};
 
 	public constructor(bot: ModBot)
 	{
 		this._bot = bot;
 		this.actions = new Actions(this._bot);
 		this.logger = new Logger(this._bot);
+
+		this.managers = {
+			history: new HistoryManager()
+		};
 
 		this._events = new Events(this._bot);
 		this._scheduler = new Scheduler(this._bot);

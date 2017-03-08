@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User, RichEmbed, GuildMember } from 'discord.js';
+import { prompt, PromptResult } from '../../lib/Util';
 import ModBot from '../../lib/ModBot';
-import { modCommand, prompt, PromptResult } from '../../lib/Util';
 
 export default class History extends Command<ModBot>
 {
@@ -10,25 +10,28 @@ export default class History extends Command<ModBot>
 		super(bot, {
 			name: 'history',
 			description: 'Check a member\'s offense history',
-			usage: '<prefix>history <member> [\'reset\']',
+			usage: '<prefix>history [member] [\'reset\']',
 			extraHelp: `To reset a member's history, just add the word 'reset' after the member to look up`,
 			group: 'mod',
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-		this.use(Middleware.resolveArgs({ '<member>': 'Member' }));
-		this.use(Middleware.expect({ '<member>': 'Member' }));
+		this.use((message, args) => {
+			if (!this.bot.mod.canCallModCommand(message)) return [message, []];
+			else return Middleware.resolveArgs({ '<member>': 'Member' }).call(this, message, args);
+		});
 	}
 
 	public async action(message: Message, [member, reset]: [GuildMember, string]): Promise<any>
 	{
-		let user: User = member.user;
+		const user: User = member ? member.user : message.author;
 		let offenses: any = this.bot.mod.actions.checkUserHistory(message.guild, user);
 		let embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)
 			.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
 			.setFooter(offenses.toString());
+
+		if (!member) return message.author.sendEmbed(embed);
 
 		if (reset === 'reset')
 		{
@@ -40,8 +43,7 @@ export default class History extends Command<ModBot>
 			if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting history reset.');
 			if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting history reset.');
 
-			for (const type of ['warnings', 'mutes', 'kicks', 'softbans', 'bans'])
-				message.guild.storage.removeItem(`${type}/${user.id}`);
+			this.bot.mod.managers.history.clear(user, message.guild);
 
 			offenses = this.bot.mod.actions.checkUserHistory(message.guild, user);
 			embed = new RichEmbed()

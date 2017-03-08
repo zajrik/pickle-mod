@@ -18,30 +18,18 @@ export default class Actions
 	 * Increment the number of times the given user has
 	 * received a given type of formal moderation action
 	 */
-	public count(user: GuildMember | User | string,
-					guild: Guild | string,
-					type: 'warnings' | 'mutes' | 'kicks' | 'softbans' | 'bans'): void
+	public count(user: User, guild: Guild, type: ActionType): void
 	{
-		const storage: GuildStorage = this._bot.guildStorages.get(<string> guild);
-		let counts: any = storage.getItem(type);
-		if (!counts)
-		{
-			counts = {};
-			counts[(<User> user).id || <string> user] = 0;
-		}
-		counts[(<User> user).id || <string> user]++;
-		storage.setItem(type, counts);
+		this._bot.mod.managers.history.incr(user, guild, type);
 	}
 
 	/**
 	 * Check the number of past offenses a user has had
 	 */
-	public checkUserHistory(guild: Guild, user: GuildMember | User): { toString: () => string, color: number, values: number[]}
+	public checkUserHistory(guild: Guild, user: User): { toString: () => string, color: number, values: number[]}
 	{
-		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		const [warns, mutes, kicks, softbans, bans]: number[] = ['warnings', 'mutes', 'kicks', 'softbans', 'bans']
-			.map((type: string) => (storage.getItem(type) || {})[user.id] || 0);
-		const values: number[] = [warns, mutes, kicks, softbans, bans];
+		let { warn, mute, kick, ban }: MemberHistory = this._bot.mod.managers.history.get(user, guild);
+		const values = [warn, mute, kick, ban] = [warn || 0, mute || 0, kick || 0, ban || 0];
 		const colors: number[] = [
 			8450847,
 			10870283,
@@ -55,7 +43,11 @@ export default class Actions
 			.reduce((a: number, b: number) => a + b), colors.length - 1);
 
 		return {
-			toString: () => `This user has ${warns} warnings, ${mutes} mutes, ${kicks + softbans} kicks, and ${bans} bans.`,
+			toString: () => `This user has ${warn} warning${
+				warn > 1 || warn === 0 ? 's' : ''}, ${mute} mute${
+				mute > 1 || mute === 0 ? 's' : ''}, ${kick} kick${
+				kick > 1 || kick === 0 ? 's' : ''}, and ${ban} ban${
+				ban > 1 || ban === 0 ? 's' : ''}.`,
 			color: colors[colorIndex],
 			values: values
 		};
@@ -64,10 +56,10 @@ export default class Actions
 	/**
 	 * Increment a user's warnings
 	 */
-	public async warn(user: GuildMember | User | string, guild: Guild): Promise<GuildMember | User | string>
+	public async warn(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this.count(user, guild, 'warnings');
-		return user;
+		this.count(member.user, guild, 'warn');
+		return member;
 	}
 
 	/**
@@ -75,7 +67,7 @@ export default class Actions
 	 */
 	public async mute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this.count(member, guild, 'mutes');
+		this.count(member.user, guild, 'mute');
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
 		return await member.addRoles([guild.roles.get(storage.getSetting('mutedrole'))]);
 	}
@@ -122,16 +114,16 @@ export default class Actions
 	 */
 	public async kick(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this.count(member, guild, 'kicks');
+		this.count(member.user, guild, 'kick');
 		return await member.kick();
 	}
 
 	/**
 	 * Ban a user from a guild
 	 */
-	public async ban(user: GuildMember | User | string, guild: Guild): Promise<GuildMember>
+	public async ban(user: User, guild: Guild): Promise<GuildMember>
 	{
-		this.count(user, guild, 'bans');
+		this.count(user, guild, 'ban');
 		return <GuildMember> await guild.ban((<User> user).id || <any> user, 7);
 	}
 
@@ -146,11 +138,11 @@ export default class Actions
 	/**
 	 * Softban a user from a guild, removing the past 7 days of their messages
 	 */
-	public async softban(member: GuildMember | User, guild: Guild): Promise<User>
+	public async softban(user: User, guild: Guild): Promise<User>
 	{
-		this.count(member, guild, 'softbans');
-		await guild.ban(<GuildMember> member, 7);
+		this.count(user, guild, 'kick');
+		await guild.ban(user, 7);
 		await new Promise((r: any) => setTimeout(r, 5e3));
-		return await guild.unban(member.id);
+		return await guild.unban(user.id);
 	}
 }

@@ -64,7 +64,7 @@ export default class Help extends Command<Bot>
 		}
 		else
 		{
-			const filter: Function = (c: Command<any>) =>
+			const filter: any = (c: Command<any>) =>
 				c.name === args[0] || c.aliases.includes(<string> args[0]);
 			if (!dm) command = this.bot.commands
 				.filterGuildUsable(this.bot, message).filter(filter).first();
