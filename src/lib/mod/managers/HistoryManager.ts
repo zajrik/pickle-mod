@@ -22,7 +22,7 @@ export class HistoryManager
 	}
 
 	/**
-	 * Increment an action type the moderation action history
+	 * Increment an action type in the moderation action history
 	 * for a user within a guild
 	 */
 	public incr(user: User, guild: Guild, type: ActionType): void
