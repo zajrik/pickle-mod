@@ -37,7 +37,7 @@ export default class ClearLogs extends Command<ModBot>
 		if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting mod logs reset.');
 		if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting mod logs reset.');
 
-		message.channel.send('Okay, resetting mod logs.');
+		const resetting: Message = <Message> await message.channel.send('Okay, resetting mod logs.');
 		const channel: TextChannel = <TextChannel> message.guild.channels.get(message.guild.storage.getSetting('modlogs'));
 		try
 		{
@@ -47,11 +47,11 @@ export default class ClearLogs extends Command<ModBot>
 
 			await channel.delete();
 			await newChannel.setPosition(channel.position);
-			return message.channel.send('Mod logs successfully reset.');
+			return resetting.edit('Mod logs successfully reset.');
 		}
 		catch (err)
 		{
-			return message.channel.send('There was an error while resetting mod logs.');
+			return resetting.edit('There was an error while resetting mod logs.');
 		}
 	}
 }
