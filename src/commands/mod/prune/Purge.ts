@@ -1,5 +1,5 @@
 import { Command, Message, Middleware } from 'yamdbf';
-import { User, Collection } from 'discord.js';
+import { Collection } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import { modCommand } from '../../../lib/Util';
 

@@ -1,5 +1,5 @@
 import { Command, LocalStorage, GuildStorage } from 'yamdbf';
-import { User, Message, TextChannel, Guild, RichEmbed } from 'discord.js';
+import { Message, TextChannel, Guild, RichEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 
 export default class Appeal extends Command<ModBot>
