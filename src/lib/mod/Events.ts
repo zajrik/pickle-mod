@@ -1,6 +1,7 @@
-import ModBot from '../ModBot';
 import { LocalStorage, GuildStorage, Message } from 'yamdbf';
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
+import { MuteManager } from './managers/MuteManager';
+import ModBot from '../ModBot';
 
 /**
  * Handles received moderation related client events
@@ -35,26 +36,11 @@ export default class Events
 		const settings: GuildStorage = this._bot.guildStorages.get(guild);
 		if (!this._bot.mod.hasLoggingChannel(guild)) return;
 		if (member.roles.has(settings.getSetting('modrole'))) return;
-		const storage: LocalStorage = this._bot.storage;
 		const user: User = member.user;
 
-		await storage.queue('activeMutes', (key: string) =>
-		{
-			let activeMutes: ActiveMutes = storage.getItem(key) || {};
-			if (!activeMutes[user.id]) activeMutes[user.id] = [];
-			const activeIndex: int = activeMutes[user.id].findIndex(a => a.guild === guild.id);
-			const mute: MuteObject = {
-				raw: `${user.username}#${user.discriminator}`,
-				user: user.id,
-				guild: guild.id,
-				timestamp: Date.now()
-			};
-			if (activeIndex > -1) activeMutes[user.id][activeIndex] = mute;
-			else activeMutes[user.id].push(mute);
-			storage.setItem(key, activeMutes);
-			user.send(`You've been muted in ${guild.name}`);
-			console.log(`Muted user '${user.username}#${user.discriminator}' in ${guild.name}`);
-		});
+		this._bot.mod.managers.mute.set(member);
+		user.send(`You've been muted in ${guild.name}`);
+		console.log(`Muted user: '${user.username}#${user.discriminator}' in '${guild.name}'`);
 
 		await this._bot.mod.logger.caseLog(
 			user,
@@ -72,46 +58,26 @@ export default class Events
 		const settings: GuildStorage = this._bot.guildStorages.get(member.guild);
 		if (!member.roles.has(settings.getSetting('mutedrole'))) return;
 
-		const storage: LocalStorage = this._bot.storage;
 		const user: User = member.user;
-
-		await storage.queue('activeMutes', (key: string) =>
-		{
-			let activeMutes: ActiveMutes = storage.getItem('activeMutes') || {};
-			if (!activeMutes[user.id]) return;
-			const activeIndex: int = activeMutes[user.id].findIndex(a => a.guild === member.guild.id);
-			if (activeIndex === -1) return;
-
-			activeMutes[user.id][activeIndex].leftGuild = true;
-			storage.setItem(key, activeMutes);
-			console.log(`Potential mute evasion: '${user.username}#${user.discriminator}' in ${member.guild.name}`);
-		});
+		this._bot.mod.managers.mute.setEvasionFlag(member);
+		console.log(`Potential mute evasion: '${user.username}#${user.discriminator}' in '${member.guild.name}'`);
 	}
 
 	/**
-	 * Handle member joining, check if they left the guild
-	 * while muted and reassign the muted role if so
+	 * Handle member joining, check if they were flagged for
+	 * mute evasion and reassign the muted role if so
 	 */
 	private async _onGuildMemberAdd(member: GuildMember): Promise<void>
 	{
 		const settings: GuildStorage = this._bot.guildStorages.get(member.guild);
-		const storage: LocalStorage = this._bot.storage;
-		const user: User = member.user;
+		let muteManager: MuteManager = this._bot.mod.managers.mute;
+		if (!muteManager.isMuted(member)) return;
+		if (!muteManager.isEvasionFlagged(member)) return;
 
-		await storage.queue('activeMutes', (key: string) =>
-		{
-			let activeMutes: ActiveMutes = storage.getItem('activeMutes') || {};
-			if (!activeMutes[user.id]) return;
-			const activeIndex: int = activeMutes[user.id].findIndex(a => a.guild === member.guild.id);
-			if (activeIndex === -1) return;
-			if (!activeMutes[user.id][activeIndex].leftGuild) return;
-
-			const mutedRole: string = settings.getSetting('mutedrole');
-			(<any> member)._roles.push(mutedRole);
-			member.addRoles([member.guild.roles.get(mutedRole)]);
-			delete activeMutes[user.id][activeIndex].leftGuild;
-			storage.setItem(key, activeMutes);
-		});
+		const mutedRole: string = settings.getSetting('mutedrole');
+		(<any> member)._roles.push(mutedRole);
+		member.addRole(mutedRole);
+		muteManager.clearEvasionFlag(member);
 	}
 
 	/**

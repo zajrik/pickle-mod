@@ -2,10 +2,8 @@
  * Represents a mute entry in storage
  */
 type MuteObject = {
-	raw: string;
-	user: string;
+	member: string;
 	guild: string;
-	duration?: number;
-	timestamp: number;
+	expires?: number;
 	leftGuild?: boolean;
 }

@@ -1,10 +1,8 @@
-import Time from '../Time';
+import ModBot from '../ModBot';
 import Timer from '../timer/Timer';
 import TimerCollection from '../timer/TimerCollection';
-import ModBot from '../ModBot';
-import { LocalStorage } from 'yamdbf';
-import { GuildMember, Guild } from 'discord.js';
 import { LockdownManager } from './managers/LockdownManager';
+import { MuteManager } from './managers/MuteManager';
 
 /**
  * Handles registering timers for running scheduled
@@ -29,39 +27,23 @@ export default class Scheduler
 	 */
 	private async _checkMutes(): Promise<void>
 	{
-		const storage: LocalStorage = this._bot.storage;
-		storage.queue('activeMutes', async (key: string) =>
+		const muteManager: MuteManager = this._bot.mod.managers.mute;
+		for (const guild of this._bot.guilds.values())
 		{
-			let activeMutes: ActiveMutes = storage.getItem(key);
-			if (!activeMutes) return;
-			for (let user of Object.keys(activeMutes))
+			const mutedRole: string = this._bot.guildStorages.get(guild).getSetting('mutedrole');
+			for (const member of (await muteManager.getMutedMembers(guild)).values())
 			{
-				if (activeMutes[user].length === 0) { delete activeMutes[user]; continue; };
-				for (let i: number = 0; i < activeMutes[user].length; i++)
-				{
-					const mute: MuteObject = activeMutes[user][i];
-					const mutedRole: string = this._bot.guildStorages.get(mute.guild).getSetting('mutedrole');
-					if (!mutedRole || mute.leftGuild) continue;
+				if (typeof member === 'string') continue;
+				if (!muteManager.isExpired(member)) continue;
+				if (muteManager.isEvasionFlagged(member)) continue;
 
-					const guild: Guild = this._bot.guilds.get(mute.guild);
-					let member: GuildMember;
-					try { member = await guild.fetchMember(mute.user); }
-					catch (err) { continue; }
-
-					const isMuted: boolean = member.roles.has(mutedRole);
-					if (!mute.duration && isMuted) continue;
-					else if (!mute.duration || !isMuted) mute.duration = 0;
-
-					if ((mute.duration - (Time.now() - mute.timestamp)) > 1) continue;
-
-					console.log(`Removing expired mute for user '${mute.raw}'`);
-					if (isMuted) await member.removeRole(guild.roles.get(mutedRole));
-					member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
-					activeMutes[user].splice(i--, 1);
-				}
+				console.log(`Removed expired mute: '${member.user.username}#${member.user.discriminator}' in '${guild.name}'`);
+				muteManager.remove(member);
+				if (member.roles.has(mutedRole))
+					await member.removeRole(guild.roles.get(mutedRole));
+				member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
 			}
-			storage.setItem(key, activeMutes);
-		});
+		}
 	}
 
 	/**

@@ -1,4 +1,4 @@
-import { Command, LocalStorage, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import { modCommand } from '../../../lib/Util';
@@ -37,15 +37,8 @@ export default class Unmute extends Command<ModBot>
 
 		try
 		{
-			const storage: LocalStorage = this.bot.storage;
 			await this.bot.mod.actions.unmute(member, message.guild);
-			await storage.queue('activeMutes', key =>
-			{
-				let activeMutes: ActiveMutes = storage.getItem(key) || {};
-				activeMutes[user.id] = activeMutes[user.id].filter((a: MuteObject) => a.guild !== message.guild.id);
-				storage.setItem(key, activeMutes);
-				console.log(`Unmuted user '${user.username}#${user.discriminator}'`);
-			});
+			this.bot.mod.managers.mute.remove(member);
 			user.send(`You have been unmuted on ${message.guild.name}. You may now send messages.`);
 			return unmuting.edit(`Unmuted ${user.username}#${user.discriminator}`);
 		}

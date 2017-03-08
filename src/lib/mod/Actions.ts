@@ -1,5 +1,5 @@
 import ModBot from '../ModBot';
-import { GuildStorage, LocalStorage } from 'yamdbf';
+import { GuildStorage } from 'yamdbf';
 import { GuildMember, Guild, User } from 'discord.js';
 
 /**
@@ -75,29 +75,11 @@ export default class Actions
 	/**
 	 * Restart a mute, setting a new duration and timestamp
 	 */
-	public async setMuteDuration(member: GuildMember, guild: Guild, duration: int): Promise<boolean>
+	public async setMuteDuration(member: GuildMember, guild: Guild, duration: int): Promise<void>
 	{
-		const storage: LocalStorage = this._bot.storage;
 		const user: User = member.user;
-		let success: boolean = false;
-		let activeMutes: ActiveMutes = storage.getItem('activeMutes') || {};
-		if (!activeMutes[user.id]) return success;
-		await storage.queue('activeMutes', (key: string) =>
-		{
-			const activeIndex: int = activeMutes[user.id].findIndex(a => a.guild === guild.id);
-			if (activeIndex === -1) return;
-			activeMutes[user.id][activeIndex] = {
-				raw: `${user.username}#${user.discriminator}`,
-				user: user.id,
-				guild: guild.id,
-				duration: duration,
-				timestamp: Date.now()
-			};
-			storage.setItem(key, activeMutes);
-			success = true;
-			console.log(`Updated mute for '${user.username}#${user.discriminator}' in ${guild.name}`);
-		});
-		return success;
+		await this._bot.mod.managers.mute.set(member, duration);
+		console.log(`Updated mute: '${user.username}#${user.discriminator}' in '${guild.name}'`);
 	}
 
 	/**

@@ -7,6 +7,7 @@ import { GuildStorage, Message } from 'yamdbf';
 import { GuildMember, Guild } from 'discord.js';
 import { HistoryManager } from './managers/HistoryManager';
 import { LockdownManager } from './managers/LockdownManager';
+import { MuteManager } from './managers/MuteManager';
 
 /**
  * Handles loading the different moderation controllers
@@ -23,7 +24,8 @@ export default class ModLoader
 	public logger: Logger;
 	public managers: {
 		history: HistoryManager,
-		lockdown: LockdownManager
+		lockdown: LockdownManager,
+		mute: MuteManager
 	};
 
 	public constructor(bot: ModBot)
@@ -34,7 +36,8 @@ export default class ModLoader
 
 		this.managers = {
 			history: new HistoryManager(),
-			lockdown: new LockdownManager(this._bot)
+			lockdown: new LockdownManager(this._bot),
+			mute: new MuteManager(this._bot)
 		};
 
 		this._events = new Events(this._bot);

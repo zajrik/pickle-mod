@@ -73,9 +73,7 @@ export default class Duration extends Command<ModBot>
 		if (!member.roles.has(message.guild.storage.getSetting('mutedrole')))
 			return started.edit(`That member is no longer muted.`);
 
-		const durationSet: boolean = await this.bot.mod.actions.setMuteDuration(member, message.guild, duration);
-		if (!durationSet) return started.edit('Failed to set duration.');
-
+		await this.bot.mod.actions.setMuteDuration(member, message.guild, duration);
 		const editedCase: Message = await this.bot.mod.logger.editCase(message.guild, caseMessage, message.author, null, durationString);
 		if (!editedCase) return started.edit('Failed to edit case.');
 
