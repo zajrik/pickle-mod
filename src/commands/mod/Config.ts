@@ -20,25 +20,24 @@ export default class Config extends Command<ModBot>
 		});
 
 		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<option>': 'String', '[...value]': 'String' }));
-		this.use((message, [option, value]: string[]) => {
-			if (!['reset', 'status'].includes(option.toLowerCase()))
+		this.use((message, args: string[]) => {
+			if (!['reset', 'status'].includes(args[0].toLowerCase()))
 				return expect({ '<option>': 'String', '[...value]': 'Any' })
-					.call(this, message, [option, value]);
+					.call(this, message, args);
 
-			else return expect({ '<option>': 'String' }).call(this, message, [option, value]);
+			else return expect({ '<option>': 'String' }).call(this, message, args);
 		});
 
-		this.use((message, [option, value]: string[]) => {
-			if (['logs', 'appeals'].includes(option.toLowerCase()))
-				return resolveArgs({ '<option>': 'String', '[value]': 'Channel' })
-					.call(this, message, [option, value]);
+		this.use((message, args: string[]) => {
+			if (['logs', 'appeals'].includes(args[0].toLowerCase()))
+				return resolveArgs({ '<option>': 'String', '[...value]': 'Channel' })
+					.call(this, message, args);
 
-			else if (['mod', 'mute'].includes(option.toLowerCase()))
-				return resolveArgs({ '<option>': 'String', '[value]': 'Role' })
-					.call(this, message, [option, value]);
+			else if (['mod', 'mute'].includes(args[0].toLowerCase()))
+				return resolveArgs({ '<option>': 'String', '[...value]': 'Role' })
+					.call(this, message, args);
 
-			else return [message, [option, value]];
+			else return [message, args];
 		});
 	}
 
