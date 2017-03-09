@@ -40,9 +40,9 @@ export enum PromptResult
  * if the caller cannot call it, sending the
  * appropriate error to the channel
  */
-export function modCommand(message: Message, args: any[]): any
+export async function modCommand(message: Message, args: any[]): Promise<any>
 {
-	if (!(<Command<ModBot>> this).bot.mod.canCallModCommand(message))
+	if (!(await (<Command<ModBot>> this).bot.mod.canCallModCommand(message)))
 		return (<Command<ModBot>> this).bot.mod.sendModError(message);
 	return [message, args];
 }

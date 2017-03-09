@@ -80,9 +80,10 @@ export default class ModLoader
 	}
 
 	/** Check whether a member is allowed to call mod commands */
-	public canCallModCommand(message: Message): boolean
+	public async canCallModCommand(message: Message): Promise<boolean>
 	{
 		if (!message.guild) return false;
+		if (!message.member) message.member = await message.guild.fetchMember(message.author);
 		if (!this.hasLoggingChannel(message.guild)) return false;
 		if (!message.guild.channels.get(message.guild.storage.getSetting('modlogs'))
 			.permissionsFor(this._bot.user).hasPermission('SEND_MESSAGES')) return false;
