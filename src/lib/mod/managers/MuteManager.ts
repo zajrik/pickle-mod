@@ -80,6 +80,16 @@ export class MuteManager
 	}
 
 	/**
+	 * Returns whether or not the member currently has the mute role
+	 */
+	public hasMuteRole(member: GuildMember): boolean
+	{
+		const storage: GuildStorage = this._bot.guildStorages.get(member.guild);
+		if (member.roles.has(storage.getSetting('mutedrole'))) return true;
+		return false;
+	}
+
+	/**
 	 * Returns the mute object for the muted member
 	 */
 	public getMute(member: GuildMember): MuteObject

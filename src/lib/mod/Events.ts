@@ -46,7 +46,7 @@ export default class Events
 			user,
 			guild,
 			'Mute',
-			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this mute`,
+			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <...reason>\` to set a reason for this mute`,
 			this._bot.user);
 	}
 
@@ -108,7 +108,7 @@ export default class Events
 			user,
 			guild,
 			'Ban',
-			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this ban`,
+			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <...reason>\` to set a reason for this ban`,
 			this._bot.user);
 	}
 
@@ -138,7 +138,7 @@ export default class Events
 			user,
 			guild,
 			'Unban',
-			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <reason text>\` to set a reason for this unban`,
+			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <...reason>\` to set a reason for this unban`,
 			this._bot.user);
 
 		// Try to remove an active appeal for the user if there

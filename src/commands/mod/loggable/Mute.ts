@@ -20,11 +20,11 @@ export default class Mute extends Command<ModBot>
 		this.use(modCommand);
 
 		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<member>': 'Member', '<duration>': 'String', '<...reason>': 'String' }));
-		this.use(expect({ '<member>': 'Member', '<duration>': 'String', '<...reason>': 'String' }));
+		this.use(resolveArgs({ '<member>': 'Member', '<duration>': 'Duration', '<...reason>': 'String' }));
+		this.use(expect({ '<member>': 'Member', '<duration>': 'Number', '<...reason>': 'String' }));
 	}
 
-	public async action(message: Message, [member, durationString, reason]: [GuildMember, string, string]): Promise<any>
+	public async action(message: Message, [member, duration, reason]: [GuildMember, number, string]): Promise<any>
 	{
 		if (!this.bot.mod.hasSetMutedRole(message.guild)) return message.channel.send(
 			`This server doesn't have a role set for muting.`);
@@ -37,9 +37,6 @@ export default class Mute extends Command<ModBot>
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
-		const duration: number = Time.parseShorthand(durationString);
-		if (!duration) return message.channel.send('You must provide a proper duration. (example: `30m`, `1h`, `2d`)');
-
 		const mutedRole: string = message.guild.storage.getSetting('mutedrole');
 		if (member.roles.has(mutedRole))
 			return message.channel.send(`That user is already muted`);
@@ -50,7 +47,7 @@ export default class Mute extends Command<ModBot>
 		this.bot.mod.actions.mute(member, message.guild);
 		let muteCase: Message = <Message> await this.bot.mod.logger.awaitMuteCase(message.guild, user);
 		await this.bot.mod.actions.setMuteDuration(member, message.guild, duration);
-		await this.bot.mod.logger.editCase(message.guild, muteCase, message.author, reason, durationString);
+		await this.bot.mod.logger.editCase(message.guild, muteCase, message.author, reason, Time.duration(duration).toSimplifiedString());
 
 		return muting.edit(`Muted ${user.username}#${user.discriminator}`);
 	}
