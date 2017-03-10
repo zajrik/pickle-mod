@@ -27,6 +27,9 @@ export default class ModBot extends Bot
 			this.mod = new ModLoader(this);
 			this._dmManager = new DMManager(this, this.config.DMManager);
 		});
+
+		this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
+		this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
 	}
 
 	/**
