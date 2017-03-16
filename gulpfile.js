@@ -15,7 +15,8 @@ gulp.task('default', () =>
 			module: 'commonjs',
 			lib: ['es7'],
 			moduleResolution: 'node',
-			sourceMap: true
+			sourceMap: true,
+			experimentalDecorators: true
 		}))
 		.pipe(source.write('../bin/', { sourceRoot: '../src' }))
 		.pipe(gulp.dest('bin/'));

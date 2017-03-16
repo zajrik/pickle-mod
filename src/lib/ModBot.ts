@@ -7,13 +7,13 @@ import ModLoader from './mod/Loader';
 export default class ModBot extends Bot
 {
 	public mod: ModLoader;
-	private _rateLimiter: RateLimiter;
+	private _memberLogRateLimiter: RateLimiter;
 	private _dmManager: DMManager;
 
 	public constructor(botOptions: BotOptions)
 	{
 		super(botOptions);
-		this._rateLimiter = new RateLimiter(this);
+		this._memberLogRateLimiter = new RateLimiter(this);
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.logMember(member, true, 8450847));
 		this.on('guildMemberRemove', (member: GuildMember) => this.logMember(member, false, 16039746));
@@ -41,14 +41,14 @@ export default class ModBot extends Bot
 	{
 		if (!member.guild.channels.exists('name', 'member-log')) return;
 		const type: 'join' | 'leave' = joined ? 'join' : 'leave';
-		if (this._rateLimiter.memberLog(member, type)) return;
+		if (this._memberLogRateLimiter.memberLog(member, type)) return;
 		const memberLog: TextChannel = <TextChannel> member.guild.channels.find('name', 'member-log');
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(color)
 			.setAuthor(`${member.user.username}#${member.user.discriminator} (${member.id})`, member.user.avatarURL)
 			.setFooter(joined ? 'User joined' : 'User left' , '')
 			.setTimestamp();
-		this._rateLimiter.memberLog(member, type, true);
+		this._memberLogRateLimiter.memberLog(member, type, true);
 		return memberLog.sendEmbed(embed);
 	}
 
