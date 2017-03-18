@@ -1,5 +1,5 @@
 'use strict';
-import { modCommand } from '../../lib/Util';
+import { modOnly } from '../../lib/Util';
 import { Command, Message, GuildStorage, Middleware } from 'yamdbf';
 import { TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';
@@ -18,10 +18,10 @@ export default class Fixcases extends Command<ModBot>
 			ownerOnly: false
 		});
 
-		this.use(modCommand);
 		this.use(Middleware.expect({ '<case msg id>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [id]: [string]): Promise<any>
 	{
 		if (!/\d+/.test(id))

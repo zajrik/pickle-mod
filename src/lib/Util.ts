@@ -36,15 +36,22 @@ export enum PromptResult
 }
 
 /**
- * Middleware function to cancel a mod command
- * if the caller cannot call it, sending the
- * appropriate error to the channel
+ * Command action method decorator for rejecting command calls
+ * from non-mods or improperly set up guilds
  */
-export async function modCommand(message: Message, args: any[]): Promise<any>
+export function modOnly(target: Command<ModBot>, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
 {
-	if (!(await (<Command<ModBot>> this).bot.mod.canCallModCommand(message)))
-		return (<Command<ModBot>> this).bot.mod.sendModError(message);
-	return [message, args];
+	if (!target) throw new Error('@modCommand must be used as a method decorator for a Command action method.');
+	if (key !== 'action') throw new Error(`"${target.constructor.name}#${key}" is not a valid method target for @modCommand.`);
+	if (!descriptor) descriptor = Object.getOwnPropertyDescriptor(target, key);
+	const original: any = descriptor.value;
+	descriptor.value = async function(message: Message, args: any[]): Promise<any>
+	{
+		const canCall: boolean = await this.bot.mod.canCallModCommand(message);
+		if (!canCall) this.bot.mod.sendModError(message);
+		else return await original.apply(this, [message, args]);
+	};
+	return descriptor;
 }
 
 /**

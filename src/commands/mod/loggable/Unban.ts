@@ -1,6 +1,6 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User } from 'discord.js';
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
 
 export default class Unban extends Command<ModBot>
@@ -15,13 +15,12 @@ export default class Unban extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<user>': 'BannedUser', '<...reason>': 'String' }));
 		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		const id: string = user.id;

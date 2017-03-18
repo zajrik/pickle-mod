@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { TextChannel } from 'discord.js';
 import { LockdownManager } from '../../lib/mod/managers/LockdownManager';
-import { modCommand } from '../../lib/Util';
+import { modOnly } from '../../lib/Util';
 import ModBot from '../../lib/ModBot';
 import Time from '../../lib/Time';
 
@@ -19,11 +19,11 @@ export default class Lockdown extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
 		this.use(Middleware.resolveArgs({ '<duration|clear>': 'String', '[#channel]': 'Channel' }));
 		this.use(Middleware.expect({ '<duration|clear>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{
 		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_CHANNELS'))

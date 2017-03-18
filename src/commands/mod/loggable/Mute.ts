@@ -1,5 +1,5 @@
 import Time from '../../../lib/Time';
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 import { GuildMember, User } from 'discord.js';
 import { Command, Message, Middleware } from 'yamdbf';
 import ModBot from '../../../lib/ModBot';
@@ -17,13 +17,12 @@ export default class Mute extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<member>': 'Member', '<duration>': 'Duration', '<...reason>': 'String' }));
 		this.use(expect({ '<member>': 'Member', '<duration>': 'Number', '<...reason>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [member, duration, reason]: [GuildMember, number, string]): Promise<any>
 	{
 		if (!this.bot.mod.hasSetMutedRole(message.guild)) return message.channel.send(

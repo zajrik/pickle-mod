@@ -1,5 +1,5 @@
 import { MuteManager } from '../../../lib/mod/managers/MuteManager';
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 import { Command, Message, Middleware } from 'yamdbf';
 import { GuildMember, MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
@@ -19,13 +19,12 @@ export default class Duration extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<case#>': 'String', '<duration>': 'Duration' }));
 		this.use(expect({ '<case#>': 'String', '<duration>': 'Number' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [toSelect, duration]: [string | int, int]): Promise<any>
 	{
 		if (!isNaN(parseInt(<string> toSelect))) toSelect = parseInt(<string> toSelect);

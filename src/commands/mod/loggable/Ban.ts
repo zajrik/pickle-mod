@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User, GuildMember, RichEmbed } from 'discord.js';
 import { prompt, PromptResult } from '../../../lib/Util';
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
 
 export default class Ban extends Command<ModBot>
@@ -17,13 +17,12 @@ export default class Ban extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }));
 		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		if (user.id === message.author.id)

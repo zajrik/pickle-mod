@@ -1,4 +1,4 @@
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 import { Command, Message, Middleware } from 'yamdbf';
 import { MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
@@ -17,13 +17,12 @@ export default class Reason extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<case(s)>': 'String', '<...reason>': 'String' }));
 		this.use(expect({ '<case(s)>': 'Any', '<...reason>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [caseString, reason]: string[]): Promise<any>
 	{
 		const parseRange: RegExp = /(\d+)\-(\d+)/;

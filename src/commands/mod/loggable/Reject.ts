@@ -1,6 +1,6 @@
 import { User } from 'discord.js';
 import { Command, LocalStorage, Message } from 'yamdbf';
-import { prompt, PromptResult, modCommand } from '../../../lib/Util';
+import { prompt, PromptResult, modOnly } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
 
 export default class Reject extends Command<ModBot>
@@ -16,10 +16,9 @@ export default class Reject extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		this.use(modCommand);
 	}
 
+	@modOnly
 	public async action(message: Message, args: string[]): Promise<any>
 	{
 		const appealsChannel: string = message.guild.storage.getSetting('appeals');

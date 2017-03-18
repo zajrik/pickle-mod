@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 
 export default class Softban extends Command<ModBot>
 {
@@ -17,13 +17,12 @@ export default class Softban extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }));
 		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		if (user.id === message.author.id)

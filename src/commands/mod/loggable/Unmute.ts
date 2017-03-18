@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 
 export default class Unmute extends Command<ModBot>
 {
@@ -16,13 +16,12 @@ export default class Unmute extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<member>': 'Member' }));
 		this.use(expect({ '<member>': 'Member' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [member]: [GuildMember]): Promise<any>
 	{
 		if (!this.bot.mod.hasSetMutedRole(message.guild)) return message.channel.send(

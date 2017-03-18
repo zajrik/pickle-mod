@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { GuildMember, User } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
-import { modCommand } from '../../../lib/Util';
+import { modOnly } from '../../../lib/Util';
 
 export default class Kick extends Command<ModBot>
 {
@@ -17,13 +17,12 @@ export default class Kick extends Command<ModBot>
 			guildOnly: true
 		});
 
-		this.use(modCommand);
-
 		const { resolveArgs, expect } = Middleware;
 		this.use(resolveArgs({ '<member>': 'Member', '<...reason>': 'String' }));
 		this.use(expect({ '<member>': 'Member', '<...reason>': 'String' }));
 	}
 
+	@modOnly
 	public async action(message: Message, [member, reason]: [GuildMember, string]): Promise<any>
 	{
 		const user: User = member.user;
