@@ -18,12 +18,7 @@ export default class Logger
 	/**
 	 * Post the moderation case to the mod-logs channel
 	 */
-	public caseLog(user: User,
-					guild: Guild,
-					type: 'Warn' | 'Mute' | 'Kick' | 'Softban' | 'Ban' | 'Unban',
-					reason: string,
-					issuer: User,
-					duration?: string): Promise<Message>
+	public caseLog(user: User, guild: Guild, type: CaseType, reason: string, issuer: User, duration?: string): Promise<Message>
 	{
 		if (!this._bot.mod.hasLoggingChannel(guild)) return null;
 		const storage: GuildStorage = this._bot.guildStorages.get(guild);
