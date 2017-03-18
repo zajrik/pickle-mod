@@ -1,6 +1,7 @@
-import ModBot from '../ModBot';
-import { GuildStorage, Message } from 'yamdbf';
 import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
+import { GuildStorage, Message } from 'yamdbf';
+import { CaseTypeColors } from '../Util';
+import ModBot from '../ModBot';
 
 /**
  * Contains methods and handles functionality pertaining
@@ -9,7 +10,6 @@ import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageC
 export default class Logger
 {
 	private _bot: ModBot;
-
 	public constructor(bot: ModBot)
 	{
 		this._bot = bot;
@@ -26,18 +26,8 @@ export default class Logger
 		caseNum++;
 		storage.setSetting('cases', caseNum);
 
-		enum colors
-		{
-			'Unban' = 8450847,
-			'Warn' = 16776960,
-			'Mute' = 16763904,
-			'Kick' = 16745216,
-			'Softban' = 16745216,
-			'Ban' = 16718080
-		}
-
 		const embed: RichEmbed = new RichEmbed()
-			.setColor(colors[type])
+			.setColor(CaseTypeColors[type])
 			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
 			.setDescription(`**Member:** ${user.username}#${user.discriminator} (${user.id})\n`
 				+ `**Action:** ${type}\n`
@@ -125,7 +115,7 @@ export default class Logger
 		if (!unbanCaseMessage) return null;
 
 		const embed: RichEmbed = new RichEmbed()
-			.setColor(banMessageEmbed.color)
+			.setColor(CaseTypeColors.Softban)
 			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
 			.setDescription(banMessageEmbed.description
 				.replace(/\*\*Action:\*\* .+/, `**Action:** Softban`)

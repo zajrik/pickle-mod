@@ -46,3 +46,17 @@ export async function modCommand(message: Message, args: any[]): Promise<any>
 		return (<Command<ModBot>> this).bot.mod.sendModError(message);
 	return [message, args];
 }
+
+/**
+ * Contains the different colors to be used
+ * for moderation case logging
+ */
+export enum CaseTypeColors
+{
+	'Unban' = 8450847,
+	'Warn' = 16776960,
+	'Mute' = 16763904,
+	'Kick' = 16745216,
+	'Softban' = 16745216,
+	'Ban' = 16718080
+}
