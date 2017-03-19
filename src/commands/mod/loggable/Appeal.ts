@@ -8,10 +8,9 @@ export default class Appeal extends Command<ModBot>
 	{
 		super(bot, {
 			name: 'appeal',
-			aliases: [],
 			description: 'Appeal a ban',
 			usage: '<prefix>appeal <message>',
-			extraHelp: '',
+			ratelimit: '1/10m',
 			group: 'mod'
 		});
 	}
