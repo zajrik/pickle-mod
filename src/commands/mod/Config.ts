@@ -21,7 +21,7 @@ export default class Config extends Command<ModBot>
 
 		const { resolveArgs, expect } = Middleware;
 		this.use((message, args: string[]) => {
-			if (!['reset', 'status'].includes(args[0].toLowerCase()))
+			if (args[0] && !['reset', 'status'].includes(args[0].toLowerCase()))
 				return expect({ '<option>': 'String', '[...value]': 'Any' })
 					.call(this, message, args);
 

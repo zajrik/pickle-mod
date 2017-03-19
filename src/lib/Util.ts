@@ -41,8 +41,8 @@ export enum PromptResult
  */
 export function modOnly(target: Command<ModBot>, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
 {
-	if (!target) throw new Error('@modCommand must be used as a method decorator for a Command action method.');
-	if (key !== 'action') throw new Error(`"${target.constructor.name}#${key}" is not a valid method target for @modCommand.`);
+	if (!target) throw new Error('@modOnly must be used as a method decorator for a Command action method.');
+	if (key !== 'action') throw new Error(`"${target.constructor.name}#${key}" is not a valid method target for @modOnly.`);
 	if (!descriptor) descriptor = Object.getOwnPropertyDescriptor(target, key);
 	const original: any = descriptor.value;
 	descriptor.value = async function(message: Message, args: any[]): Promise<any>

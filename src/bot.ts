@@ -15,7 +15,8 @@ const bot: ModBot = new ModBot({ // tslint:disable-line
 	disableBase: [
 		// 'version',
 		// 'reload'
-	]
+	],
+	ratelimit: '10/1m'
 })
 .setDefaultSetting('prefix', '?')
 .setDefaultSetting('cases', 0)
