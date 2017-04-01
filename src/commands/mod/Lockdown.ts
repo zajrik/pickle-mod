@@ -26,8 +26,8 @@ export default class Lockdown extends Command<ModBot>
 	@modOnly
 	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{
-		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_CHANNELS'))
-			return message.channel.send(`I need to have \`Manage Channels\` permissions to do that on this server.`);
+		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_ROLES'))
+			return message.channel.send(`I need to have \`Manage Roles\` permissions to do that on this server.`);
 
 		const lockdownManager: LockdownManager = this.bot.mod.managers.lockdown;
 
@@ -60,7 +60,8 @@ export default class Lockdown extends Command<ModBot>
 					'The lockdown on the channel is about to expire. Just wait it out.');
 
 			await lockdownManager.remove(channel);
-			channel.send('**The lockdown on this channel has ended.**');
+			try { await channel.send('**The lockdown on this channel has ended.**'); }
+			catch (err) { message.author.send('Failed to send lockdown end message to the channel.'); }
 		}
 	}
 }

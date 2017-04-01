@@ -58,7 +58,7 @@ export class LockdownManager
 				{
 					await channel.guild.owner.send(
 						`Due to incorrect server permissions, I am unable to remove a lockdown in your server \`${channel.guild.name}\` for channel \`${channel.name}\`.\n`
-						+ `In the future you must make sure I have Manage Channels and Send Messages permissions at all times, as well as have my YAMDBF Mod role higher`
+						+ `In the future you must make sure I have Manage Roles, Manage Channels, and Send Messages permissions at all times, as well as have my YAMDBF Mod role higher`
 						+ `than other roles to ensure this does not happen again.`);
 				}
 				catch (err) {}
