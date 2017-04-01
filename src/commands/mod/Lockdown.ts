@@ -26,7 +26,7 @@ export default class Lockdown extends Command<ModBot>
 	@modOnly
 	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{
-		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_ROLES'))
+		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_ROLES_OR_PERMISSIONS'))
 			return message.channel.send(`I need to have \`Manage Roles\` permissions to do that on this server.`);
 
 		const lockdownManager: LockdownManager = this.bot.mod.managers.lockdown;
