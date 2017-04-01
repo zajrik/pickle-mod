@@ -51,7 +51,18 @@ export class LockdownManager
 				allow: lockdown.allow,
 				deny: lockdown.deny
 			};
-			await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload);
+			try { await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload); }
+			catch (err)
+			{
+				try
+				{
+					await channel.guild.owner.send(
+						`Due to incorrect server permissions, I am unable to remove a lockdown in your server \`${channel.guild.name}\` for channel \`${channel.name}\`.\n`
+						+ `In the future you must make sure I have Manage Channels and Send Messages permissions at all times, as well as have my YAMDBF Mod role higher`
+						+ `than other roles to ensure this does not happen again.`);
+				}
+				catch (err) {}
+			}
 			this._storage.removeItem(key);
 		});
 	}

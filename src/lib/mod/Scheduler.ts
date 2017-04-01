@@ -57,7 +57,8 @@ export default class Scheduler
 			if (!lockdownManager.isExpired(channel)) continue;
 			console.log(`Removing expired lockdown for channel '${channel.name}' in guild '${channel.guild.name}'`);
 			await lockdownManager.remove(channel);
-			channel.send('**The lockdown on this channel has ended.**');
+			try { await channel.send('**The lockdown on this channel has ended.**'); }
+			catch (err) { console.log(`Failed to send lockdown expiry message for channel '${channel.name}' in guild '${channel.guild.name}'`); }
 		}
 	}
 }
