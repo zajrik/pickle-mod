@@ -9,7 +9,7 @@ export default class Softban extends Command<ModBot>
 	{
 		super(bot, {
 			name: 'softban',
-			aliases: [],
+			aliases: ['softb&', 'softbanne'],
 			description: 'Softban a user',
 			usage: '<prefix>softban <user> <...reason>',
 			extraHelp: '',
