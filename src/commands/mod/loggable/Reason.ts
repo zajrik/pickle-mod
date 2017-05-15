@@ -1,7 +1,10 @@
 import { modOnly } from '../../../lib/Util';
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Reason extends Command<ModBot>
 {
@@ -16,13 +19,11 @@ export default class Reason extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<case(s)>': 'String', '<...reason>': 'String' }));
-		this.use(expect({ '<case(s)>': 'Any', '<...reason>': 'String' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<case(s)>': 'String', '<...reason>': 'String' }))
+	@using(expect({ '<case(s)>': 'Any', '<...reason>': 'String' }))
 	public async action(message: Message, [caseString, reason]: string[]): Promise<any>
 	{
 		const parseRange: RegExp = /(\d+)\-(\d+)/;
@@ -37,7 +38,7 @@ export default class Reason extends Command<ModBot>
 		}
 		else if (caseString === 'latest')
 		{
-			firstID = message.guild.storage.getSetting('cases');
+			firstID = await message.guild.storage.settings.get('cases');
 			secondID = firstID;
 		}
 		else
@@ -54,13 +55,13 @@ export default class Reason extends Command<ModBot>
 		const errors: Map<int, string> = new Map();
 		for (let i: int = firstID; i <= secondID; i++)
 		{
-			const caseMessage: Message = await this.bot.mod.logger.findCase(message.guild, i);
+			const caseMessage: Message = await this.client.mod.logger.findCase(message.guild, i);
 			if (!caseMessage)
 			{
 				errors.set(i, 'Failed to fetch case.');
 				continue;
 			}
-			if (caseMessage.author.id !== this.bot.user.id)
+			if (caseMessage.author.id !== this.client.user.id)
 			{
 				errors.set(i, `I didn't post that case.`);
 				continue;
@@ -68,7 +69,7 @@ export default class Reason extends Command<ModBot>
 
 			const messageEmbed: MessageEmbed = caseMessage.embeds[0];
 			if (messageEmbed.author.name !== `${message.author.username}#${message.author.discriminator}`
-				&& messageEmbed.author.name !== `${this.bot.user.username}#${this.bot.user.discriminator}`
+				&& messageEmbed.author.name !== `${this.client.user.username}#${this.client.user.discriminator}`
 				&& !message.member.hasPermission('MANAGE_GUILD'))
 				errors.set(i, 'That is not your case to edit.');
 
@@ -88,7 +89,7 @@ export default class Reason extends Command<ModBot>
 
 		await working.edit('Updating cases...');
 		for (const caseNum of cases.keys())
-			await this.bot.mod.logger.editCase(message.guild, caseNum, message.author, reason);
+			await this.client.mod.logger.editCase(message.guild, caseNum, message.author, reason);
 
 		if (firstID < secondID)	working.edit(`Set reason for cases #${firstID}-${secondID}.`);
 		else working.edit(`Set reason for case #${firstID}.`);

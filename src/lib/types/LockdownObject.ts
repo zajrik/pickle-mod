@@ -7,4 +7,4 @@ type LockdownObject = {
 	allow: number;
 	deny: number;
 	expires: number;
-}
+};

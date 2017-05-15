@@ -1,9 +1,12 @@
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { TextChannel } from 'discord.js';
 import { LockdownManager } from '../../lib/mod/managers/LockdownManager';
 import { modOnly } from '../../lib/Util';
 import ModBot from '../../lib/ModBot';
 import Time from '../../lib/Time';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Lockdown extends Command<ModBot>
 {
@@ -11,25 +14,23 @@ export default class Lockdown extends Command<ModBot>
 	{
 		super(bot, {
 			name: 'lockdown',
-			aliases: [],
 			description: 'Lock down a channel for a set time',
 			usage: '<prefix>lockdown <duration|\'clear\'> [#channel]',
 			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown.\n\nCalling the lockdown command when a channel is already locked down will restart the lockdown with the new duration.',
 			group: 'mod',
 			guildOnly: true
 		});
-
-		this.use(Middleware.resolveArgs({ '<duration|clear>': 'String', '[#channel]': 'Channel' }));
-		this.use(Middleware.expect({ '<duration|clear>': 'String' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<duration|clear>': 'String', '[#channel]': 'Channel' }))
+	@using(expect({ '<duration|clear>': 'String' }))
 	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{
-		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_ROLES_OR_PERMISSIONS'))
+		if (!(await message.guild.fetchMember(this.client.user)).permissions.has('MANAGE_ROLES_OR_PERMISSIONS'))
 			return message.channel.send(`I need to have \`Manage Roles\` permissions to do that on this server.`);
 
-		const lockdownManager: LockdownManager = this.bot.mod.managers.lockdown;
+		const lockdownManager: LockdownManager = this.client.mod.managers.lockdown;
 
 		if (!channel) channel = <TextChannel> message.channel;
 		if (channel.guild.id !== message.guild.id)
@@ -55,7 +56,7 @@ export default class Lockdown extends Command<ModBot>
 			if (!lockdownManager.isLockedDown(channel))
 				return message.channel.send('The channel is not locked down.');
 
-			if (lockdownManager.getRemaining(channel) < 10e3)
+			if (await lockdownManager.getRemaining(channel) < 10e3)
 				return message.channel.send(
 					'The lockdown on the channel is about to expire. Just wait it out.');
 

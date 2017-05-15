@@ -1,4 +1,4 @@
-import { LocalStorage } from 'yamdbf';
+import { KeyedStorage, JSONProvider } from 'yamdbf';
 import { User, Guild } from 'discord.js';
 
 /**
@@ -7,38 +7,51 @@ import { User, Guild } from 'discord.js';
  */
 export class HistoryManager
 {
-	private _storage: LocalStorage;
+	private _storage: KeyedStorage;
 	public constructor()
 	{
-		this._storage = new LocalStorage('storage/managers/history');
+		this._storage = new KeyedStorage('managers/history', JSONProvider);
+	}
+
+	/**
+	 * Initialize the storage for this manager
+	 */
+	public async init(): Promise<void>
+	{
+		await this._storage.init();
 	}
 
 	/**
 	 * Get moderation action history for a user within a guild
 	 */
-	public get(user: User, guild: Guild): MemberHistory
+	public async get(user: User, guild: Guild): Promise<MemberHistory>
 	{
-		return <MemberHistory> (this._storage.getItem(`${guild.id}/${user.id}`) || {});
+		return <MemberHistory> (await this._storage.get(`${guild.id}.${user.id}`) || {});
 	}
 
 	/**
 	 * Increment an action type in the moderation action history
 	 * for a user within a guild
 	 */
-	public incr(user: User, guild: Guild, type: ActionType): void
+	public async incr(user: User, guild: Guild, type: ActionType): Promise<void>
 	{
-		if (this._storage.exists(`${guild.id}/${user.id}/${type}`))
-			this._storage.incr(`${guild.id}/${user.id}/${type}`);
-		else this._storage.setItem(`${guild.id}/${user.id}/${type}`, 1);
+		const key: string = `${guild.id}.${user.id}.${type}`;
+		if (await this._storage.exists(key))
+		{
+			let value: number = await this._storage.get(key);
+			await this._storage.set(key, ++value);
+		}
+		else await this._storage.set(key, 1);
 	}
 
 	/**
 	 * Clear all moderation action history for a user within
 	 * a guild
 	 */
-	public clear(user: User, guild: Guild): void
+	public async clear(user: User, guild: Guild): Promise<void>
 	{
-		if (this._storage.exists(`${guild.id}/${user.id}`))
-			this._storage.removeItem(`${guild.id}/${user.id}`);
+		const key: string = `${guild.id}.${user.id}`;
+		if (await this._storage.exists(key))
+			await this._storage.remove(key);
 	}
 }

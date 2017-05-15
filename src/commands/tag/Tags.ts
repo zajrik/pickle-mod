@@ -1,8 +1,8 @@
-import { Bot, Command, GuildStorage, Message } from 'yamdbf';
+import { Client, Command, GuildStorage, Message } from 'yamdbf';
 
-export default class Tags extends Command<Bot>
+export default class Tags extends Command<Client>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: Client)
 	{
 		super(bot, {
 			name: 'tags',
@@ -15,12 +15,12 @@ export default class Tags extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: string[]): any
+	public async action(message: Message, args: string[]): Promise<any>
 	{
 		const storage: GuildStorage = message.guild.storage;
-		const tags: object = storage.getItem('tags');
+		const tags: object = await storage.get('tags');
 		if (!tags || Object.keys(tags).length === 0)
 			return message.channel.send('There are currently no saved tags.');
 		return message.channel.send(`**Current tags:**\n${Object.keys(tags).sort().join(', ')}`);
 	}
-};
+}

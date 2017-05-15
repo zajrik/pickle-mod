@@ -1,8 +1,9 @@
-'use strict';
 import { modOnly } from '../../lib/Util';
-import { Command, Message, GuildStorage, Middleware } from 'yamdbf';
+import { Command, Message, GuildStorage, Middleware, CommandDecorators } from 'yamdbf';
 import { TextChannel } from 'discord.js';
 import ModBot from '../../lib/ModBot';
+
+const { using } = CommandDecorators;
 
 export default class Fixcases extends Command<ModBot>
 {
@@ -17,11 +18,10 @@ export default class Fixcases extends Command<ModBot>
 			guildOnly: true,
 			ownerOnly: false
 		});
-
-		this.use(Middleware.expect({ '<case msg id>': 'String' }));
 	}
 
 	@modOnly
+	@using(Middleware.expect({ '<case msg id>': 'String' }))
 	public async action(message: Message, [id]: [string]): Promise<any>
 	{
 		if (!/\d+/.test(id))
@@ -29,7 +29,7 @@ export default class Fixcases extends Command<ModBot>
 
 		const storage: GuildStorage = message.guild.storage;
 		const logsChannel: TextChannel = <TextChannel> message.guild.channels
-			.get(storage.getSetting('modlogs'));
+			.get(await storage.settings.get('modlogs'));
 
 		const caseRegex: RegExp = /Case (\d+)/;
 		let startCase: Message;
@@ -48,7 +48,7 @@ export default class Fixcases extends Command<ModBot>
 		const working: Message = <Message> await message.channel.send(
 			`Re-indexing cases, starting at #${caseNum}... *(This can take a while)*`);
 
-		try { await this.bot.mod.logger.fixCases(startCase); }
+		try { await this.client.mod.logger.fixCases(startCase); }
 		catch (err) { return working.edit(err); }
 
 		working.edit('Finished re-indexing cases.');

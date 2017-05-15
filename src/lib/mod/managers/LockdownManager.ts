@@ -1,5 +1,5 @@
-import { TextChannel, Collection } from 'discord.js';
-import { LocalStorage } from 'yamdbf';
+import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
+import { KeyedStorage, JSONProvider } from 'yamdbf';
 import ModBot from '../../ModBot';
 
 /**
@@ -7,12 +7,20 @@ import ModBot from '../../ModBot';
  */
 export class LockdownManager
 {
-	private _storage: LocalStorage;
-	private _bot: ModBot;
-	public constructor(bot: ModBot)
+	private _storage: KeyedStorage;
+	private _client: ModBot;
+	public constructor(client: ModBot)
 	{
-		this._storage = new LocalStorage('storage/managers/lockdown');
-		this._bot = bot;
+		this._storage = new KeyedStorage('managers/lockdown', JSONProvider);
+		this._client = client;
+	}
+
+	/**
+	 * Initialize the storage for this manager
+	 */
+	public async init(): Promise<void>
+	{
+		await this._storage.init();
 	}
 
 	/**
@@ -20,21 +28,19 @@ export class LockdownManager
 	 */
 	public async set(channel: TextChannel, duration: int): Promise<void>
 	{
-		let oldPayload: any;
-		if (this.isLockedDown(channel)) oldPayload = this.getLockdown(channel);
+		let oldPayload: PermissionOverwrites | LockdownObject | { allow: int, deny: int };
+		if (await this.isLockedDown(channel)) oldPayload = await this.getLockdown(channel);
 		else oldPayload = channel.permissionOverwrites.get(channel.guild.id) || { allow: 0, deny: 0 };
-		await this._storage.queue(channel.id, async key =>
-		{
-			const lockdown: LockdownObject = {
-				channel: channel.id,
-				allow: oldPayload.allow,
-				deny: oldPayload.deny,
-				expires: Date.now() + duration
-			};
-			this._storage.setItem(key, lockdown);
-			await channel.overwritePermissions(
-				channel.guild.roles.get(channel.guild.id), { SEND_MESSAGES: false });
-		});
+
+		const lockdown: LockdownObject = {
+			channel: channel.id,
+			allow: oldPayload.allow,
+			deny: oldPayload.deny,
+			expires: Date.now() + duration
+		};
+		await this._storage.set(channel.id, lockdown);
+		await channel.overwritePermissions(
+			channel.guild.roles.get(channel.guild.id), { SEND_MESSAGES: false });
 	}
 
 	/**
@@ -42,16 +48,14 @@ export class LockdownManager
 	 */
 	public async remove(channel: TextChannel): Promise<void>
 	{
-		await this._storage.queue(channel.id, async key =>
-		{
-			let lockdown: LockdownObject = this._storage.getItem(key);
+			let lockdown: LockdownObject = await this._storage.get(channel.id);
 			const payload: any = {
 				id: channel.guild.id,
 				type: 'role',
 				allow: lockdown.allow,
 				deny: lockdown.deny
 			};
-			try { await (<any> this._bot).rest.methods.setChannelOverwrite(channel, payload); }
+			try { await (<any> this._client).rest.methods.setChannelOverwrite(channel, payload); }
 			catch (err)
 			{
 				try
@@ -63,55 +67,54 @@ export class LockdownManager
 				}
 				catch (err) {}
 			}
-			this._storage.removeItem(key);
-		});
+			await this._storage.remove(channel.id);
 	}
 
 	/**
 	 * Returns whether or not a channel is currently lockded down
 	 */
-	public isLockedDown(channel: TextChannel): boolean
+	public async isLockedDown(channel: TextChannel): Promise<boolean>
 	{
-		return this._storage.exists(channel.id);
+		return await this._storage.exists(channel.id);
 	}
 
 	/**
 	 * Get the lockdown object for the channel if it is locked down
 	 */
-	public getLockdown(channel: TextChannel): LockdownObject
+	public async getLockdown(channel: TextChannel): Promise<LockdownObject>
 	{
-		if (!this.isLockedDown(channel)) return null;
-		return this._storage.getItem(channel.id);
+		if (!await this.isLockedDown(channel)) return null;
+		return await this._storage.get(channel.id);
 	}
 
 	/**
 	 * Returns whether or not a lockdown has expired
 	 */
-	public isExpired(channel: TextChannel): boolean
+	public async isExpired(channel: TextChannel): Promise<boolean>
 	{
-		if (!this.isLockedDown(channel)) return null;
-		let lockdown: LockdownObject = this.getLockdown(channel);
+		if (!await this.isLockedDown(channel)) return null;
+		let lockdown: LockdownObject = await this.getLockdown(channel);
 		return Date.now() > lockdown.expires;
 	}
 
 	/**
 	 * Get the remaining duration of a lockdown
 	 */
-	public getRemaining(channel: TextChannel): int
+	public async getRemaining(channel: TextChannel): Promise<int>
 	{
-		if (!this.isLockedDown(channel)) return null;
-		let lockdown: LockdownObject = this.getLockdown(channel);
+		if (!await this.isLockedDown(channel)) return null;
+		let lockdown: LockdownObject = await this.getLockdown(channel);
 		return lockdown.expires - Date.now();
 	}
 
 	/**
 	 * Get all currently locked down channels
 	 */
-	public getLockedChannels(): Collection<string, TextChannel>
+	public async getLockedChannels(): Promise<Collection<string, TextChannel>>
 	{
-		const ids: string[] = Object.keys(this._storage.getItem('') || {});
+		const ids: string[] = await this._storage.keys();
 		let lockedChannels: Collection<string, TextChannel> = new Collection<string, TextChannel>();
-		for (const id of ids) lockedChannels.set(id, <TextChannel> this._bot.channels.get(id));
+		for (const id of ids) lockedChannels.set(id, <TextChannel> this._client.channels.get(id));
 		return lockedChannels;
 	}
 }

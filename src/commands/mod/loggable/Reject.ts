@@ -1,5 +1,5 @@
 import { User } from 'discord.js';
-import { Command, LocalStorage, Message } from 'yamdbf';
+import { Command, ClientStorage, Message } from 'yamdbf';
 import { prompt, PromptResult, modOnly } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
 
@@ -21,7 +21,7 @@ export default class Reject extends Command<ModBot>
 	@modOnly
 	public async action(message: Message, args: string[]): Promise<any>
 	{
-		const appealsChannel: string = message.guild.storage.getSetting('appeals');
+		const appealsChannel: string = await message.guild.storage.settings.get('appeals');
 		if (message.channel.id !== appealsChannel)
 			return message.channel.send('Reject command may only be run in the appeals channel.');
 
@@ -29,8 +29,8 @@ export default class Reject extends Command<ModBot>
 		if (!id) return message.channel.send('You must provide an appeal ID to reject.')
 			.then((res: Message) => res.delete(5e3));
 
-		const storage: LocalStorage = this.bot.storage;
-		const appeal: string = storage.getItem('activeAppeals')[id];
+		const storage: ClientStorage = this.client.storage;
+		const appeal: string = (await storage.get('activeAppeals'))[id];
 		if (!appeal) return message.channel.send('Could not find an appeal with that ID.')
 			.then((res: Message) => res.delete(5e3));
 
@@ -55,28 +55,23 @@ export default class Reject extends Command<ModBot>
 				.then(() => confirmation.delete())
 				.then(() => message.delete());
 
-		const user: User = await this.bot.fetchUser(id);
-		await storage.queue('activeBans', key =>
-		{
-			const activeBans: ActiveBans = storage.getItem(key) || {};
-			const bans: BanObject[] = activeBans[user.id];
-			for (let i: number = 0; i < bans.length; i++)
-			{
-				if (bans[i].guild === message.guild.id) bans.splice(i--, 1);
-			}
-			if (bans.length === 0) delete activeBans[user.id];
-			else activeBans[user.id] = bans;
-			storage.setItem(key, activeBans);
-		});
+		const user: User = await this.client.fetchUser(id);
 
-		await storage.queue('activeAppeals', key =>
+		const activeBans: ActiveBans = await storage.get('activeBans') || {};
+		const bans: BanObject[] = activeBans[user.id];
+		for (let i: number = 0; i < bans.length; i++)
 		{
-			const activeAppeals: ActiveAppeals = storage.getItem(key) || {};
-			message.channel.fetchMessage(activeAppeals[user.id])
-				.then((msg: Message) => msg.delete()).catch(console.log);
-			delete activeAppeals[user.id];
-			storage.setItem(key, activeAppeals);
-		});
+			if (bans[i].guild === message.guild.id) bans.splice(i--, 1);
+		}
+		if (bans.length === 0) delete activeBans[user.id];
+		else activeBans[user.id] = bans;
+		await storage.set('activeBans', activeBans);
+
+		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
+		message.channel.fetchMessage(activeAppeals[user.id])
+			.then((msg: Message) => msg.delete()).catch(console.log);
+		delete activeAppeals[user.id];
+		await storage.set('activeAppeals', activeAppeals);
 
 		message.channel.send(`Rejected appeal \`${id}\``)
 			.then((res: Message) => res.delete(5000))

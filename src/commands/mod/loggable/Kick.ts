@@ -1,7 +1,10 @@
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { GuildMember, User } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import { modOnly } from '../../../lib/Util';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Kick extends Command<ModBot>
 {
@@ -16,20 +19,18 @@ export default class Kick extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<member>': 'Member', '<...reason>': 'String' }));
-		this.use(expect({ '<member>': 'Member', '<...reason>': 'String' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<member>': 'Member', '<...reason>': 'String' }))
+	@using(expect({ '<member>': 'Member', '<...reason>': 'String' }))
 	public async action(message: Message, [member, reason]: [GuildMember, string]): Promise<any>
 	{
 		const user: User = member.user;
 		if (user.id === message.author.id)
 			return message.channel.send(`I don't think you want to kick yourself.`);
 
-		const modRole: string = message.guild.storage.getSetting('modrole');
+		const modRole: string = await message.guild.storage.settings.get('modrole');
 		if ((member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
@@ -45,8 +46,8 @@ export default class Kick extends Command<ModBot>
 			console.log(`Failed to send kick DM to ${user.username}#${user.discriminator}`);
 		}
 
-		await this.bot.mod.actions.kick(member, message.guild);
-		await this.bot.mod.logger.caseLog(user, message.guild, 'Kick', reason, message.author);
+		await this.client.mod.actions.kick(member, message.guild);
+		await this.client.mod.logger.caseLog(user, message.guild, 'Kick', reason, message.author);
 		console.log(`Kicked ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
 		kicking.edit(`Kicked ${user.username}#${user.discriminator}`);
 	}

@@ -19,15 +19,14 @@ export default class ClearLogs extends Command<ModBot>
 
 	public async action(message: Message, args: any[]): Promise<any>
 	{
-		if (!(this.bot.config.owner.includes(message.author.id)
-			|| (<TextChannel> message.channel).permissionsFor(message.member)
-				.hasPermission('MANAGE_GUILD')))
+		if (!(this.client.isOwner(message.author)
+			|| (<TextChannel> message.channel).permissionsFor(message.member).has('MANAGE_GUILD')))
 			return message.channel.send('You must have `Manage Server` permissions to use this command.');
 
-		if (!(await message.guild.fetchMember(this.bot.user)).hasPermission('MANAGE_CHANNELS'))
+		if (!(await message.guild.fetchMember(this.client.user)).permissions.has('MANAGE_CHANNELS'))
 			return message.channel.send(`I need to have \`Manage Channels\` permissions to do that on this server.`);
 
-		if (message.channel.id === message.guild.storage.getSetting('modlogs'))
+		if (message.channel.id === await message.guild.storage.settings.get('modlogs'))
 			return message.channel.send('You may not use that command in this channel.')
 				.then((res: Message) => message.delete().then(() => res.delete()));
 
@@ -38,12 +37,12 @@ export default class ClearLogs extends Command<ModBot>
 		if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting mod logs reset.');
 
 		const resetting: Message = <Message> await message.channel.send('Okay, resetting mod logs.');
-		const channel: TextChannel = <TextChannel> message.guild.channels.get(message.guild.storage.getSetting('modlogs'));
+		const channel: TextChannel = <TextChannel> message.guild.channels.get(await message.guild.storage.settings.get('modlogs'));
 		try
 		{
 			const newChannel: TextChannel = <TextChannel> await channel.clone(channel.name, true);
-			message.guild.storage.setSetting('modlogs', newChannel.id);
-			message.guild.storage.setSetting('cases', 0);
+			await message.guild.storage.settings.set('modlogs', newChannel.id);
+			await message.guild.storage.settings.set('cases', 0);
 
 			await channel.delete();
 			await newChannel.setPosition(channel.position);

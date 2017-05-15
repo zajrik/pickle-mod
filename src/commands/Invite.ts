@@ -1,10 +1,10 @@
 'use strict';
-import { Bot, Command } from 'yamdbf';
+import { Client, Command } from 'yamdbf';
 import { Message } from 'discord.js';
 
-export default class Invite extends Command<Bot>
+export default class Invite extends Command<Client>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: Client)
 	{
 		super(bot, {
 			name: 'invite',
@@ -19,11 +19,11 @@ export default class Invite extends Command<Bot>
 	public action(message: Message, args: string[]): void
 	{
 		message.channel.send(`You can invite me to your server with this link:\n`
-			+ `https://discordapp.com/oauth2/authorize?client_id=${this.bot.user.id}&scope=bot&permissions=297888791\n\n`
+			+ `https://discordapp.com/oauth2/authorize?client_id=${this.client.user.id}&scope=bot&permissions=297888791\n\n`
 			+ `Be sure to use the \`guide\` command for information `
 			+ `on setting up your server for moderation! The default prefix for commands is \`?\`. `
 			+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
-			+ `just use \`@${this.bot.user.username}#${this.bot.user.discriminator} prefix\`. `
+			+ `just use \`@${this.client.user.username}#${this.client.user.discriminator} prefix\`. `
 			+ `Thanks for choosing YAMDBF Mod for your server moderation control needs! 👏`);
 	}
 }

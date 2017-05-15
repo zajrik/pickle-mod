@@ -9,7 +9,7 @@ type Difference = {
 	secs?: int;
 	toString(): string;
 	toSimplifiedString?(): string;
-}
+};
 
 type int = number;
 
@@ -65,7 +65,7 @@ export default class Time extends Date
 
 	/**
 	 * Parse a duration shorthand and return the duration in ms
-	 * 
+	 *
 	 * Shorthand examples: 10m, 5h, 1d
 	 */
 	public static parseShorthand(shorthand: string): int

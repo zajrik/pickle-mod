@@ -1,4 +1,4 @@
-import { LocalStorage, GuildStorage, Message } from 'yamdbf';
+import { ClientStorage, GuildStorage, Message } from 'yamdbf';
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 import { MuteManager } from './managers/MuteManager';
 import ModBot from '../ModBot';
@@ -8,24 +8,23 @@ import ModBot from '../ModBot';
  */
 export default class Events
 {
-	private _bot: ModBot;
-
-	public constructor(bot: ModBot)
+	private _client: ModBot;
+	public constructor(client: ModBot)
 	{
-		this._bot = bot;
+		this._client = client;
 
-		this._bot.on('guildBanAdd', (guild: Guild, user: User) => this._onGuildBanAdd(guild, user));
-		this._bot.on('guildBanRemove', async (guild: Guild, user: User) => this._onGuildBanRemove(guild, user));
-		this._bot.on('guildMemberUpdate', async (oldMember: GuildMember, newMember: GuildMember) =>
+		this._client.on('guildBanAdd', (guild: Guild, user: User) => this._onGuildBanAdd(guild, user));
+		this._client.on('guildBanRemove', async (guild: Guild, user: User) => this._onGuildBanRemove(guild, user));
+		this._client.on('guildMemberUpdate', async (oldMember: GuildMember, newMember: GuildMember) =>
 		{
-			const storage: GuildStorage = this._bot.guildStorages.get(oldMember.guild.id);
-			if (!storage.settingExists('mutedrole')) return;
-			const mutedRole: string = storage.getSetting('mutedrole');
+			const storage: GuildStorage = this._client.storage.guilds.get(oldMember.guild.id);
+			if (!await storage.settings.exists('mutedrole')) return;
+			const mutedRole: string = await storage.settings.get('mutedrole');
 			if (!oldMember.roles.has(mutedRole) && newMember.roles.has(mutedRole))
 				this._onGuildMuteAdd(newMember.guild, newMember);
 		});
-		this._bot.on('guildMemberRemove', (member: GuildMember) => this._onGuildMemberRemove(member));
-		this._bot.on('guildMemberAdd', (member: GuildMember) => this._onGuildMemberAdd(member));
+		this._client.on('guildMemberRemove', (member: GuildMember) => this._onGuildMemberRemove(member));
+		this._client.on('guildMemberAdd', (member: GuildMember) => this._onGuildMemberAdd(member));
 	}
 
 	/**
@@ -33,21 +32,22 @@ export default class Events
 	 */
 	private async _onGuildMuteAdd(guild: Guild, member: GuildMember): Promise<void>
 	{
-		const settings: GuildStorage = this._bot.guildStorages.get(guild);
-		if (!this._bot.mod.hasLoggingChannel(guild)) return;
-		if (member.roles.has(settings.getSetting('modrole'))) return;
+		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		if (!await this._client.mod.hasLoggingChannel(guild)) return;
+		if (member.roles.has(await storage.settings.get('modrole'))) return;
 		const user: User = member.user;
 
-		this._bot.mod.managers.mute.set(member);
+		this._client.mod.managers.mute.set(member);
 		user.send(`You've been muted in ${guild.name}`);
 		console.log(`Muted user: '${user.username}#${user.discriminator}' in '${guild.name}'`);
 
-		await this._bot.mod.logger.caseLog(
+		await this._client.mod.logger.caseLog(
 			user,
 			guild,
 			'Mute',
-			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <...reason>\` to set a reason for this mute`,
-			this._bot.user);
+			`Use \`${await storage.settings.get('prefix')}reason ${
+				await storage.settings.get('cases') + 1} <...reason>\` to set a reason for this mute`,
+			this._client.user);
 	}
 
 	/**
@@ -55,11 +55,11 @@ export default class Events
 	 */
 	private async _onGuildMemberRemove(member: GuildMember): Promise<void>
 	{
-		const settings: GuildStorage = this._bot.guildStorages.get(member.guild);
-		if (!member.roles.has(settings.getSetting('mutedrole'))) return;
+		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
+		if (!member.roles.has(await storage.settings.get('mutedrole'))) return;
 
 		const user: User = member.user;
-		this._bot.mod.managers.mute.setEvasionFlag(member);
+		this._client.mod.managers.mute.setEvasionFlag(member);
 		console.log(`Potential mute evasion: '${user.username}#${user.discriminator}' in '${member.guild.name}'`);
 	}
 
@@ -69,12 +69,12 @@ export default class Events
 	 */
 	private async _onGuildMemberAdd(member: GuildMember): Promise<void>
 	{
-		const settings: GuildStorage = this._bot.guildStorages.get(member.guild);
-		let muteManager: MuteManager = this._bot.mod.managers.mute;
-		if (!muteManager.isMuted(member)) return;
-		if (!muteManager.isEvasionFlagged(member)) return;
+		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
+		let muteManager: MuteManager = this._client.mod.managers.mute;
+		if (!await muteManager.isMuted(member)) return;
+		if (!await muteManager.isEvasionFlagged(member)) return;
 
-		const mutedRole: string = settings.getSetting('mutedrole');
+		const mutedRole: string = await storage.settings.get('mutedrole');
 		(<any> member)._roles.push(mutedRole);
 		member.addRole(mutedRole);
 		muteManager.clearEvasionFlag(member);
@@ -85,31 +85,28 @@ export default class Events
 	 */
 	private async _onGuildBanAdd(guild: Guild, user: User): Promise<void>
 	{
-		let settings: GuildStorage = this._bot.guildStorages.get(guild);
-		if (!this._bot.mod.hasLoggingChannel(guild)) return;
-		const storage: LocalStorage = this._bot.storage;
+		let guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		if (!await this._client.mod.hasLoggingChannel(guild)) return;
+		const storage: ClientStorage = this._client.storage;
 
-		// Add the ban to storage for appealing
-		await storage.queue('activeBans', (key: string) =>
-		{
-			const activeBans: ActiveBans = storage.getItem(key) || {};
-			if (!activeBans[user.id]) activeBans[user.id] = [];
-			activeBans[user.id].push({
-				user: user.id,
-				raw: `${user.username}#${user.discriminator}`,
-				guild: guild.id,
-				guildName: guild.name,
-				timestamp: new Date().getTime()
-			});
-			storage.setItem(key, activeBans);
+		const activeBans: ActiveBans = await storage.get('activeBans') || {};
+		if (!activeBans[user.id]) activeBans[user.id] = [];
+		activeBans[user.id].push({
+			user: user.id,
+			raw: `${user.username}#${user.discriminator}`,
+			guild: guild.id,
+			guildName: guild.name,
+			timestamp: new Date().getTime()
 		});
+		await storage.set('activeBans', activeBans);
 
-		await this._bot.mod.logger.caseLog(
+		await this._client.mod.logger.caseLog(
 			user,
 			guild,
 			'Ban',
-			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <...reason>\` to set a reason for this ban`,
-			this._bot.user);
+			`Use \`${await guildStorage.settings.get('prefix')}reason ${
+				await guildStorage.settings.get('cases') + 1} <...reason>\` to set a reason for this ban`,
+			this._client.user);
 	}
 
 	/**
@@ -117,55 +114,55 @@ export default class Events
 	 */
 	private async _onGuildBanRemove(guild: Guild, user: User): Promise<void>
 	{
-		let settings: GuildStorage = this._bot.guildStorages.get(guild);
-		if (!this._bot.mod.hasLoggingChannel(guild)) return;
-		const storage: LocalStorage = this._bot.storage;
+		let guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		if (!await this._client.mod.hasLoggingChannel(guild)) return;
+		const storage: ClientStorage = this._client.storage;
 
-		// Remove the active ban in storage for the user
-		await storage.queue('activeBans', (key: string) =>
+		const activeBans: ActiveBans = await storage.get('activeBans') || {};
+		const bans: BanObject[] = activeBans[user.id];
+		if (bans)
 		{
-			const activeBans: ActiveBans = storage.getItem(key) || {};
-			const bans: BanObject[] = activeBans[user.id];
-			if (!bans) return;
 			const activeIndex: int = bans.findIndex(ban => ban.guild === guild.id);
 			bans.splice(activeIndex, 1);
+
 			if (bans.length === 0) delete activeBans[user.id];
 			else activeBans[user.id] = bans;
-			storage.setItem(key, activeBans);
-		});
 
-		await this._bot.mod.logger.caseLog(
+			await storage.set('activeBans', activeBans);
+		}
+
+		await this._client.mod.logger.caseLog(
 			user,
 			guild,
 			'Unban',
-			`Use \`${settings.getSetting('prefix')}reason ${settings.getSetting('cases') + 1} <...reason>\` to set a reason for this unban`,
-			this._bot.user);
+			`Use \`${await guildStorage.settings.get('prefix')}reason ${
+				await guildStorage.settings.get('cases') + 1} <...reason>\` to set a reason for this unban`,
+			this._client.user);
 
 		// Try to remove an active appeal for the user if there
 		// was one in the guild
-		await storage.queue('activeAppeals', async (key: string) =>
+		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
+		const appealsChannel: TextChannel = <TextChannel> guild.channels
+			.get(await guildStorage.settings.get('appeals'));
+		try
 		{
-			const activeAppeals: ActiveAppeals = storage.getItem(key) || {};
-			const appealsChannel: TextChannel = <TextChannel> guild.channels
-				.get(settings.getSetting('appeals'));
-			try
+			const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
+			await storage.remove(`activeAppeals.${user.id}`);
+			appeal.delete();
+			if (activeAppeals[user.id])
 			{
-				const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
-				appeal.delete();
-				if (activeAppeals[user.id])
-				{
-					const invite: Invite = await guild.defaultChannel
-						.createInvite({ maxAge: 72 * 1000 * 60 * 60, maxUses: 1 });
-					await user.send(`Your appeal has been approved. You have been unbanned from ${
-						guild.name}. You may rejoin using this invite:\n${invite.url}`);
-				}
-				delete activeAppeals[user.id];
-				storage.setItem(key, activeAppeals);
+				const invite: Invite = await guild.defaultChannel
+					.createInvite({ maxAge: 86400, maxUses: 1 });
+				await user.send(`Your appeal has been approved. You have been unbanned from ${
+					guild.name}. You may rejoin using this invite:\n${invite.url}`);
 			}
-			catch (err)
-			{
-				return;
-			}
-		});
+			// delete activeAppeals[user.id];
+			// await storage.set('activeAppeals', activeAppeals);
+		}
+		catch (err)
+		{
+			console.log(err);
+			return;
+		}
 	}
 }

@@ -1,7 +1,10 @@
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import { modOnly } from '../../../lib/Util';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Unmute extends Command<ModBot>
 {
@@ -15,19 +18,17 @@ export default class Unmute extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<member>': 'Member' }));
-		this.use(expect({ '<member>': 'Member' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<member>': 'Member' }))
+	@using(expect({ '<member>': 'Member' }))
 	public async action(message: Message, [member]: [GuildMember]): Promise<any>
 	{
-		if (!this.bot.mod.hasSetMutedRole(message.guild)) return message.channel.send(
+		if (!await this.client.mod.hasSetMutedRole(message.guild)) return message.channel.send(
 			`This server doesn't have a role set for muting.`);
 
-		const mutedRole: string = message.guild.storage.getSetting('mutedrole');
+		const mutedRole: string = await message.guild.storage.settings.get('mutedrole');
 		if (!member.roles.has(mutedRole)) return message.channel.send(`That user is not muted`);
 
 		const user: User = member.user;
@@ -36,8 +37,8 @@ export default class Unmute extends Command<ModBot>
 
 		try
 		{
-			await this.bot.mod.actions.unmute(member, message.guild);
-			this.bot.mod.managers.mute.remove(member);
+			await this.client.mod.actions.unmute(member, message.guild);
+			await this.client.mod.managers.mute.remove(member);
 			user.send(`You have been unmuted on ${message.guild.name}. You may now send messages.`);
 			return unmuting.edit(`Unmuted ${user.username}#${user.discriminator}`);
 		}

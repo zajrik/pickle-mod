@@ -1,9 +1,9 @@
 import { RichEmbed, TextChannel } from 'discord.js';
-import { Bot, Command, Message } from 'yamdbf';
+import { Client, Command, Message } from 'yamdbf';
 
-export default class Guide extends Command<Bot>
+export default class Guide extends Command<Client>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: Client)
 	{
 		super(bot, {
 			name: 'guide',
@@ -15,17 +15,17 @@ export default class Guide extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: string[]): void
+	public async action(message: Message, args: string[]): Promise<void>
 	{
 		if (message.channel.type !== 'dm'
 			&& !(<TextChannel> message.channel).permissionsFor(message.member).hasPermission('MANAGE_GUILD')
-			&& !this.bot.config.owner.includes(message.author.id)) return;
+			&& !this.client.owner.includes(message.author.id)) return;
 
-		const prefix: string = message.guild ? this.bot.getPrefix(message.guild) : '<prefix>';
+		const prefix: string = message.guild ? await this.client.getPrefix(message.guild) : '<prefix>';
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)
-			.setAuthor('YAMDBF Mod Setup Guide', this.bot.user.avatarURL)
+			.setAuthor('YAMDBF Mod Setup Guide', this.client.user.avatarURL)
 			.setDescription(`In order to be able to use moderation commands on your server there `
 				+ `are some steps you'll need to take. In all cases, if a valid value is not found `
 				+ `for any of the config commands, you will be notified and can try again.`)

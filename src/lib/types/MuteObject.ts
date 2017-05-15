@@ -6,4 +6,4 @@ type MuteObject = {
 	guild: string;
 	expires?: number;
 	leftGuild?: boolean;
-}
+};

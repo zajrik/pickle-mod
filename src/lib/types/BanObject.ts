@@ -7,4 +7,4 @@ type BanObject = {
 	guild: string;
 	guildName: string;
 	timestamp: number;
-}
+};

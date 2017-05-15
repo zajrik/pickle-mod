@@ -1,7 +1,10 @@
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { User } from 'discord.js';
 import { modOnly } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Unban extends Command<ModBot>
 {
@@ -14,13 +17,11 @@ export default class Unban extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<user>': 'BannedUser', '<...reason>': 'String' }));
-		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<user>': 'BannedUser', '<...reason>': 'String' }))
+	@using(expect({ '<user>': 'User', '<...reason>': 'String' }))
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		const id: string = user.id;
@@ -29,9 +30,9 @@ export default class Unban extends Command<ModBot>
 
 		try
 		{
-			this.bot.mod.actions.unban(id, message.guild);
-			const unbanCase: Message = <Message> await this.bot.mod.logger.awaitBanCase(message.guild, user, 'Unban');
-			this.bot.mod.logger.editCase(message.guild, unbanCase, message.author, reason);
+			this.client.mod.actions.unban(id, message.guild);
+			const unbanCase: Message = <Message> await this.client.mod.logger.awaitBanCase(message.guild, user, 'Unban');
+			this.client.mod.logger.editCase(message.guild, unbanCase, message.author, reason);
 
 			return unbanning.edit(`Successfully unbanned ${user.username}#${user.discriminator}`);
 		}

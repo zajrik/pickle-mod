@@ -1,4 +1,4 @@
-import { Bot } from 'yamdbf';
+import { Client } from 'yamdbf';
 import { GuildMember } from 'discord.js';
 import Timer from '../timer/Timer';
 import Time from '../Time';
@@ -9,15 +9,15 @@ import Time from '../Time';
  */
 export default class RateLimiter
 {
-	private bot: Bot;
+	private _client: Client;
 	private _rl: { [guild: string]: { [member: string]: { [type: string]: int } } };
 	private _rlTimer: Timer;
 
-	public constructor(bot: Bot)
+	public constructor(client: Client)
 	{
-		this.bot = bot;
+		this._client = client;
 		this._rl = {};
-		this._rlTimer = new Timer(this.bot, 'memberlog-ratelimit', 5, async () => this._checkMemberLogLimits());
+		this._rlTimer = new Timer(this._client, 'memberlog-ratelimit', 5, async () => this._checkMemberLogLimits());
 	}
 
 	/**

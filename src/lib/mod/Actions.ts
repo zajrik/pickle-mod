@@ -7,30 +7,30 @@ import { GuildMember, Guild, User } from 'discord.js';
  */
 export default class Actions
 {
-	private _bot: ModBot;
-
-	public constructor(bot: ModBot)
+	private _client: ModBot;
+	public constructor(client: ModBot)
 	{
-		this._bot = bot;
+		this._client = client;
 	}
 
 	/**
 	 * Increment the number of times the given user has
 	 * received a given type of formal moderation action
 	 */
-	public count(user: User, guild: Guild, type: ActionType): void
+	public async count(user: User, guild: Guild, type: ActionType): Promise<void>
 	{
-		this._bot.mod.managers.history.incr(user, guild, type);
+		await this._client.mod.managers.history.incr(user, guild, type);
 	}
 
 	/**
 	 * Check the number of past offenses a user has had
 	 */
-	public checkUserHistory(guild: Guild, user: User): { toString: () => string, color: number, values: number[]}
+	public async checkUserHistory(guild: Guild, user: User): Promise<{ toString: () => string, color: number, values: number[]}>
 	{
-		let { warn, mute, kick, ban }: MemberHistory = this._bot.mod.managers.history.get(user, guild);
-		const values = [warn, mute, kick, ban] = [warn || 0, mute || 0, kick || 0, ban || 0];
-		const colors: number[] = [
+		let { warn, mute, kick, ban }: MemberHistory = await this._client.mod.managers.history.get(user, guild);
+		const values: int[] = [warn, mute, kick, ban] = [warn || 0, mute || 0, kick || 0, ban || 0];
+		const colors: int[] =
+		[
 			8450847,
 			10870283,
 			13091073,
@@ -39,8 +39,8 @@ export default class Actions
 			16667430,
 			16462404
 		];
-		const colorIndex: number = Math.min(values
-			.reduce((a: number, b: number) => a + b), colors.length - 1);
+		const colorIndex: int = Math.min(values
+			.reduce((a: int, b: int) => a + b), colors.length - 1);
 
 		return {
 			toString: () => `This user has ${warn} warning${
@@ -58,7 +58,7 @@ export default class Actions
 	 */
 	public async warn(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this.count(member.user, guild, 'warn');
+		await this.count(member.user, guild, 'warn');
 		return member;
 	}
 
@@ -67,9 +67,9 @@ export default class Actions
 	 */
 	public async mute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this.count(member.user, guild, 'mute');
-		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		return await member.addRoles([guild.roles.get(storage.getSetting('mutedrole'))]);
+		await this.count(member.user, guild, 'mute');
+		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		return await member.addRoles([guild.roles.get(await storage.settings.get('mutedrole'))]);
 	}
 
 	/**
@@ -78,7 +78,7 @@ export default class Actions
 	public async setMuteDuration(member: GuildMember, guild: Guild, duration: int): Promise<void>
 	{
 		const user: User = member.user;
-		await this._bot.mod.managers.mute.set(member, duration);
+		await this._client.mod.managers.mute.set(member, duration);
 		console.log(`Updated mute: '${user.username}#${user.discriminator}' in '${guild.name}'`);
 	}
 
@@ -87,8 +87,8 @@ export default class Actions
 	 */
 	public async unmute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		return await member.removeRole(guild.roles.get(storage.getSetting('mutedrole')));
+		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		return await member.removeRole(guild.roles.get(await storage.settings.get('mutedrole')));
 	}
 
 	/**
@@ -96,7 +96,7 @@ export default class Actions
 	 */
 	public async kick(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		this.count(member.user, guild, 'kick');
+		await this.count(member.user, guild, 'kick');
 		return await member.kick();
 	}
 
@@ -105,7 +105,7 @@ export default class Actions
 	 */
 	public async ban(user: User, guild: Guild): Promise<GuildMember>
 	{
-		this.count(user, guild, 'ban');
+		await this.count(user, guild, 'ban');
 		return <GuildMember> await guild.ban((<User> user).id || <any> user, 7);
 	}
 
@@ -122,7 +122,7 @@ export default class Actions
 	 */
 	public async softban(user: User, guild: Guild): Promise<User>
 	{
-		this.count(user, guild, 'kick');
+		await this.count(user, guild, 'kick');
 		await guild.ban(user, 7);
 		await new Promise((r: any) => setTimeout(r, 5e3));
 		return await guild.unban(user.id);

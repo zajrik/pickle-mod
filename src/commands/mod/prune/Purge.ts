@@ -1,7 +1,10 @@
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { Collection } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import { modOnly } from '../../../lib/Util';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Purge extends Command<ModBot>
 {
@@ -16,12 +19,11 @@ export default class Purge extends Command<ModBot>
 			group: 'prune',
 			guildOnly: true
 		});
-
-		this.use(Middleware.resolveArgs({ '<quantity>': 'Number' }));
-		this.use(Middleware.expect({ '<quantity>': 'Number' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<quantity>': 'Number' }))
+	@using(expect({ '<quantity>': 'Number' }))
 	public async action(message: Message, [quantity]: [int]): Promise<any>
 	{
 		if (!quantity || quantity < 1)

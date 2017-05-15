@@ -24,17 +24,17 @@
   },
   "homepage": "https://github.com/zajrik/modbot#readme",
   "dependencies": {
-    "discord.js": "^11.0.0",
-    "yamdbf": "^2.6.0",
+    "yamdbf": "github:zajrik/yamdbf",
     "yamdbf-addon-dm-manager": "github:zajrik/yamdbf-addon-dm-manager"
   },
   "devDependencies": {
-    "@types/node": "^6.0.46",
+    "@types/node": "^6.0.73",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-sourcemaps": "^2.4.0",
-    "gulp-typescript": "^3.1.0",
-    "tslint": "^3.15.1",
-    "typescript": "^2.2.1"
+    "gulp-tslint": "^8.0.0",
+    "gulp-typescript": "^3.1.6",
+    "tslint": "^5.2.0",
+    "typescript": "^2.3.2"
   }
 }

@@ -1,9 +1,9 @@
 import { Collection, RichEmbed } from 'discord.js';
-import { Bot, Command, GuildStorage, Message } from 'yamdbf';
+import { Client, Command, GuildStorage, Message } from 'yamdbf';
 
-export default class Help extends Command<Bot>
+export default class Help extends Command<Client>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: Client)
 	{
 		super(bot, {
 			name: 'help',
@@ -16,21 +16,21 @@ export default class Help extends Command<Bot>
 		});
 	}
 
-	public action(message: Message, args: string[]): void
+	public async action(message: Message, args: string[]): Promise<any>
 	{
 		const dm: boolean = message.channel.type === 'dm' || message.channel.type === 'group';
-		const mentionName: string = `@${this.bot.user.username}#${this.bot.user.discriminator}`;
-		const prefix: string = !dm ? message.guild.storage.getSetting('prefix') : '';
+		const mentionName: string = `@${this.client.user.username}#${this.client.user.discriminator}`;
+		const prefix: string = !dm ? await message.guild.storage.settings.get('prefix') : '';
 
 		let usableCommands: Collection<string, Command<any>> =
-			new Collection<string, Command<any>>(this.bot.commands.entries());
+			new Collection<string, Command<any>>(this.client.commands.entries());
 		let command: Command<any>;
 		let output: string = '';
 		let embed: RichEmbed = new RichEmbed();
 
 		if (!args[0])
 		{
-			embed.setAuthor('Moderation commands', this.bot.user.avatarURL)
+			embed.setAuthor('Moderation commands', this.client.user.avatarURL)
 				.addField(`${prefix}warn <member> <...reason>`, 'Give a formal warning to a user')
 				.addField(`${prefix}mute <member> <duration> <...reason>`,
 					`Mute a user for a specified duration\n`
@@ -53,23 +53,23 @@ export default class Help extends Command<Bot>
 			{
 				const storage: GuildStorage = message.guild.storage;
 				for (const [name, cmd] of usableCommands.entries())
-					if (storage.settingExists('disabledGroups')
-						&& storage.getSetting('disabledGroups').includes(cmd.group))
+					if (await storage.settings.exists('disabledGroups')
+						&& (await storage.settings.get('disabledGroups') || []).includes(cmd.group))
 						usableCommands.delete(name);
 			}
 
 			embed.addField('Other commands', usableCommands.map((c: Command<any>) => c.name).join(', '))
-				.addField('\u200b', `Use \`help <command>\` ${this.bot.selfbot ? '' : `or \`${
+				.addField('\u200b', `Use \`help <command>\` ${this.client.selfbot ? '' : `or \`${
 					mentionName} help <command>\` `}for more information.\n\n`);
 		}
 		else
 		{
 			const filter: any = (c: Command<any>) =>
 				c.name === args[0] || c.aliases.includes(<string> args[0]);
-			if (!dm) command = this.bot.commands
-				.filterGuildUsable(this.bot, message).filter(filter).first();
-			else command = this.bot.commands
-				.filterDMHelp(this.bot, message).filter(filter).first();
+			if (!dm) command = (await this.client.commands
+				.filterGuildUsable(this.client, message)).filter(filter).first();
+			else command = this.client.commands
+				.filterDMHelp(this.client, message).filter(filter).first();
 
 			if (!command) output = `A command by that name could not be found or you do\n`
 				+ `not have permissions to view it in this guild or channel`;
@@ -83,7 +83,7 @@ export default class Help extends Command<Bot>
 		}
 
 		output = dm ? output.replace(/<prefix>/g, '')
-			: output.replace(/<prefix>/g, this.bot.getPrefix(message.guild) || '');
+			: output.replace(/<prefix>/g, await this.client.getPrefix(message.guild) || '');
 
 		embed.setColor(11854048);
 		if (output) embed.setDescription(output);

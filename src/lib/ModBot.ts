@@ -1,18 +1,38 @@
-import { Bot, BotOptions } from 'yamdbf';
+import { Client, ListenerUtil, LogLevel } from 'yamdbf';
 import { GuildMember, TextChannel, RichEmbed, Message, Guild } from 'discord.js';
-import { DMManager } from 'yamdbf-addon-dm-manager';
+// import { DMManager } from 'yamdbf-addon-dm-manager';
 import RateLimiter from './mod/RateLimiter';
 import ModLoader from './mod/Loader';
+const config: any = require('../config.json');
+const pkg: any = require('../../package.json');
 
-export default class ModBot extends Bot
+const { once } = ListenerUtil;
+
+export default class ModBot extends Client
 {
+	public config: any;
 	public mod: ModLoader;
 	private _memberLogRateLimiter: RateLimiter;
-	private _dmManager: DMManager;
+	// private _dmManager: DMManager;
 
-	public constructor(botOptions: BotOptions)
+	public constructor()
 	{
-		super(botOptions);
+		super({
+			name: 'YAMDBF Mod',
+			token: config.token,
+			owner: config.owner,
+			version: pkg.version,
+			unknownCommandError: false,
+			statusText: 'Obey the law.',
+			readyText: 'Ready\u0007',
+			commandsDir: './bin/commands',
+			ratelimit: '10/1m',
+			pause: true,
+			logLevel: LogLevel.INFO
+		});
+
+		this.config = config;
+
 		this._memberLogRateLimiter = new RateLimiter(this);
 
 		this.on('guildMemberAdd', (member: GuildMember) => this.logMember(member, true, 8450847));
@@ -22,14 +42,23 @@ export default class ModBot extends Bot
 		this.on('command', (name: string, args: any, execTime: number, message: Message) =>
 			this.logCommand(name, args, execTime, message));
 
-		this.once('ready', () =>
+		this.once('clientReady', async () =>
 		{
 			this.mod = new ModLoader(this);
-			this._dmManager = new DMManager(this, this.config.DMManager);
+			await this.mod.init();
+			// this._dmManager = new DMManager(this, this.config.DMManager);
 		});
 
-		this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
-		this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
+		// this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
+		// this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
+	}
+
+	@once('pause')
+	private async _onPause(): Promise<void>
+	{
+		await this.setDefaultSetting('prefix', '?');
+		await this.setDefaultSetting('cases', 0);
+		this.emit('continue');
 	}
 
 	/**

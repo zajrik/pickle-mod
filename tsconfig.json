@@ -1,12 +1,19 @@
 {
-	"compilerOptions": {
-		"target": "es6",
-		"module": "commonjs",
-		"lib": [
-			"es7"
-		],
-		"experimentalDecorators": true
-	},
+    "compilerOptions": {
+        "noImplicitAny": true,
+		"moduleResolution": "node",
+        "module": "commonjs",
+        "target": "es6",
+        "lib": [
+            "es7"
+        ],
+        "sourceMap": true,
+        "removeComments": false,
+        "experimentalDecorators": true,
+		"typeRoots": [
+			"node_modules/yamdbf/node_modules/discord.js/typings"
+		]
+    },
 	"exclude": [
 		"node_modules",
 		"bower_components",

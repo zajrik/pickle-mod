@@ -1,7 +1,10 @@
 import { modOnly } from '../../../lib/Util';
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Prune extends Command<ModBot>
 {
@@ -12,16 +15,15 @@ export default class Prune extends Command<ModBot>
 			aliases: [],
 			description: 'Remove the last given quantity of messages for the provided member',
 			usage: '<prefix>prune <quantity> <member>',
-			extraHelp: 'Can delete up to 100 messages per command call',
+			extraHelp: 'Removes as many messages as possible from the given member within the given quantity of messages. Can delete up to 100 messages per command call',
 			group: 'prune',
 			guildOnly: true
 		});
-
-		this.use(Middleware.resolveArgs({ '<quantity>': 'Number', '<member>': 'Member' }));
-		this.use(Middleware.expect({ '<quantity>': 'Number', '<member>': 'Member' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<quantity>': 'Number', '<member>': 'Member' }))
+	@using(expect({ '<quantity>': 'Number', '<member>': 'Member' }))
 	public async action(message: Message, [quantity, member]: [int, GuildMember]): Promise<any>
 	{
 		if (!quantity || quantity < 1)

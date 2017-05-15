@@ -1,4 +1,4 @@
 /**
  * Storage entry containing all active appeals
  */
-type ActiveAppeals = { [id: string]: string }
+type ActiveAppeals = { [id: string]: string };

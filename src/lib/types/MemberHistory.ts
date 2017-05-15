@@ -7,4 +7,4 @@ type MemberHistory = {
 	mute: int;
 	kick: int;
 	ban: int;
-}
+};

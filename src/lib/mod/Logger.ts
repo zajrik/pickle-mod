@@ -9,22 +9,21 @@ import ModBot from '../ModBot';
  */
 export default class Logger
 {
-	private _bot: ModBot;
-	public constructor(bot: ModBot)
+	private _client: ModBot;
+	public constructor(client: ModBot)
 	{
-		this._bot = bot;
+		this._client = client;
 	}
 
 	/**
 	 * Post the moderation case to the mod-logs channel
 	 */
-	public caseLog(user: User, guild: Guild, type: CaseType, reason: string, issuer: User, duration?: string): Promise<Message>
+	public async caseLog(user: User, guild: Guild, type: CaseType, reason: string, issuer: User, duration?: string): Promise<Message>
 	{
-		if (!this._bot.mod.hasLoggingChannel(guild)) return null;
-		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		let caseNum: number = storage.getSetting('cases') || 0;
-		caseNum++;
-		storage.setSetting('cases', caseNum);
+		if (!await this._client.mod.hasLoggingChannel(guild)) return null;
+		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		let caseNum: number = await storage.settings.get('cases') || 0;
+		await storage.settings.set('cases', ++caseNum);
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(CaseTypeColors[type])
@@ -36,7 +35,7 @@ export default class Logger
 			.setFooter(`Case ${caseNum}`)
 			.setTimestamp();
 
-		return (<TextChannel> guild.channels.get(storage.getSetting('modlogs'))).sendEmbed(embed);
+		return (<TextChannel> guild.channels.get(await storage.settings.get('modlogs'))).sendEmbed(embed);
 	}
 
 	/**
@@ -45,7 +44,7 @@ export default class Logger
 	public async findCase(guild: Guild, loggedCase: int): Promise<Message>
 	{
 		const messages: Collection<string, Message> = await (<TextChannel> guild.channels
-			.get(this._bot.guildStorages.get(guild).getSetting('modlogs')))
+			.get(await this._client.storage.guilds.get(guild.id).settings.get('modlogs')))
 			.fetchMessages({ limit: 100 });
 
 		const foundCase: Message = messages.find((msg: Message) =>
@@ -67,8 +66,8 @@ export default class Logger
 
 		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
 		if (messageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`
-			&& messageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
-			&& !(await guild.fetchMember(issuer)).hasPermission('MANAGE_GUILD'))
+			&& messageEmbed.author.name !== `${this._client.user.username}#${this._client.user.discriminator}`
+			&& !(await guild.fetchMember(issuer)).permissions.has('MANAGE_GUILD'))
 			return null;
 
 		const durationRegex: RegExp = /\*\*Length:\*\* (.+)*/;
@@ -106,7 +105,7 @@ export default class Logger
 		if (!banCaseMessage) return null;
 
 		const banMessageEmbed: MessageEmbed = banCaseMessage.embeds[0];
-		if (banMessageEmbed.author.name !== `${this._bot.user.username}#${this._bot.user.discriminator}`
+		if (banMessageEmbed.author.name !== `${this._client.user.username}#${this._client.user.discriminator}`
 			&& banMessageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
 
 		let unbanCaseMessage: Message;
@@ -123,9 +122,9 @@ export default class Logger
 			.setFooter(banMessageEmbed.footer.text)
 			.setTimestamp(new Date(banMessageEmbed.createdTimestamp));
 
-		const storage: GuildStorage = this._bot.guildStorages.get(guild);
-		storage.setSetting('cases', storage.getSetting('cases') - 1);
-		return banCaseMessage.edit('', Object.assign({}, { embed })).then(() => unbanCaseMessage.delete());
+		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		await storage.settings.set('cases', await storage.settings.get('cases') - 1);
+		return banCaseMessage.edit('', { embed }).then(() => unbanCaseMessage.delete());
 	}
 
 	/**
@@ -134,19 +133,20 @@ export default class Logger
 	 */
 	public async awaitMuteCase(guild: Guild, user: User): Promise<Message>
 	{
-		return new Promise<Message>(resolve =>
+		return new Promise<Message>(async resolve =>
 		{
-			const logs: TextChannel = <TextChannel> guild.channels.get(this._bot.guildStorages.get(guild).getSetting('modlogs'));
+			const logs: TextChannel = <TextChannel> guild.channels.get(
+				await this._client.storage.guilds.get(guild.id).settings.get('modlogs'));
 			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
 			const actionRegex: RegExp = /\*\*Action:\*\* (Mute)/;
 
-			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._bot.user.id
+			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._client.user.id
 				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 60e3 });
 
 			let found: Message;
 			collector.on('end', () => resolve(found));
 
-			collector.on('message', (message: Message) =>
+			collector.on(<any> 'message', (message: Message) =>
 			{
 				if (/Mute/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
 				if (found) collector.stop('found');
@@ -160,13 +160,14 @@ export default class Logger
 	 */
 	public async awaitBanCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Softban'): Promise<Message | Message[]>
 	{
-		return new Promise<Message | Message[]>(resolve =>
+		return new Promise<Message | Message[]>(async resolve =>
 		{
-			const logs: TextChannel = <TextChannel> guild.channels.get(this._bot.guildStorages.get(guild).getSetting('modlogs'));
+			const logs: TextChannel = <TextChannel> guild.channels.get(
+				await this._client.storage.guilds.get(guild.id).settings.get('modlogs'));
 			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
 			const actionRegex: RegExp = /\*\*Action:\*\* (Ban|Unban|Softban)/;
 
-			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._bot.user.id
+			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._client.user.id
 				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 60e3 });
 
 			let found: Message | Message[];
@@ -176,7 +177,7 @@ export default class Logger
 			{
 				case 'Ban':
 				case 'Unban':
-					collector.on('message', (message: Message) =>
+					collector.on(<any> 'message', (message: Message) =>
 					{
 						if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
 						if (found) collector.stop('found');
@@ -186,7 +187,7 @@ export default class Logger
 				case 'Softban':
 					let softbanResult: boolean[] = [false, false];
 					found = [null, null];
-					collector.on('message', (message: Message) =>
+					collector.on(<any> 'message', (message: Message) =>
 					{
 						const caseType: string = message.embeds[0].description.match(actionRegex)[1];
 						const index: int = caseType === 'Ban' ? 0 : caseType === 'Unban' ? 1 : null;
@@ -208,7 +209,7 @@ export default class Logger
 	public async fixCases(start: Message): Promise<boolean>
 	{
 		const caseRegex: RegExp = /Case (\d+)/;
-		if (start.channel.id !== start.guild.storage.getSetting('modlogs')
+		if (start.channel.id !== await start.guild.storage.settings.get('modlogs')
 			|| (start.embeds[0] && !caseRegex.test(start.embeds[0].footer.text))) return false;
 
 		const logs: TextChannel = <TextChannel> start.channel;
@@ -225,7 +226,7 @@ export default class Logger
 			if (fetched.length < 100) break;
 		}
 
-		if (cases.find(c => c.author.id !== this._bot.user.id))
+		if (cases.find(c => c.author.id !== this._client.user.id))
 			throw `Operation failed: Found at least one case that cannot be edited.`;
 
 		for (const loggedCase of cases)
@@ -241,9 +242,9 @@ export default class Logger
 				.setFooter(`Case ${++currentCase}`)
 				.setTimestamp(new Date(messageEmbed.createdTimestamp));
 
-			await loggedCase.edit('', Object.assign({}, { embed }));
+			await loggedCase.edit('', { embed });
 		}
-		start.guild.storage.setSetting('cases', currentCase);
+		await start.guild.storage.settings.set('cases', currentCase);
 
 		return true;
 	}

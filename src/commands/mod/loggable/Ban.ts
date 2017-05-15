@@ -1,8 +1,11 @@
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { User, GuildMember, RichEmbed } from 'discord.js';
 import { prompt, PromptResult } from '../../../lib/Util';
 import { modOnly } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Ban extends Command<ModBot>
 {
@@ -16,13 +19,11 @@ export default class Ban extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }));
-		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }))
+	@using(expect({ '<user>': 'User', '<...reason>': 'String' }))
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		if (user.id === message.author.id)
@@ -32,11 +33,11 @@ export default class Ban extends Command<ModBot>
 		try { member = await message.guild.fetchMember(user); }
 		catch (err) {}
 
-		const modRole: string = message.guild.storage.getSetting('modrole');
+		const modRole: string = await message.guild.storage.settings.get('modrole');
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
-		const offenses: any = this.bot.mod.actions.checkUserHistory(message.guild, user);
+		const offenses: any = await this.client.mod.actions.checkUserHistory(message.guild, user);
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)
 			.setDescription(`**Reason:** ${reason}`)
@@ -58,9 +59,9 @@ export default class Ban extends Command<ModBot>
 		const banning: Message = <Message> await message.channel.send(
 			`Banning ${user.username}#${user.discriminator}...`);
 
-		this.bot.mod.actions.ban(user, message.guild);
-		let banCase: Message = <Message> await this.bot.mod.logger.awaitBanCase(message.guild, user, 'Ban');
-		this.bot.mod.logger.editCase(message.guild, banCase, message.author, reason);
+		this.client.mod.actions.ban(user, message.guild);
+		let banCase: Message = <Message> await this.client.mod.logger.awaitBanCase(message.guild, user, 'Ban');
+		this.client.mod.logger.editCase(message.guild, banCase, message.author, reason);
 
 		console.log(`Banned ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
 		banning.edit(`Successfully banned ${user.username}#${user.discriminator}`);

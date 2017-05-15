@@ -1,6 +1,6 @@
 import { GuildStorage } from 'yamdbf/bin';
 import { GuildMember, Guild, Collection } from 'discord.js';
-import { LocalStorage } from 'yamdbf';
+import { KeyedStorage, JSONProvider } from 'yamdbf';
 import ModBot from '../../ModBot';
 
 /**
@@ -8,12 +8,20 @@ import ModBot from '../../ModBot';
  */
 export class MuteManager
 {
-	private _storage: LocalStorage;
-	private _bot: ModBot;
-	public constructor(bot: ModBot)
+	private _storage: KeyedStorage;
+	private _client: ModBot;
+	public constructor(client: ModBot)
 	{
-		this._storage = new LocalStorage('storage/managers/mute');
-		this._bot = bot;
+		this._storage = new KeyedStorage('managers/mute', JSONProvider);
+		this._client = client;
+	}
+
+	/**
+	 * Initialize the storage for this manager
+	 */
+	public async init(): Promise<void>
+	{
+		await this._storage.init();
 	}
 
 	/**
@@ -23,100 +31,98 @@ export class MuteManager
 	{
 		let guild: Guild = member.guild;
 		let mute: MuteObject;
-		if (this.isMuted(member)) mute = this.getMute(member);
+		if (await this.isMuted(member)) mute = await this.getMute(member);
 		else mute = {
 			member: member.user.id,
 			guild: guild.id
 		};
 		if (duration) mute.expires = Date.now() + duration;
-		await this._storage.queue(`${guild.id}/${member.id}`, async key =>
-		{
-			this._storage.setItem(key, mute);
-		});
+		await this._storage.set(`${guild.id}.${member.id}`, mute);
 	}
 
 	/**
 	 * Add the `leftGuild` flag to a member's mute object
 	 */
-	public setEvasionFlag(member: GuildMember): void
+	public async setEvasionFlag(member: GuildMember): Promise<void>
 	{
-		if (!this.isMuted(member)) return;
-		this._storage.setItem(`${member.guild.id}/${member.user.id}/leftGuild`, true);
+		if (!await this.isMuted(member)) return;
+		await this._storage.set(`${member.guild.id}.${member.user.id}.leftGuild`, true);
 	}
 
 	/**
 	 * Remove the `leftGuild` flag from a member's mute object
 	 */
-	public clearEvasionFlag(member: GuildMember): void
+	public async clearEvasionFlag(member: GuildMember): Promise<void>
 	{
-		if (!this.isMuted(member)) return;
-		this._storage.removeItem(`${member.guild.id}/${member.user.id}/leftGuild`);
+		if (!await this.isMuted(member)) return;
+		await this._storage.remove(`${member.guild.id}.${member.user.id}.leftGuild`);
 	}
 
 	/**
 	 * Return whether or not a member is flagged for mute evasion
 	 */
-	public isEvasionFlagged(member: GuildMember): boolean
+	public async isEvasionFlagged(member: GuildMember): Promise<boolean>
 	{
-		if (!this.isMuted(member)) return false;
-		return this._storage.exists(`${member.guild.id}/${member.user.id}/leftGuild`)
-			&& this._storage.getItem(`${member.guild.id}/${member.user.id}/leftGuild`);
+		if (!await this.isMuted(member)) return false;
+		return await this._storage.exists(`${member.guild.id}.${member.user.id}.leftGuild`)
+			&& await this._storage.get(`${member.guild.id}.${member.user.id}.leftGuild`);
 	}
 
 	/**
 	 * Remove a mute from storage
 	 */
-	public remove(member: GuildMember): void
+	public async remove(member: GuildMember): Promise<void>
 	{
-		this._storage.removeItem(`${member.guild.id}/${member.user.id}`);
+		await this._storage.remove(`${member.guild.id}.${member.user.id}`);
 	}
 
 	/**
 	 * Returns whether or not the member currently has a stored mute
 	 */
-	public isMuted(member: GuildMember): boolean
+	public async isMuted(member: GuildMember): Promise<boolean>
 	{
-		return this._storage.exists(`${member.guild.id}/${member.user.id}`);
+		return await this._storage.exists(`${member.guild.id}.${member.user.id}`);
 	}
 
 	/**
 	 * Returns whether or not the member currently has the mute role
 	 */
-	public hasMuteRole(member: GuildMember): boolean
+	public async hasMuteRole(member: GuildMember): Promise<boolean>
 	{
-		const storage: GuildStorage = this._bot.guildStorages.get(member.guild);
-		if (member.roles.has(storage.getSetting('mutedrole'))) return true;
+		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
+		if (!await storage.settings.exists('mutedrole')) return false;
+		if (member.roles.has(await storage.settings.get('mutedrole'))) return true;
 		return false;
 	}
 
 	/**
 	 * Returns the mute object for the muted member
 	 */
-	public getMute(member: GuildMember): MuteObject
+	public async getMute(member: GuildMember): Promise<MuteObject>
 	{
-		if (!this.isMuted(member)) return null;
-		return this._storage.getItem(`${member.guild.id}/${member.user.id}`);
+		if (!await this.isMuted(member)) return null;
+		return await this._storage.get(`${member.guild.id}.${member.user.id}`);
 	}
 
 	/**
 	 * Returns whether or not a mute for a member is expired
 	 */
-	public isExpired(member: GuildMember): boolean
+	public async isExpired(member: GuildMember): Promise<boolean>
 	{
-		if (!this.isMuted(member)) return null;
-		const mute: MuteObject = this.getMute(member);
-		const storage: GuildStorage = this._bot.guildStorages.get(member.guild);
-		const mutedRole: string = storage.getSetting('mutedrole');
+		if (!await this.isMuted(member)) return null;
+		const mute: MuteObject = await this.getMute(member);
+		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
+		const mutedRole: string = await storage.settings.get('mutedrole');
 		return (mutedRole && !member.roles.has(mutedRole)) || Date.now() > mute.expires;
 	}
 
 	/**
 	 * Returns the remaining duration for a member's mute
 	 */
-	public getRemaining(member: GuildMember): int
+	public async getRemaining(member: GuildMember): Promise<int>
 	{
-		if (!this.isMuted(member)) return null;
-		const mute: MuteObject = this.getMute(member);
+		if (!await this.isMuted(member)) return null;
+		const mute: MuteObject = await this.getMute(member);
 		return mute.expires - Date.now();
 	}
 
@@ -125,7 +131,7 @@ export class MuteManager
 	 */
 	public async getMutedMembers(guild: Guild): Promise<Collection<string, GuildMember | string>>
 	{
-		const ids: string[] = Object.keys(this._storage.getItem(guild.id) || {});
+		const ids: string[] = Object.keys(await this._storage.get(guild.id) || {});
 		let mutedMembers: Collection<string, GuildMember | string> = new Collection<string, GuildMember | string>();
 		for (const id of ids)
 		{

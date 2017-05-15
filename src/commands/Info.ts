@@ -1,11 +1,11 @@
-import { Bot, Command, version, Message } from 'yamdbf';
+import { Client, Command, version, Message } from 'yamdbf';
 import { RichEmbed, Guild } from 'discord.js';
 import * as Discord from 'discord.js';
 import Time from '../lib/Time';
 
-export default class Info extends Command<Bot>
+export default class Info extends Command<Client>
 {
-	public constructor(bot: Bot)
+	public constructor(bot: Client)
 	{
 		super(bot, {
 			name: 'info',
@@ -21,13 +21,13 @@ export default class Info extends Command<Bot>
 	{
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)
-			.setAuthor('YAMDBF Mod Info', this.bot.user.avatarURL)
+			.setAuthor('YAMDBF Mod Info', this.client.user.avatarURL)
 			.addField('Mem Usage', `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`, true)
-			.addField('Uptime', Time.difference(this.bot.uptime * 2, this.bot.uptime).toString(), true)
+			.addField('Uptime', Time.difference(this.client.uptime * 2, this.client.uptime).toString(), true)
 			.addField('\u200b', '\u200b', true)
-			.addField('Servers', this.bot.guilds.size.toString(), true)
-			.addField('Channels', this.bot.channels.size.toString(), true)
-			.addField('Users', this.bot.guilds.map((g: Guild) =>
+			.addField('Servers', this.client.guilds.size.toString(), true)
+			.addField('Channels', this.client.channels.size.toString(), true)
+			.addField('Users', this.client.guilds.map((g: Guild) =>
 				g.memberCount).reduce((a: number, b: number) => a + b), true)
 			.addField('YAMDBF', `v${version}`, true)
 			.addField('Discord.js', `v${Discord.version}`, true)
@@ -35,12 +35,12 @@ export default class Info extends Command<Bot>
 			.addField('Modbot Source', '[Available on GitHub](https://github.com/zajrik/modbot)', true)
 			.addField('Modbot Support', '[Channel Invite](https://discord.gg/ZYZuKsW)', true)
 			.addField('Bot Invite', `[Click here](https://discordapp.com/oauth2/authorize`
-				+ `?permissions=297888791&scope=bot&client_id=${this.bot.user.id})`, true)
+				+ `?permissions=297888791&scope=bot&client_id=${this.client.user.id})`, true)
 			.addField('\u200b', `Be sure to use the \`guide\` command for information `
 				+ `on setting up your server for moderation! The default prefix for commands is \`?\`. `
 				+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
-				+ `just use \`@${this.bot.user.username}#${this.bot.user.discriminator} prefix\`.`)
-			.setFooter('YAMDBF', this.bot.user.avatarURL)
+				+ `just use \`@${this.client.user.username}#${this.client.user.discriminator} prefix\`.`)
+			.setFooter('YAMDBF', this.client.user.avatarURL)
 			.setTimestamp();
 
 		message.channel.sendEmbed(embed);

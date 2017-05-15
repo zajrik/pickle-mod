@@ -17,7 +17,7 @@ export default class History extends Command<ModBot>
 		});
 
 		this.use((message, args) => {
-			if (!this.bot.mod.canCallModCommand(message)) return [message, []];
+			if (!this.client.mod.canCallModCommand(message)) return [message, []];
 			else return Middleware.resolveArgs({ '<member>': 'Member' }).call(this, message, args);
 		});
 	}
@@ -25,7 +25,7 @@ export default class History extends Command<ModBot>
 	public async action(message: Message, [member, reset]: [GuildMember, string]): Promise<any>
 	{
 		const user: User = member ? member.user : message.author;
-		let offenses: any = this.bot.mod.actions.checkUserHistory(message.guild, user);
+		let offenses: any = await this.client.mod.actions.checkUserHistory(message.guild, user);
 		let embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)
 			.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
@@ -35,7 +35,7 @@ export default class History extends Command<ModBot>
 
 		if (reset === 'reset')
 		{
-			if (!message.member.hasPermission('MANAGE_GUILD'))
+			if (!message.member.permissions.has('MANAGE_GUILD'))
 				return message.channel.send(`You don't have permission to reset member history.`);
 
 			const [result]: [PromptResult] = <[PromptResult]> await prompt(message,
@@ -44,9 +44,9 @@ export default class History extends Command<ModBot>
 			if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting history reset.');
 			if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting history reset.');
 
-			this.bot.mod.managers.history.clear(user, message.guild);
+			await this.client.mod.managers.history.clear(user, message.guild);
 
-			offenses = this.bot.mod.actions.checkUserHistory(message.guild, user);
+			offenses = await this.client.mod.actions.checkUserHistory(message.guild, user);
 			embed = new RichEmbed()
 				.setColor(offenses.color)
 				.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)

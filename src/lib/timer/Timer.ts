@@ -1,4 +1,4 @@
-import { Bot, LocalStorage } from 'yamdbf';
+import { Client, KeyedStorage, JSONProvider } from 'yamdbf';
 
 /**
  * A timer for bots that allows registering callback functions that
@@ -7,23 +7,22 @@ import { Bot, LocalStorage } from 'yamdbf';
  */
 export default class Timer
 {
-	private _bot: Bot;
+	private _bot: Client;
 	private _interval: int;
 	/** Must be async */
 	private _callback: () => Promise<void>;
-	private _storage: LocalStorage;
+	private _storage: KeyedStorage;
 	private _ticks: int;
 	private _timer: NodeJS.Timer;
 	public name: string;
 
-	public constructor(bot: Bot, name: string, interval: int, callback: () => Promise<void>)
+	public constructor(bot: Client, name: string, interval: int, callback: () => Promise<void>)
 	{
 		this.name = name;
-		this._storage = new LocalStorage(`storage/timers/${this.name}`);
+		this._storage = new KeyedStorage(`timers/${this.name}`, JSONProvider);
 		this._bot = bot;
 		this._interval = interval;
 		this._callback = callback;
-		this._ticks = this._storage.getItem(this.name) || 0;
 
 		this.create();
 	}
@@ -33,14 +32,18 @@ export default class Timer
 	 * when the timer is first created. Can be called again to
 	 * recreate the timer if it has been destroyed.
 	 */
-	public create(): void
+	public async create(): Promise<void>
 	{
+		await this._storage.init();
+		if (typeof this._ticks === 'undefined')
+			this._ticks = await this._storage.get(this.name) || 0;
+
 		if (this._timer) throw new Error('Timer has already been created.');
 		this._timer = this._bot.setInterval(async () =>
 		{
 			if (this._ticks >= this._interval) this._ticks = 0;
 			if (this._ticks++ === 0) this._callback().catch(console.error);
-			this._storage.setItem(this.name, this._ticks);
+			await this._storage.set(this.name, this._ticks);
 		}, 1000);
 	}
 
@@ -48,11 +51,11 @@ export default class Timer
 	 * Destroy the timer, resetting ticks and clearing the interval.
 	 * The timer can be created again with `<Timer>.create()`
 	 */
-	public destroy(): void
+	public async destroy(): Promise<void>
 	{
 		this._bot.clearInterval(this._timer);
 		this._ticks = 0;
 		this._timer = null;
-		this._storage.setItem(this.name, this._ticks);
+		await this._storage.set(this.name, this._ticks);
 	}
 }

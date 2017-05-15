@@ -3,6 +3,16 @@ import { Command } from 'yamdbf';
 import ModBot from '../lib/ModBot';
 
 /**
+ * Represents possible results of Util#prompt
+ */
+export enum PromptResult
+{
+	SUCCESS,
+	FAILURE,
+	TIMEOUT
+}
+
+/**
  * Provide a prompt with simple success/failure expressions that
  * succeeds/fails if the respective expression is matched. Resolves
  * with a tuple containing the PromptResult, as well as the message
@@ -26,16 +36,6 @@ export async function prompt(
 }
 
 /**
- * Represents possible results of Util#prompt
- */
-export enum PromptResult
-{
-	SUCCESS,
-	FAILURE,
-	TIMEOUT
-}
-
-/**
  * Command action method decorator for rejecting command calls
  * from non-mods or improperly set up guilds
  */
@@ -47,8 +47,8 @@ export function modOnly(target: Command<ModBot>, key: string, descriptor: Proper
 	const original: any = descriptor.value;
 	descriptor.value = async function(message: Message, args: any[]): Promise<any>
 	{
-		const canCall: boolean = await this.bot.mod.canCallModCommand(message);
-		if (!canCall) this.bot.mod.sendModError(message);
+		const canCall: boolean = await (<Command<ModBot>> this).client.mod.canCallModCommand(message);
+		if (!canCall) (<Command<ModBot>> this).client.mod.sendModError(message);
 		else return await original.apply(this, [message, args]);
 	};
 	return descriptor;

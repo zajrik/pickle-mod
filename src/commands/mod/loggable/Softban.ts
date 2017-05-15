@@ -1,7 +1,10 @@
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import { modOnly } from '../../../lib/Util';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Softban extends Command<ModBot>
 {
@@ -16,13 +19,11 @@ export default class Softban extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }));
-		this.use(expect({ '<user>': 'User', '<...reason>': 'String' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }))
+	@using(expect({ '<user>': 'User', '<...reason>': 'String' }))
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		if (user.id === message.author.id)
@@ -32,7 +33,7 @@ export default class Softban extends Command<ModBot>
 		try { member = await message.guild.fetchMember(user); }
 		catch (err) {}
 
-		const modRole: string = message.guild.storage.getSetting('modrole');
+		const modRole: string = await message.guild.storage.settings.get('modrole');
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
@@ -47,9 +48,9 @@ export default class Softban extends Command<ModBot>
 		}
 		catch (err) { console.log(`Failed to send softban DM to ${user.username}#${user.discriminator}`); }
 
-		this.bot.mod.actions.softban(user, message.guild);
-		let cases: Message[] = <Message[]> await this.bot.mod.logger.awaitBanCase(message.guild, user, 'Softban');
-		this.bot.mod.logger.mergeSoftban(message.guild, cases[0], cases[1], message.author, reason);
+		this.client.mod.actions.softban(user, message.guild);
+		let cases: Message[] = <Message[]> await this.client.mod.logger.awaitBanCase(message.guild, user, 'Softban');
+		this.client.mod.logger.mergeSoftban(message.guild, cases[0], cases[1], message.author, reason);
 
 		return kicking.edit(`Successfully softbanned ${user.username}#${user.discriminator}`);
 	}

@@ -1,9 +1,12 @@
 import { MuteManager } from '../../../lib/mod/managers/MuteManager';
 import { modOnly } from '../../../lib/Util';
-import { Command, Message, Middleware } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { GuildMember, MessageEmbed } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
 import Time from '../../../lib/Time';
+
+const { resolveArgs, expect } = Middleware;
+const { using } = CommandDecorators;
 
 export default class Duration extends Command<ModBot>
 {
@@ -18,13 +21,11 @@ export default class Duration extends Command<ModBot>
 			group: 'mod',
 			guildOnly: true
 		});
-
-		const { resolveArgs, expect } = Middleware;
-		this.use(resolveArgs({ '<case#>': 'String', '<duration>': 'Duration' }));
-		this.use(expect({ '<case#>': 'String', '<duration>': 'Number' }));
 	}
 
 	@modOnly
+	@using(resolveArgs({ '<case#>': 'String', '<duration>': 'Duration' }))
+	@using(expect({ '<case#>': 'String', '<duration>': 'Number' }))
 	public async action(message: Message, [toSelect, duration]: [string | int, int]): Promise<any>
 	{
 		if (!isNaN(parseInt(<string> toSelect))) toSelect = parseInt(<string> toSelect);
@@ -32,14 +33,14 @@ export default class Duration extends Command<ModBot>
 			return message.channel.send(`You must provide a case number or 'latest'`);
 
 		const caseNum: int = typeof toSelect === 'string' ?
-			message.guild.storage.getSetting('cases') : toSelect;
-		const caseMessage: Message = await this.bot.mod.logger.findCase(message.guild, caseNum);
+			await message.guild.storage.settings.get('cases') : toSelect;
+		const caseMessage: Message = await this.client.mod.logger.findCase(message.guild, caseNum);
 		if (!caseMessage) return message.channel.send('Failed to fetch case.');
-		if (caseMessage.author.id !== this.bot.user.id) return message.channel.send(`I didn't post that case.`);
+		if (caseMessage.author.id !== this.client.user.id) return message.channel.send(`I didn't post that case.`);
 
 		const messageEmbed: MessageEmbed = caseMessage.embeds[0];
 		if (messageEmbed.author.name !== `${message.author.username}#${message.author.discriminator}`
-			&& messageEmbed.author.name !== `${this.bot.user.username}#${this.bot.user.discriminator}`
+			&& messageEmbed.author.name !== `${this.client.user.username}#${this.client.user.discriminator}`
 			&& !message.member.hasPermission('MANAGE_GUILD'))
 			return message.channel.send('That is not your case to edit.');
 
@@ -53,7 +54,7 @@ export default class Duration extends Command<ModBot>
 		try { member = await message.guild.fetchMember(messageEmbed.description.match(memberIDRegex)[1]); }
 		catch (err) { return message.channel.send(`Failed to fetch the muted member.`); }
 
-		const muteManager: MuteManager = this.bot.mod.managers.mute;
+		const muteManager: MuteManager = this.client.mod.managers.mute;
 		if (!muteManager.hasMuteRole(member))
 			return message.channel.send(`That member is no longer muted.`);
 
@@ -66,8 +67,8 @@ export default class Duration extends Command<ModBot>
 				+ 'then this is in error and they will need to have their mute re-applied.');
 
 		const started: Message = <Message> await message.channel.send('Setting mute duration...');
-		await this.bot.mod.actions.setMuteDuration(member, message.guild, duration);
-		const editedCase: Message = await this.bot.mod.logger.editCase(
+		await this.client.mod.actions.setMuteDuration(member, message.guild, duration);
+		const editedCase: Message = await this.client.mod.logger.editCase(
 			message.guild, caseMessage, message.author, null, Time.duration(duration).toSimplifiedString());
 		if (!editedCase) return started.edit('Failed to edit case.');
 
