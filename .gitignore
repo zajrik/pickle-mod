@@ -8,3 +8,5 @@ npm-debug*
 /.vscode/*
 yarn*
 Test.ts
+/old_storage/*
+migration*
