@@ -47,7 +47,8 @@ export default class Mute extends Command<ModBot>
 		this.client.mod.actions.mute(member, message.guild);
 		let muteCase: Message = <Message> await this.client.mod.logger.awaitMuteCase(message.guild, user);
 		await this.client.mod.actions.setMuteDuration(member, message.guild, duration);
-		await this.client.mod.logger.editCase(message.guild, muteCase, message.author, reason, Time.duration(duration).toSimplifiedString());
+		await this.client.mod.logger.editCase(
+			message.guild, muteCase, message.author, reason, Time.duration(duration).toSimplifiedString());
 
 		return muting.edit(`Muted ${user.username}#${user.discriminator}`);
 	}

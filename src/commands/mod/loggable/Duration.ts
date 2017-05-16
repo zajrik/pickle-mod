@@ -55,13 +55,13 @@ export default class Duration extends Command<ModBot>
 		catch (err) { return message.channel.send(`Failed to fetch the muted member.`); }
 
 		const muteManager: MuteManager = this.client.mod.managers.mute;
-		if (!muteManager.hasMuteRole(member))
+		if (!await muteManager.hasMuteRole(member))
 			return message.channel.send(`That member is no longer muted.`);
 
-		if (muteManager.isExpired(member))
+		if (await muteManager.isExpired(member))
 			return message.channel.sendMessage('That mute has expired.');
 
-		if (!muteManager.isMuted(member))
+		if (!await muteManager.isMuted(member))
 			return message.channel.send(
 				'That member does not have stored mute data. If they are still muted\n'
 				+ 'then this is in error and they will need to have their mute re-applied.');

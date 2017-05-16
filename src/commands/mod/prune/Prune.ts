@@ -41,6 +41,7 @@ export default class Prune extends Command<ModBot>
 
 		if (messages.length === 1) await messages[0].delete();
 		else await message.channel.bulkDelete(messages);
+		if (member.id === message.author.id) message.delete();
 
 		return message.author.send('Prune operation completed.');
 	}

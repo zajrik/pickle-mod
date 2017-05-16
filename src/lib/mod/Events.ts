@@ -142,8 +142,11 @@ export default class Events
 		// Try to remove an active appeal for the user if there
 		// was one in the guild
 		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
+		if (!activeAppeals[user.id]) return;
+
 		const appealsChannel: TextChannel = <TextChannel> guild.channels
 			.get(await guildStorage.settings.get('appeals'));
+
 		try
 		{
 			const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
@@ -156,8 +159,6 @@ export default class Events
 				await user.send(`Your appeal has been approved. You have been unbanned from ${
 					guild.name}. You may rejoin using this invite:\n${invite.url}`);
 			}
-			// delete activeAppeals[user.id];
-			// await storage.set('activeAppeals', activeAppeals);
 		}
 		catch (err)
 		{

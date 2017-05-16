@@ -58,7 +58,7 @@ export default class Reject extends Command<ModBot>
 		const user: User = await this.client.fetchUser(id);
 
 		const activeBans: ActiveBans = await storage.get('activeBans') || {};
-		const bans: BanObject[] = activeBans[user.id];
+		const bans: BanObject[] = activeBans[user.id] || [];
 		for (let i: number = 0; i < bans.length; i++)
 		{
 			if (bans[i].guild === message.guild.id) bans.splice(i--, 1);
@@ -68,10 +68,12 @@ export default class Reject extends Command<ModBot>
 		await storage.set('activeBans', activeBans);
 
 		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
-		message.channel.fetchMessage(activeAppeals[user.id])
-			.then((msg: Message) => msg.delete()).catch(console.log);
-		delete activeAppeals[user.id];
-		await storage.set('activeAppeals', activeAppeals);
+		if (activeAppeals[user.id])
+		{
+			message.channel.fetchMessage(activeAppeals[user.id])
+				.then((msg: Message) => msg.delete()).catch(console.log);
+			await storage.remove(`activeAppeals.${user.id}`);
+		}
 
 		message.channel.send(`Rejected appeal \`${id}\``)
 			.then((res: Message) => res.delete(5000))

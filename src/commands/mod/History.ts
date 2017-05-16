@@ -9,29 +9,29 @@ export default class History extends Command<ModBot>
 	{
 		super(bot, {
 			name: 'history',
-			description: 'Check a member\'s offense history',
-			usage: '<prefix>history [member] [\'reset\']',
-			extraHelp: `To reset a member's history, just add the word 'reset' after the member to look up. If no member is provided, or you do not have permission to use mod commands, you will be DM'd your own history.`,
+			description: 'Check a user\'s offense history',
+			usage: '<prefix>history [user [\'reset\']]',
+			extraHelp: `To reset a user's history, just add the word 'reset' after the user to look up. If no user is provided, or you do not have permission to use mod commands, you will be DM'd your own history.`,
 			group: 'mod',
 			guildOnly: true
 		});
 
-		this.use((message, args) => {
-			if (!this.client.mod.canCallModCommand(message)) return [message, []];
-			else return Middleware.resolveArgs({ '<member>': 'Member' }).call(this, message, args);
+		this.use(async (message, args) => {
+			if (!await this.client.mod.canCallModCommand(message)) return [message, []];
+			else return Middleware.resolveArgs({ '[user]': 'User' }).call(this, message, args);
 		});
 	}
 
-	public async action(message: Message, [member, reset]: [GuildMember, string]): Promise<any>
+	public async action(message: Message, [user, reset]: [User, string]): Promise<any>
 	{
-		const user: User = member ? member.user : message.author;
+		user = user ? user : message.author;
 		let offenses: any = await this.client.mod.actions.checkUserHistory(message.guild, user);
 		let embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)
 			.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
 			.setFooter(offenses.toString());
 
-		if (!member) return message.author.sendEmbed(embed);
+		if (user.id === message.author.id) return message.author.sendEmbed(embed);
 
 		if (reset === 'reset')
 		{
