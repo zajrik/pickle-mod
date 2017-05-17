@@ -1,5 +1,5 @@
 import { Command, Message, Middleware } from 'yamdbf';
-import { User, RichEmbed, GuildMember } from 'discord.js';
+import { User, RichEmbed } from 'discord.js';
 import { prompt, PromptResult } from '../../lib/Util';
 import ModBot from '../../lib/ModBot';
 

@@ -1,6 +1,7 @@
 import { Client, ListenerUtil, LogLevel } from 'yamdbf';
 import { GuildMember, TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 // import { DMManager } from 'yamdbf-addon-dm-manager';
+import { MentionSpamManager } from './mod/managers/MentionSpamManager';
 import RateLimiter from './mod/RateLimiter';
 import ModLoader from './mod/Loader';
 const config: any = require('../config.json');
@@ -10,11 +11,11 @@ const { once } = ListenerUtil;
 
 export default class ModBot extends Client
 {
+	private _memberLogRateLimiter: RateLimiter;
+	private _mentionSpamManager: MentionSpamManager;
+	// private _dmManager: DMManager;
 	public config: any;
 	public mod: ModLoader;
-	private _memberLogRateLimiter: RateLimiter;
-	// private _dmManager: DMManager;
-
 	public constructor()
 	{
 		super({
@@ -46,6 +47,8 @@ export default class ModBot extends Client
 		{
 			this.mod = new ModLoader(this);
 			await this.mod.init();
+
+			this._mentionSpamManager = new MentionSpamManager(this);
 			// this._dmManager = new DMManager(this, this.config.DMManager);
 		});
 
@@ -58,6 +61,7 @@ export default class ModBot extends Client
 	{
 		await this.setDefaultSetting('prefix', '?');
 		await this.setDefaultSetting('cases', 0);
+		await this.setDefaultSetting('mentionSpam', false);
 		this.emit('continue');
 	}
 

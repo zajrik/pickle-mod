@@ -67,3 +67,19 @@ export enum CaseTypeColors
 	'Softban' = 16745216,
 	'Ban' = 16718080
 }
+
+/**
+ * Load strings from static/Strings.json
+ */
+export function stringResource(key: string, data?: TokenReplaceData): string
+{
+	const strings: { [key: string]: string } = require('../static/Strings.json');
+	let loadedString: string = strings[key];
+
+	if (typeof data === 'undefined') return loadedString;
+
+	for (const token of Object.keys(data))
+		loadedString = loadedString.replace(`{{${token}}}`, data[token]);
+
+	return loadedString;
+}
