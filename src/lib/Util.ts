@@ -69,7 +69,8 @@ export enum CaseTypeColors
 }
 
 /**
- * Load strings from static/Strings.json
+ * Load a string resource from `static/Strings.json`, replacing
+ * tokens with the given `TokenReplaceData` value, if any
  */
 export function stringResource(key: string, data?: TokenReplaceData): string
 {
@@ -79,7 +80,7 @@ export function stringResource(key: string, data?: TokenReplaceData): string
 	if (typeof data === 'undefined') return loadedString;
 
 	for (const token of Object.keys(data))
-		loadedString = loadedString.replace(`{{${token}}}`, data[token]);
+		loadedString = loadedString.replace(new RegExp(`{{${token}}}`, 'g'), data[token]);
 
 	return loadedString;
 }

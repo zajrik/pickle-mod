@@ -1,6 +1,6 @@
 import { Collection, GuildMember, Message, Role, User } from 'discord.js';
 import { GuildStorage, Logger, logger } from 'yamdbf';
-import { stringResource } from '../../Util';
+import { stringResource as res } from '../../Util';
 import ModBot from '../../ModBot';
 
 export class MentionSpamManager
@@ -61,8 +61,7 @@ export class MentionSpamManager
 
 		try
 		{
-			await message.author.send(stringResource(
-				'autoBanMessage', { guildName: message.guild.name }), { split: true });
+			await message.author.send(res('MSG_AUTO_BAN', { guildName: message.guild.name }), { split: true });
 		}
 		catch (err) { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
 
