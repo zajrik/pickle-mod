@@ -27,10 +27,15 @@ export class MentionSpamManager
 	{
 		if (!message.guild) return;
 		const storage: GuildStorage = this.client.storage.guilds.get(message.guild.id);
-		if (message.author.bot
-			|| message.guild.ownerID === message.author.id
-			|| message.member.permissions.has('ADMINISTRATOR')
-			|| message.member.roles.has(await storage.settings.get('modrole'))
+		if (message.system
+			|| message.webhookID
+			|| message.author.bot
+			|| message.guild.ownerID === message.author.id) return;
+
+		const member: GuildMember = (message.member || await message.guild.fetchMember(message.author.id));
+		if (!member) return;
+		if (member.permissions.has('ADMINISTRATOR')
+			|| member.roles.has(await storage.settings.get('modrole'))
 			|| !await storage.settings.get('mentionSpam')) return;
 
 		const mentions: Collection<string, any> =
