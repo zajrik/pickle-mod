@@ -1,16 +1,16 @@
 import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { User } from 'discord.js';
+import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
-import ModBot from '../../../lib/ModBot';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Unban extends Command<ModBot>
+export default class Unban extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'unban',
 			description: 'Unban a user by id',
 			usage: '<prefix>unban <user> <...reason>',

@@ -2,16 +2,16 @@ import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { User, GuildMember, RichEmbed } from 'discord.js';
 import { prompt, PromptResult } from '../../../lib/Util';
 import { modOnly, stringResource as res } from '../../../lib/Util';
-import ModBot from '../../../lib/ModBot';
+import { ModClient } from '../../../lib/ModClient';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Ban extends Command<ModBot>
+export default class Ban extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'ban',
 			aliases: ['b&', 'banne'],
 			description: 'Ban a user',

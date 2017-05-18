@@ -1,16 +1,16 @@
 import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { Collection } from 'discord.js';
-import ModBot from '../../../lib/ModBot';
+import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Purge extends Command<ModBot>
+export default class Purge extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'purge',
 			aliases: [],
 			description: 'Remove the last given quantity of messages from the channel',

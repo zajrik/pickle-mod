@@ -1,12 +1,12 @@
 import { Command, ClientStorage, GuildStorage } from 'yamdbf';
 import { Message, TextChannel, Guild, RichEmbed } from 'discord.js';
-import ModBot from '../../../lib/ModBot';
+import { ModClient } from '../../../lib/ModClient';
 
-export default class Appeal extends Command<ModBot>
+export default class Appeal extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'appeal',
 			description: 'Appeal a ban',
 			usage: '<prefix>appeal <message>',

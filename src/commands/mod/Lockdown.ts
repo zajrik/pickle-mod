@@ -1,18 +1,17 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Time } from 'yamdbf';
 import { TextChannel } from 'discord.js';
+import { ModClient } from '../../lib/ModClient';
 import { LockdownManager } from '../../lib/mod/managers/LockdownManager';
 import { modOnly } from '../../lib/Util';
-import ModBot from '../../lib/ModBot';
-import Time from '../../lib/Time';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Lockdown extends Command<ModBot>
+export default class Lockdown extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'lockdown',
 			description: 'Lock down a channel for a set time',
 			usage: '<prefix>lockdown <duration|\'clear\'> [#channel]',

@@ -1,7 +1,7 @@
 import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
 import { KeyedStorage, JSONProvider } from 'yamdbf';
 import { stringResource as res } from '../../Util';
-import ModBot from '../../ModBot';
+import { ModClient } from '../../ModClient';
 
 /**
  * Contains methods for managing lockdowns on guild channels
@@ -9,8 +9,8 @@ import ModBot from '../../ModBot';
 export class LockdownManager
 {
 	private _storage: KeyedStorage;
-	private _client: ModBot;
-	public constructor(client: ModBot)
+	private _client: ModClient;
+	public constructor(client: ModClient)
 	{
 		this._storage = new KeyedStorage('managers/lockdown', JSONProvider);
 		this._client = client;

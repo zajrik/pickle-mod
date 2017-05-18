@@ -1,4 +1,4 @@
-import ModBot from '../ModBot';
+import { ModClient } from '../ModClient';
 import { GuildStorage } from 'yamdbf';
 import { GuildMember, Guild, User } from 'discord.js';
 
@@ -7,8 +7,8 @@ import { GuildMember, Guild, User } from 'discord.js';
  */
 export default class Actions
 {
-	private _client: ModBot;
-	public constructor(client: ModBot)
+	private _client: ModClient;
+	public constructor(client: ModClient)
 	{
 		this._client = client;
 	}

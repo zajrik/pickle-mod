@@ -1,17 +1,17 @@
 import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { TextChannel, Role, RichEmbed } from 'discord.js';
-import ModLoader from '../../lib/mod/Loader';
-import ModBot from '../../lib/ModBot';
+import { ModClient } from '../../lib/ModClient';
 import { prompt, PromptResult } from '../../lib/Util';
+import ModLoader from '../../lib/mod/Loader';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Config extends Command<ModBot>
+export default class Config extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'config',
 			aliases: [],
 			description: 'Configure options for the server',

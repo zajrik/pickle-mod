@@ -1,17 +1,16 @@
-import Time from '../../../lib/Time';
-import { modOnly } from '../../../lib/Util';
+import { Command, Message, Middleware, CommandDecorators, Time } from 'yamdbf';
 import { GuildMember, User } from 'discord.js';
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
-import ModBot from '../../../lib/ModBot';
+import { ModClient } from '../../../lib/ModClient';
+import { modOnly } from '../../../lib/Util';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Mute extends Command<ModBot>
+export default class Mute extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'mute',
 			description: 'Mute a user',
 			usage: '<prefix>mute <member> <duration> <...reason>',

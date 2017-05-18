@@ -1,13 +1,13 @@
-import { User } from 'discord.js';
 import { Command, ClientStorage, Message } from 'yamdbf';
+import { User } from 'discord.js';
+import { ModClient } from '../../../lib/ModClient';
 import { prompt, PromptResult, modOnly } from '../../../lib/Util';
-import ModBot from '../../../lib/ModBot';
 
-export default class Reject extends Command<ModBot>
+export default class Reject extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'reject',
 			aliases: [],
 			description: 'Reject an appeal',

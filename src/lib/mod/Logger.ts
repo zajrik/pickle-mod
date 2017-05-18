@@ -1,7 +1,7 @@
 import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
 import { GuildStorage, Message } from 'yamdbf';
 import { CaseTypeColors } from '../Util';
-import ModBot from '../ModBot';
+import { ModClient } from '../ModClient';
 
 /**
  * Contains methods and handles functionality pertaining
@@ -9,8 +9,8 @@ import ModBot from '../ModBot';
  */
 export default class Logger
 {
-	private _client: ModBot;
-	public constructor(client: ModBot)
+	private _client: ModClient;
+	public constructor(client: ModClient)
 	{
 		this._client = client;
 	}
@@ -91,7 +91,7 @@ export default class Logger
 		if (duration) embed.setTimestamp(new Date());
 		else embed.setTimestamp(new Date(messageEmbed.createdTimestamp));
 
-		return caseMessage.edit('', Object.assign({}, { embed }));
+		return caseMessage.edit('', { embed });
 	}
 
 	/**

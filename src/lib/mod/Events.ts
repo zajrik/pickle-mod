@@ -1,15 +1,15 @@
 import { ClientStorage, GuildStorage, Message } from 'yamdbf';
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 import { MuteManager } from './managers/MuteManager';
-import ModBot from '../ModBot';
+import { ModClient } from '../ModClient';
 
 /**
  * Handles received moderation related client events
  */
 export default class Events
 {
-	private _client: ModBot;
-	public constructor(client: ModBot)
+	private _client: ModClient;
+	public constructor(client: ModClient)
 	{
 		this._client = client;
 

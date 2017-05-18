@@ -1,9 +1,9 @@
-import ModBot from './lib/ModBot';
+import { ModClient } from './lib/ModClient';
 
-const bot: ModBot = new ModBot();
-bot.start();
+const client: ModClient = new ModClient();
+client.start();
 
-bot.on('disconnect', () => process.exit(100));
+client.on('disconnect', () => process.exit(100));
 
 process.on('unhandledRejection', (reason: string) => {
 	if (/ETIMEDOUT|getaddrinfo|Something took too long to do/.test(reason)) process.exit(200);

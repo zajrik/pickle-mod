@@ -1,6 +1,6 @@
 import { Message, MessageOptions } from 'discord.js';
 import { Command } from 'yamdbf';
-import ModBot from '../lib/ModBot';
+import { ModClient } from '../lib/ModClient';
 
 /**
  * Represents possible results of Util#prompt
@@ -39,7 +39,7 @@ export async function prompt(
  * Command action method decorator for rejecting command calls
  * from non-mods or improperly set up guilds
  */
-export function modOnly(target: Command<ModBot>, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
+export function modOnly(target: Command<ModClient>, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
 {
 	if (!target) throw new Error('@modOnly must be used as a method decorator for a Command action method.');
 	if (key !== 'action') throw new Error(`"${target.constructor.name}#${key}" is not a valid method target for @modOnly.`);
@@ -47,8 +47,8 @@ export function modOnly(target: Command<ModBot>, key: string, descriptor: Proper
 	const original: any = descriptor.value;
 	descriptor.value = async function(message: Message, args: any[]): Promise<any>
 	{
-		const canCall: boolean = await (<Command<ModBot>> this).client.mod.canCallModCommand(message);
-		if (!canCall) (<Command<ModBot>> this).client.mod.sendModError(message);
+		const canCall: boolean = await (<Command<ModClient>> this).client.mod.canCallModCommand(message);
+		if (!canCall) (<Command<ModClient>> this).client.mod.sendModError(message);
 		else return await original.apply(this, [message, args]);
 	};
 	return descriptor;

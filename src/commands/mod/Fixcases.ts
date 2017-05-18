@@ -1,15 +1,15 @@
-import { modOnly } from '../../lib/Util';
 import { Command, Message, GuildStorage, Middleware, CommandDecorators } from 'yamdbf';
 import { TextChannel } from 'discord.js';
-import ModBot from '../../lib/ModBot';
+import { ModClient } from '../../lib/ModClient';
+import { modOnly } from '../../lib/Util';
 
 const { using } = CommandDecorators;
 
-export default class Fixcases extends Command<ModBot>
+export default class Fixcases extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'fixcases',
 			description: 'Re-index case numbers',
 			usage: '<prefix>fixcases <case msg id>',

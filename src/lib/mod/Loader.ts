@@ -2,7 +2,7 @@ import Actions from './Actions';
 import Logger from './Logger';
 import Events from './Events';
 import Scheduler from './Scheduler';
-import ModBot from '../ModBot';
+import { ModClient } from '../ModClient';
 import { GuildStorage, Message } from 'yamdbf';
 import { GuildMember, Guild } from 'discord.js';
 import { HistoryManager } from './managers/HistoryManager';
@@ -16,7 +16,7 @@ import { MuteManager } from './managers/MuteManager';
  */
 export default class ModLoader
 {
-	private _client: ModBot;
+	private _client: ModClient;
 	private _events: Events;
 	private _scheduler: Scheduler;
 
@@ -28,7 +28,7 @@ export default class ModLoader
 		mute: MuteManager
 	};
 
-	public constructor(client: ModBot)
+	public constructor(client: ModClient)
 	{
 		this._client = client;
 		this.actions = new Actions(this._client);

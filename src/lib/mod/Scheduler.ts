@@ -1,4 +1,4 @@
-import ModBot from '../ModBot';
+import { ModClient } from '../ModClient';
 import Timer from '../timer/Timer';
 import TimerCollection from '../timer/TimerCollection';
 import { LockdownManager } from './managers/LockdownManager';
@@ -10,9 +10,9 @@ import { MuteManager } from './managers/MuteManager';
  */
 export default class Scheduler
 {
-	private _client: ModBot;
+	private _client: ModClient;
 	public timers: TimerCollection;
-	public constructor(client: ModBot)
+	public constructor(client: ModClient)
 	{
 		this._client = client;
 		this.timers = new TimerCollection();

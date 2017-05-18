@@ -1,16 +1,16 @@
-import { modOnly } from '../../../lib/Util';
 import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { MessageEmbed } from 'discord.js';
-import ModBot from '../../../lib/ModBot';
+import { ModClient } from '../../../lib/ModClient';
+import { modOnly } from '../../../lib/Util';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Reason extends Command<ModBot>
+export default class Reason extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'reason',
 			aliases: [],
 			description: 'Set a reason for a case',

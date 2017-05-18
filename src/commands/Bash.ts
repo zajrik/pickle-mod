@@ -5,9 +5,9 @@ import { execSync } from 'child_process';
 
 export default class Bash extends Command<Client>
 {
-	public constructor(bot: Client)
+	public constructor(client: Client)
 	{
-		super(bot, {
+		super(client, {
 			name: '$',
 			aliases: [],
 			description: 'Execute a bash command and print output',

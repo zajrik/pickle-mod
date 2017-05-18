@@ -9,7 +9,7 @@ const pkg: any = require('../../package.json');
 
 const { once } = ListenerUtil;
 
-export default class ModBot extends Client
+export class ModClient extends Client
 {
 	private _memberLogRateLimiter: RateLimiter;
 	private _mentionSpamManager: MentionSpamManager;
@@ -36,12 +36,11 @@ export default class ModBot extends Client
 
 		this._memberLogRateLimiter = new RateLimiter(this);
 
-		this.on('guildMemberAdd', (member: GuildMember) => this.logMember(member, true, 8450847));
-		this.on('guildMemberRemove', (member: GuildMember) => this.logMember(member, false, 16039746));
-		this.on('guildCreate', (guild: Guild) => this.logGuild(guild, true, 8450847));
-		this.on('guildDelete', (guild: Guild) => this.logGuild(guild, false, 13091073));
-		this.on('command', (name: string, args: any, execTime: number, message: Message) =>
-			this.logCommand(name, args, execTime, message));
+		this.on('guildMemberAdd', member => this.logMember(member, true, 8450847));
+		this.on('guildMemberRemove', member => this.logMember(member, false, 16039746));
+		this.on('guildCreate', guild => this.logGuild(guild, true, 8450847));
+		this.on('guildDelete', guild => this.logGuild(guild, false, 13091073));
+		this.on('command', (name, args, execTime, message) => this.logCommand(name, args, execTime, message));
 
 		this.once('clientReady', async () =>
 		{

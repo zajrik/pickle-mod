@@ -1,13 +1,13 @@
 import { Command, Message } from 'yamdbf';
 import { TextChannel } from 'discord.js';
-import ModBot from '../../lib/ModBot';
+import { ModClient } from '../../lib/ModClient';
 import { prompt, PromptResult } from '../../lib/Util';
 
-export default class ClearLogs extends Command<ModBot>
+export default class ClearLogs extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'clearlogs',
 			aliases: [],
 			description: 'Clear the moderation logs channel, resetting cases to 0',

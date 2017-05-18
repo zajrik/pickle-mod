@@ -1,15 +1,15 @@
 import { Collection, GuildMember, Message, Role, User } from 'discord.js';
 import { GuildStorage, Logger, logger } from 'yamdbf';
 import { stringResource as res } from '../../Util';
-import ModBot from '../../ModBot';
+import { ModClient } from '../../ModClient';
 
 export class MentionSpamManager
 {
 	@logger private readonly _logger: Logger;
-	private client: ModBot;
+	private client: ModClient;
 	private guilds: Collection<string, Collection<string, TrackedMention[]>>;
 	private baseThreshold: int = 6;
-	public constructor(client: ModBot)
+	public constructor(client: ModClient)
 	{
 		this.client = client;
 		this.guilds = new Collection<string, Collection<string, TrackedMention[]>>();

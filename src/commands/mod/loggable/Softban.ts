@@ -1,17 +1,17 @@
 import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
-import ModBot from '../../../lib/ModBot';
+import { ModClient } from '../../../lib/ModClient';
 import { modOnly, stringResource as res } from '../../../lib/Util';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Softban extends Command<ModBot>
+export default class Softban extends Command<ModClient>
 {
 	@logger private readonly logger: Logger;
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'softban',
 			aliases: [],
 			description: 'Softban a user',

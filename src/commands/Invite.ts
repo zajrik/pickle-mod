@@ -4,9 +4,9 @@ import { Message } from 'discord.js';
 
 export default class Invite extends Command<Client>
 {
-	public constructor(bot: Client)
+	public constructor(client: Client)
 	{
-		super(bot, {
+		super(client, {
 			name: 'invite',
 			aliases: [],
 			description: 'Get an invite url for this bot',

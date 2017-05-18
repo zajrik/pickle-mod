@@ -3,9 +3,9 @@ import { Client, Command, GuildStorage, Message } from 'yamdbf';
 
 export default class Help extends Command<Client>
 {
-	public constructor(bot: Client)
+	public constructor(client: Client)
 	{
-		super(bot, {
+		super(client, {
 			name: 'help',
 			description: 'Provides information on bot commands',
 			aliases: [],

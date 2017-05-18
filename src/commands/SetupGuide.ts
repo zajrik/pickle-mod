@@ -3,9 +3,9 @@ import { Client, Command, Message } from 'yamdbf';
 
 export default class Guide extends Command<Client>
 {
-	public constructor(bot: Client)
+	public constructor(client: Client)
 	{
-		super(bot, {
+		super(client, {
 			name: 'guide',
 			aliases: [],
 			description: 'Get a guide for setting up the modbot on a server',

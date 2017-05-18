@@ -1,7 +1,7 @@
 import { GuildStorage } from 'yamdbf/bin';
 import { GuildMember, Guild, Collection } from 'discord.js';
 import { KeyedStorage, JSONProvider } from 'yamdbf';
-import ModBot from '../../ModBot';
+import { ModClient } from '../../ModClient';
 
 /**
  * Contains methods for managing guild member mutes
@@ -9,8 +9,8 @@ import ModBot from '../../ModBot';
 export class MuteManager
 {
 	private _storage: KeyedStorage;
-	private _client: ModBot;
-	public constructor(client: ModBot)
+	private _client: ModClient;
+	public constructor(client: ModClient)
 	{
 		this._storage = new KeyedStorage('managers/mute', JSONProvider);
 		this._client = client;

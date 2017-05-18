@@ -1,4 +1,4 @@
-import { Client } from 'yamdbf';
+import { ModClient } from '../ModClient';
 import { GuildMember } from 'discord.js';
 import Timer from '../timer/Timer';
 import Time from '../Time';
@@ -9,11 +9,11 @@ import Time from '../Time';
  */
 export default class RateLimiter
 {
-	private _client: Client;
+	private _client: ModClient;
 	private _rl: { [guild: string]: { [member: string]: { [type: string]: int } } };
 	private _rlTimer: Timer;
 
-	public constructor(client: Client)
+	public constructor(client: ModClient)
 	{
 		this._client = client;
 		this._rl = {};

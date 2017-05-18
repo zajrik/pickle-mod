@@ -1,13 +1,13 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User, RichEmbed } from 'discord.js';
+import { ModClient } from '../../lib/ModClient';
 import { prompt, PromptResult } from '../../lib/Util';
-import ModBot from '../../lib/ModBot';
 
-export default class History extends Command<ModBot>
+export default class History extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'history',
 			description: 'Check a user\'s offense history',
 			usage: '<prefix>history [user [\'reset\']]',

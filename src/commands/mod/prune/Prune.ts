@@ -1,16 +1,16 @@
-import { modOnly } from '../../../lib/Util';
 import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { GuildMember } from 'discord.js';
-import ModBot from '../../../lib/ModBot';
+import { ModClient } from '../../../lib/ModClient';
+import { modOnly } from '../../../lib/Util';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Prune extends Command<ModBot>
+export default class Prune extends Command<ModClient>
 {
-	public constructor(bot: ModBot)
+	public constructor(client: ModClient)
 	{
-		super(bot, {
+		super(client, {
 			name: 'prune',
 			aliases: [],
 			description: 'Remove the last given quantity of messages for the provided member',
