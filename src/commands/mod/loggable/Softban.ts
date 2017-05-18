@@ -1,13 +1,14 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import ModBot from '../../../lib/ModBot';
-import { modOnly } from '../../../lib/Util';
+import { modOnly, stringResource as res } from '../../../lib/Util';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class Softban extends Command<ModBot>
 {
+	@logger private readonly logger: Logger;
 	public constructor(bot: ModBot)
 	{
 		super(bot, {
@@ -37,16 +38,11 @@ export default class Softban extends Command<ModBot>
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
-		const kicking: Message = <Message> await message.channel.send(
-			`Softbanning ${user.username}#${user.discriminator}... *(Waiting for unban)*`);
+		const kicking: Message = <Message> await message.channel
+			.send(`Softbanning ${user.tag}... *(Waiting for unban)*`);
 
-		try
-		{
-			await user.send(`You have been softbanned from ${message.guild.name}\n\n**Reason:** ${
-				reason}\n\nA softban is a kick that uses ban+unban to remove your messages from `
-				+ `the server. You may rejoin momentarily.`);
-		}
-		catch (err) { console.log(`Failed to send softban DM to ${user.username}#${user.discriminator}`); }
+		try { await user.send(res('MSG_DM_SOFTBAN', { guildName: message.guild.name, reason: reason })); }
+		catch (err) { this.logger.log('Command:Softban', `Failed to send softban DM to ${user.tag}`); }
 
 		this.client.mod.actions.softban(user, message.guild);
 		let cases: Message[] = <Message[]> await this.client.mod.logger.awaitBanCase(message.guild, user, 'Softban');

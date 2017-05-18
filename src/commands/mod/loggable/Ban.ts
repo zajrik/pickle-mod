@@ -1,7 +1,7 @@
 import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { User, GuildMember, RichEmbed } from 'discord.js';
 import { prompt, PromptResult } from '../../../lib/Util';
-import { modOnly } from '../../../lib/Util';
+import { modOnly, stringResource as res } from '../../../lib/Util';
 import ModBot from '../../../lib/ModBot';
 
 const { resolveArgs, expect } = Middleware;
@@ -52,7 +52,7 @@ export default class Ban extends Command<ModBot>
 
 		try
 		{
-			await user.send(`**You have been banned from ${message.guild.name}.**\n\n**Reason:** ${reason}\n\nYou can appeal your ban by DMing me the command \`appeal <message>\`, where \`'<message>'\` is a message detailing why you think you deserve to have your ban lifted. You must send this command without a prefix or I won't recognize it. If you are currently banned from more than one server that I serve, you may only appeal the most recent ban until that appeal is approved or rejected.\n\nAfter you have sent your appeal it will be passed to the server moderators for review. You will be notified when your appeal has been approved or rejected. If your appeal is rejected, you may not appeal again.\n\nIf you are unable to DM me because we do not have any mutual servers, you may use this invite to gain a mutual server and then DM me your appeal.\nhttps://discord.gg/TEXjY6e\n\nYou will want to remain in this mutual server until after your appeal has been approved so that you can be notified of the appeal result.`, { split: true });
+			await user.send(res('MSG_DM_BAN', { guildName: message.guild.name, reason: reason }), { split: true });
 		}
 		catch (err) { console.log(`Failed to send ban DM to ${user.username}#${user.discriminator}`); }
 

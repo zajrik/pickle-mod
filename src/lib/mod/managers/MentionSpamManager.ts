@@ -61,7 +61,7 @@ export class MentionSpamManager
 
 		try
 		{
-			await message.author.send(res('MSG_AUTO_BAN', { guildName: message.guild.name }), { split: true });
+			await message.author.send(res('MSG_DM_AUTO_BAN', { guildName: message.guild.name }), { split: true });
 		}
 		catch (err) { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
 
