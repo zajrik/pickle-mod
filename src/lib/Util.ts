@@ -80,7 +80,7 @@ export function stringResource(key: string, data?: TokenReplaceData): string
 	if (typeof data === 'undefined') return loadedString;
 
 	for (const token of Object.keys(data))
-		loadedString = loadedString.replace(new RegExp(`{{${token}}}`, 'g'), data[token]);
+		loadedString = loadedString.replace(new RegExp(`{{ *${token} *}}`, 'g'), data[token]);
 
 	return loadedString;
 }
