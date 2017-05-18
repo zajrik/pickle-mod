@@ -7,7 +7,7 @@ import { ModLoader } from './mod/Loader';
 const config: any = require('../config.json');
 const pkg: any = require('../../package.json');
 
-const { once } = ListenerUtil;
+const { on, once } = ListenerUtil;
 
 export class ModClient extends Client
 {
@@ -40,7 +40,6 @@ export class ModClient extends Client
 		this.on('guildMemberRemove', member => this.logMember(member, false, 16039746));
 		this.on('guildCreate', guild => this.logGuild(guild, true, 8450847));
 		this.on('guildDelete', guild => this.logGuild(guild, false, 13091073));
-		this.on('command', (name, args, execTime, message) => this.logCommand(name, args, execTime, message));
 
 		this.once('clientReady', async () =>
 		{
@@ -87,7 +86,8 @@ export class ModClient extends Client
 	/**
 	 * Log command usage to command logging channel
 	 */
-	private logCommand(name: string, args: any, execTime: number, message: Message): Promise<Message>
+	@on('command')
+	private _logCommand(name: string, args: any, execTime: number, message: Message): Promise<Message>
 	{
 		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.commands);
 		const embed: RichEmbed = new RichEmbed()
