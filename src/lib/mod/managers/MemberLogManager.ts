@@ -7,7 +7,8 @@ import Timer from '../../timer/Timer';
  * Handles logging member join/leave messages in a "#member-log" channel
  * on a server, ratelimiting as necessary to prevent spam
  *
- * TODO: Refactor this to use YAMDBF's RateLimiter stuff
+ * TODO: Refactor this to use YAMDBF's RateLimiter stuff because it'll
+ * make it all much easier and won't have to be swept on interval
  */
 export class MemberLogManager
 {
@@ -19,7 +20,7 @@ export class MemberLogManager
 	{
 		this._client = client;
 		this._rl = {};
-		this._rlTimer = new Timer(this._client, 'memberlog-ratelimit', 5, async () => this.checkMemberLogLimits());
+		this._rlTimer = new Timer(this._client, 'memberlog-ratelimit', 5, async () => this.sweepMemberLogLimits());
 		this._client.on('guildMemberAdd', member => this.logMember(member));
 		this._client.on('guildMemberRemove', member => this.logMember(member, false));
 	}
@@ -45,9 +46,8 @@ export class MemberLogManager
 	}
 
 	/**
-	 * Determine if a nested object path does not end
-	 * abruptly and can have a value assigned to the final
-	 * property in the path
+	 * Determine if a nested object path does not end abruptly and can have
+	 * a value assigned to the final property in the path
 	 */
 	private validatePath(obj: object, props: string[]): boolean
 	{
@@ -75,7 +75,7 @@ export class MemberLogManager
 	/**
 	 * Check current ratelimits and remove any expired
 	 */
-	private async checkMemberLogLimits(): Promise<void>
+	private async sweepMemberLogLimits(): Promise<void>
 	{
 		for (const guild of Object.keys(this._rl))
 			for (const member of Object.keys(this._rl[guild]))
@@ -86,7 +86,7 @@ export class MemberLogManager
 	}
 
 	/**
-	 * Check if the member join/leave can be logged
+	 * Shortcut to check if the member join/leave can be logged
 	 */
 	private canLog(member: GuildMember, type: 'join' | 'leave'): boolean
 	{
@@ -94,10 +94,10 @@ export class MemberLogManager
 	}
 
 	/**
-	 * Handle rate limiting for server member logs,
-	 * preventing server spam via join/leave abuse
-	 * and return whether or not the GuildMember is
-	 * currently ratelimited
+	 * Handle storing of ratelimits for the given guild member for the given type
+	 * of action. Returns whether or not the given guild member is currently
+	 * ratelimited. Use the `check` boolean param to check if the member
+	 * is ratelimited without updating their ratelimit
 	 */
 	public handleLog(member: GuildMember, type: 'join' | 'leave', check: boolean = false): boolean
 	{
