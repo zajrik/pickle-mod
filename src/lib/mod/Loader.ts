@@ -8,6 +8,8 @@ import { GuildMember, Guild } from 'discord.js';
 import { HistoryManager } from './managers/HistoryManager';
 import { LockdownManager } from './managers/LockdownManager';
 import { MuteManager } from './managers/MuteManager';
+import { MentionSpamManager } from './managers/MentionSpamManager';
+import { MemberLogManager } from './managers/MemberLogManager';
 
 /**
  * Handles loading the different moderation controllers
@@ -25,7 +27,9 @@ export class ModLoader
 	public managers: {
 		history: HistoryManager,
 		lockdown: LockdownManager,
-		mute: MuteManager
+		mute: MuteManager,
+		memberLog: MemberLogManager,
+		mentionSpam: MentionSpamManager
 	};
 
 	public constructor(client: ModClient)
@@ -37,7 +41,9 @@ export class ModLoader
 		this.managers = {
 			history: new HistoryManager(),
 			lockdown: new LockdownManager(this._client),
-			mute: new MuteManager(this._client)
+			mute: new MuteManager(this._client),
+			memberLog: new MemberLogManager(this._client),
+			mentionSpam: new MentionSpamManager(this._client)
 		};
 
 		this._events = new Events(this._client);
