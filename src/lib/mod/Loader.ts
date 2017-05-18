@@ -14,7 +14,7 @@ import { MuteManager } from './managers/MuteManager';
  * and has methods for determining if moderation commands
  * are able to be run within a guild by the provided member
  */
-export default class ModLoader
+export class ModLoader
 {
 	private _client: ModClient;
 	private _events: Events;
