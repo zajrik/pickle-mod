@@ -1,7 +1,7 @@
 import { GuildMember, Message, TextChannel, RichEmbed } from 'discord.js';
 import { Time } from 'yamdbf';
 import { ModClient } from '../../ModClient';
-import Timer from '../../timer/Timer';
+import { Timer } from '../../timer/Timer';
 
 /**
  * Handles logging member join/leave messages in a "#member-log" channel

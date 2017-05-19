@@ -5,7 +5,7 @@ import { Client, KeyedStorage, JSONProvider } from 'yamdbf';
  * will fire at the specified intervals. Timers will resume where
  * they left off when restarted. Intervals must be in seconds.
  */
-export default class Timer
+export class Timer
 {
 	private _bot: Client;
 	private _interval: int;

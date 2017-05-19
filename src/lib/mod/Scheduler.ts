@@ -1,14 +1,14 @@
-import { ModClient } from '../ModClient';
-import Timer from '../timer/Timer';
-import TimerCollection from '../timer/TimerCollection';
 import { LockdownManager } from './managers/LockdownManager';
 import { MuteManager } from './managers/MuteManager';
+import { ModClient } from '../ModClient';
+import { TimerCollection } from '../timer/TimerCollection';
+import { Timer } from '../timer/Timer';
 
 /**
  * Handles registering timers for running scheduled
  * moderation tasks
  */
-export default class Scheduler
+export class Scheduler
 {
 	private _client: ModClient;
 	public timers: TimerCollection;

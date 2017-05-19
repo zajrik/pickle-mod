@@ -1,11 +1,11 @@
-import { ModClient } from '../ModClient';
-import { GuildStorage } from 'yamdbf';
 import { GuildMember, Guild, User } from 'discord.js';
+import { GuildStorage } from 'yamdbf';
+import { ModClient } from '../ModClient';
 
 /**
  * Contains methods for taking moderation action
  */
-export default class Actions
+export class Actions
 {
 	private _client: ModClient;
 	public constructor(client: ModClient)

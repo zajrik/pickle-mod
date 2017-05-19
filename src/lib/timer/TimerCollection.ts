@@ -1,12 +1,12 @@
 import { Collection } from 'discord.js';
-import Timer from './Timer';
+import { Timer } from './Timer';
 
 /**
  * Collection designed for containg Timer objects. Allows use
  * of the `add` method to add Timers to the collection without
  * needing to provide a key
  */
-export default class TimerCollection extends Collection<string, Timer>
+export class TimerCollection extends Collection<string, Timer>
 {
 	public constructor() { super(); }
 

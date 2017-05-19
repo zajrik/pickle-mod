@@ -1,15 +1,15 @@
-import Actions from './Actions';
-import Logger from './Logger';
-import Events from './Events';
-import Scheduler from './Scheduler';
-import { ModClient } from '../ModClient';
 import { GuildStorage, Message } from 'yamdbf';
 import { GuildMember, Guild } from 'discord.js';
-import { HistoryManager } from './managers/HistoryManager';
-import { LockdownManager } from './managers/LockdownManager';
-import { MuteManager } from './managers/MuteManager';
 import { MentionSpamManager } from './managers/MentionSpamManager';
 import { MemberLogManager } from './managers/MemberLogManager';
+import { LockdownManager } from './managers/LockdownManager';
+import { HistoryManager } from './managers/HistoryManager';
+import { MuteManager } from './managers/MuteManager';
+import { ModClient } from '../ModClient';
+import { Scheduler } from './Scheduler';
+import { Actions } from './Actions';
+import { Events } from './Events';
+import { Logger } from './Logger';
 
 /**
  * Handles loading the different moderation controllers

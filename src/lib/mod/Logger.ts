@@ -7,7 +7,7 @@ import { ModClient } from '../ModClient';
  * Contains methods and handles functionality pertaining
  * to logging moderation actions to a guild's logging channel
  */
-export default class Logger
+export class Logger
 {
 	private _client: ModClient;
 	public constructor(client: ModClient)

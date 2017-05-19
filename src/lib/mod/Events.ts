@@ -6,7 +6,7 @@ import { ModClient } from '../ModClient';
 /**
  * Handles received moderation related client events
  */
-export default class Events
+export class Events
 {
 	private _client: ModClient;
 	public constructor(client: ModClient)
