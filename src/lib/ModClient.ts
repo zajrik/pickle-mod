@@ -1,7 +1,7 @@
 import { Client, ListenerUtil, LogLevel } from 'yamdbf';
 import { TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 // import { DMManager } from 'yamdbf-addon-dm-manager';
-import { ModLoader } from './mod/Loader';
+import { ModLoader } from './mod/ModLoader';
 const config: any = require('../config.json');
 const pkg: any = require('../../package.json');
 

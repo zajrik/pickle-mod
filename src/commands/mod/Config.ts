@@ -2,7 +2,7 @@ import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
 import { TextChannel, Role, RichEmbed } from 'discord.js';
 import { ModClient } from '../../lib/ModClient';
 import { prompt, PromptResult } from '../../lib/Util';
-import { ModLoader } from '../../lib/mod/Loader';
+import { ModLoader } from '../../lib/mod/ModLoader';
 
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
