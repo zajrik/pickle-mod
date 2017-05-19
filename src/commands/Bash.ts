@@ -1,9 +1,8 @@
-'use strict';
 import { Client, Command } from 'yamdbf';
 import { Message } from 'discord.js';
 import { execSync } from 'child_process';
 
-export default class Bash extends Command<Client>
+export default class extends Command<Client>
 {
 	public constructor(client: Client)
 	{

@@ -6,7 +6,7 @@ import { modOnly, stringResource as res } from '../../../lib/Util';
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Softban extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	@logger private readonly logger: Logger;
 	public constructor(client: ModClient)

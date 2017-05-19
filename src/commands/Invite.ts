@@ -1,8 +1,7 @@
-'use strict';
 import { Client, Command } from 'yamdbf';
 import { Message } from 'discord.js';
 
-export default class Invite extends Command<Client>
+export default class extends Command<Client>
 {
 	public constructor(client: Client)
 	{

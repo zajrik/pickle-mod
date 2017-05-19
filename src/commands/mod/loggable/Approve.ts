@@ -2,7 +2,7 @@ import { Command, ClientStorage, Message } from 'yamdbf';
 import { User } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 
-export default class Approve extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

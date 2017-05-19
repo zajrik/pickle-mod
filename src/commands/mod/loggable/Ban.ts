@@ -7,7 +7,7 @@ import { ModClient } from '../../../lib/ModClient';
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Ban extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

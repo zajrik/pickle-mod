@@ -3,7 +3,7 @@ import { User } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { prompt, PromptResult, modOnly } from '../../../lib/Util';
 
-export default class Reject extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

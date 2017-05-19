@@ -1,7 +1,7 @@
 import { RichEmbed, TextChannel } from 'discord.js';
 import { Client, Command, Message } from 'yamdbf';
 
-export default class Guide extends Command<Client>
+export default class extends Command<Client>
 {
 	public constructor(client: Client)
 	{

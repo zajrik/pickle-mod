@@ -5,7 +5,7 @@ import { modOnly } from '../../lib/Util';
 
 const { using } = CommandDecorators;
 
-export default class Fixcases extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

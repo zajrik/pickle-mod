@@ -7,7 +7,7 @@ import { modOnly } from '../../../lib/Util';
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Duration extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

@@ -7,7 +7,7 @@ import { ModLoader } from '../../lib/mod/ModLoader';
 const { resolveArgs, expect } = Middleware;
 const { using } = CommandDecorators;
 
-export default class Config extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

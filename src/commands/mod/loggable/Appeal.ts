@@ -2,7 +2,7 @@ import { Command, ClientStorage, GuildStorage } from 'yamdbf';
 import { Message, TextChannel, Guild, RichEmbed } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 
-export default class Appeal extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

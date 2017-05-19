@@ -3,7 +3,7 @@ import { TextChannel } from 'discord.js';
 import { ModClient } from '../../lib/ModClient';
 import { prompt, PromptResult } from '../../lib/Util';
 
-export default class ClearLogs extends Command<ModClient>
+export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{

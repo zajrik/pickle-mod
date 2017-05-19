@@ -1,6 +1,6 @@
 import { Client, Command, GuildStorage, Message } from 'yamdbf';
 
-export default class Tag extends Command<Client>
+export default class extends Command<Client>
 {
 	public constructor(client: Client)
 	{

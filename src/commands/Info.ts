@@ -3,7 +3,7 @@ import { RichEmbed, Guild } from 'discord.js';
 import * as Discord from 'discord.js';
 import Time from '../lib/Time';
 
-export default class Info extends Command<Client>
+export default class extends Command<Client>
 {
 	public constructor(client: Client)
 	{
