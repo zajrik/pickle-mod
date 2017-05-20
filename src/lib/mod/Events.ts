@@ -2,6 +2,7 @@ import { ClientStorage, GuildStorage, Message, ListenerUtil, Logger, logger } fr
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 import { MuteManager } from './managers/MuteManager';
 import { ModClient } from '../ModClient';
+import { stringResource as res } from '../Util';
 
 const { on, registerListeners } = ListenerUtil;
 
@@ -24,28 +25,25 @@ export class Events
 	@on('guildMemberUpdate')
 	private async _onGuildMemberUpdate(oldMember: GuildMember, newMember: GuildMember): Promise<void>
 	{
-		const storage: GuildStorage = this._client.storage.guilds.get(oldMember.guild.id);
-		if (!await storage.settings.exists('mutedrole')) return;
-		const mutedRole: string = await storage.settings.get('mutedrole');
+		const guildStorage: GuildStorage = this._client.storage.guilds.get(oldMember.guild.id);
+		if (!await guildStorage.settings.exists('mutedrole')) return;
+		const mutedRole: string = await guildStorage.settings.get('mutedrole');
 		if (!(!oldMember.roles.has(mutedRole) && newMember.roles.has(mutedRole))) return;
 
 		const guild: Guild = newMember.guild;
 		const member: GuildMember = newMember;
 		if (!await this._client.mod.hasLoggingChannel(guild)) return;
-		if (member.roles.has(await storage.settings.get('modrole'))) return;
+		if (member.roles.has(await guildStorage.settings.get('modrole'))) return;
 		const user: User = member.user;
 
 		this._client.mod.managers.mute.set(member);
 		user.send(`You've been muted in ${guild.name}`);
 		this.logger.log('Events', `Muted user: '${user.username}#${user.discriminator}' in '${guild.name}'`);
 
-		await this._client.mod.logs.logCase(
-			user,
-			guild,
-			'Mute',
-			`Use \`${await storage.settings.get('prefix')}reason ${
-				await storage.settings.get('cases') + 1} <...reason>\` to set a reason for this mute`,
-			this._client.user);
+		const prefix: string = await guildStorage.settings.get('prefix');
+		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
+		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
+		await this._client.mod.logs.logCase( user, guild, 'Mute', reason, this._client.user);
 	}
 
 	/**
@@ -101,13 +99,10 @@ export class Events
 		});
 		await storage.set('activeBans', activeBans);
 
-		await this._client.mod.logs.logCase(
-			user,
-			guild,
-			'Ban',
-			`Use \`${await guildStorage.settings.get('prefix')}reason ${
-				await guildStorage.settings.get('cases') + 1} <...reason>\` to set a reason for this ban`,
-			this._client.user);
+		const prefix: string = await guildStorage.settings.get('prefix');
+		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
+		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
+		await this._client.mod.logs.logCase( user, guild, 'Ban', reason, this._client.user);
 	}
 
 	/**
@@ -133,13 +128,10 @@ export class Events
 			await storage.set('activeBans', activeBans);
 		}
 
-		await this._client.mod.logs.logCase(
-			user,
-			guild,
-			'Unban',
-			`Use \`${await guildStorage.settings.get('prefix')}reason ${
-				await guildStorage.settings.get('cases') + 1} <...reason>\` to set a reason for this unban`,
-			this._client.user);
+		const prefix: string = await guildStorage.settings.get('prefix');
+		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
+		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
+		await this._client.mod.logs.logCase(user, guild, 'Unban', reason, this._client.user);
 
 		// Try to remove an active appeal for the user if there
 		// was one in the guild
@@ -158,8 +150,7 @@ export class Events
 			{
 				const invite: Invite = await guild.defaultChannel
 					.createInvite({ maxAge: 86400, maxUses: 1 });
-				await user.send(`Your appeal has been approved. You have been unbanned from ${
-					guild.name}. You may rejoin using this invite:\n${invite.url}`);
+				await user.send(res('MSG_DM_APPROVED_APPEAL', { guildName: guild.name, invite: invite.url }));
 			}
 		}
 		catch (err)
