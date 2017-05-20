@@ -17,32 +17,7 @@ export class Scheduler
 		this._client = client;
 		this.timers = new TimerCollection();
 
-		this.timers.add(new Timer(this._client, 'mute', 15, async () => this._checkMutes()));
 		this.timers.add(new Timer(this._client, 'lockdown', 5, async () => this._checkLockdowns()));
-	}
-
-	/**
-	 * Check active mutes and remove any that are expired
-	 */
-	private async _checkMutes(): Promise<void>
-	{
-		const muteManager: MuteManager = this._client.mod.managers.mute;
-		for (const guild of this._client.guilds.values())
-		{
-			const mutedRole: string = await this._client.storage.guilds.get(guild.id).settings.get('mutedrole');
-			for (const member of (await muteManager.getMutedMembers(guild)).values())
-			{
-				if (typeof member === 'string') continue;
-				if (!await muteManager.isExpired(member)) continue;
-				if (await muteManager.isEvasionFlagged(member)) continue;
-
-				console.log(`Removed expired mute: '${member.user.username}#${member.user.discriminator}' in '${guild.name}'`);
-				await muteManager.remove(member);
-				if (member.roles.has(mutedRole))
-					await member.removeRole(guild.roles.get(mutedRole));
-				member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
-			}
-		}
 	}
 
 	/**
