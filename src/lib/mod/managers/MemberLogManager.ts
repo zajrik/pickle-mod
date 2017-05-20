@@ -1,7 +1,9 @@
 import { GuildMember, Message, TextChannel, RichEmbed } from 'discord.js';
-import { Time } from 'yamdbf';
+import { Time, ListenerUtil } from 'yamdbf';
 import { ModClient } from '../../ModClient';
 import { Timer } from '../../timer/Timer';
+
+const { on, registerListeners } = ListenerUtil;
 
 /**
  * Handles logging member join/leave messages in a "#member-log" channel
@@ -21,8 +23,7 @@ export class MemberLogManager
 		this._client = client;
 		this._rl = {};
 		this._rlTimer = new Timer(this._client, 'memberlog-ratelimit', 5, async () => this.sweepMemberLogLimits());
-		this._client.on('guildMemberAdd', member => this.logMember(member));
-		this._client.on('guildMemberRemove', member => this.logMember(member, false));
+		registerListeners(this._client, this);
 	}
 
 	/**
@@ -30,6 +31,8 @@ export class MemberLogManager
 	 * Requires a text channel called `member-log` to be created that the bot is allowed
 	 * to post to. Won't do anything if the channel does not exist
 	 */
+	@on('guildMemberAdd')
+	@on('guildMemberRemove', false)
 	private logMember(member: GuildMember, joined: boolean = true): Promise<Message>
 	{
 		if (!member.guild.channels.exists('name', 'member-log')) return;
@@ -38,7 +41,7 @@ export class MemberLogManager
 		const memberLog: TextChannel = <TextChannel> member.guild.channels.find('name', 'member-log');
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(joined ? 8450847 : 16039746)
-			.setAuthor(`${member.user.username}#${member.user.discriminator} (${member.id})`, member.user.avatarURL)
+			.setAuthor(`${member.user.tag} (${member.id})`, member.user.avatarURL)
 			.setFooter(joined ? 'User joined' : 'User left' , '')
 			.setTimestamp();
 		this.handleLog(member, type);

@@ -30,17 +30,6 @@ export class ModClient extends Client
 
 		this.config = config;
 
-		this.on('guildCreate', guild => this.logGuild(guild, true, 8450847));
-		this.on('guildDelete', guild => this.logGuild(guild, false, 13091073));
-
-		this.once('clientReady', async () =>
-		{
-			this.mod = new ModLoader(this);
-			await this.mod.init();
-
-			// this._dmManager = new DMManager(this, this.config.DMManager);
-		});
-
 		// this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
 		// this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
 	}
@@ -52,6 +41,15 @@ export class ModClient extends Client
 		await this.setDefaultSetting('cases', 0);
 		await this.setDefaultSetting('mentionSpam', false);
 		this.emit('continue');
+	}
+
+	@once('clientReady')
+	private async _onClientReady(): Promise<void>
+	{
+		this.mod = new ModLoader(this);
+		await this.mod.init();
+
+		// this._dmManager = new DMManager(this, this.config.DMManager);
 	}
 
 	/**
@@ -76,11 +74,13 @@ export class ModClient extends Client
 	/**
 	 * Log guild join/leave to guild logging channel
 	 */
-	private logGuild(guild: Guild, joined: boolean, color: number): Promise<Message>
+	@on('guildCreate')
+	@on('guildDelete', false)
+	private _logGuild(guild: Guild, joined: boolean = true): Promise<Message>
 	{
 		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.guilds);
 		const embed: RichEmbed = new RichEmbed()
-			.setColor(color)
+			.setColor(joined ? 8450847 : 13091073)
 			.setAuthor(`${guild.name} (${guild.id})`, guild.iconURL)
 			.setFooter(joined ? 'Joined guild' : 'Left guild')
 			.setTimestamp();

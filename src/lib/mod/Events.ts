@@ -1,45 +1,43 @@
-import { ClientStorage, GuildStorage, Message } from 'yamdbf';
+import { ClientStorage, GuildStorage, Message, ListenerUtil, Logger, logger } from 'yamdbf';
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 import { MuteManager } from './managers/MuteManager';
 import { ModClient } from '../ModClient';
+
+const { on, registerListeners } = ListenerUtil;
 
 /**
  * Handles received moderation related client events
  */
 export class Events
 {
+	@logger private readonly logger: Logger;
 	private _client: ModClient;
 	public constructor(client: ModClient)
 	{
 		this._client = client;
-
-		this._client.on('guildBanAdd', (guild: Guild, user: User) => this._onGuildBanAdd(guild, user));
-		this._client.on('guildBanRemove', async (guild: Guild, user: User) => this._onGuildBanRemove(guild, user));
-		this._client.on('guildMemberUpdate', async (oldMember: GuildMember, newMember: GuildMember) =>
-		{
-			const storage: GuildStorage = this._client.storage.guilds.get(oldMember.guild.id);
-			if (!await storage.settings.exists('mutedrole')) return;
-			const mutedRole: string = await storage.settings.get('mutedrole');
-			if (!oldMember.roles.has(mutedRole) && newMember.roles.has(mutedRole))
-				this._onGuildMuteAdd(newMember.guild, newMember);
-		});
-		this._client.on('guildMemberRemove', (member: GuildMember) => this._onGuildMemberRemove(member));
-		this._client.on('guildMemberAdd', (member: GuildMember) => this._onGuildMemberAdd(member));
+		registerListeners(this._client, this);
 	}
 
 	/**
-	 * Handle guildmember being muted
+	 * Handle mute being applied to a guild member
 	 */
-	private async _onGuildMuteAdd(guild: Guild, member: GuildMember): Promise<void>
+	@on('guildMemberUpdate')
+	private async _onGuildMemberUpdate(oldMember: GuildMember, newMember: GuildMember): Promise<void>
 	{
-		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		const storage: GuildStorage = this._client.storage.guilds.get(oldMember.guild.id);
+		if (!await storage.settings.exists('mutedrole')) return;
+		const mutedRole: string = await storage.settings.get('mutedrole');
+		if (!(!oldMember.roles.has(mutedRole) && newMember.roles.has(mutedRole))) return;
+
+		const guild: Guild = newMember.guild;
+		const member: GuildMember = newMember;
 		if (!await this._client.mod.hasLoggingChannel(guild)) return;
 		if (member.roles.has(await storage.settings.get('modrole'))) return;
 		const user: User = member.user;
 
 		this._client.mod.managers.mute.set(member);
 		user.send(`You've been muted in ${guild.name}`);
-		console.log(`Muted user: '${user.username}#${user.discriminator}' in '${guild.name}'`);
+		this.logger.log('Events', `Muted user: '${user.username}#${user.discriminator}' in '${guild.name}'`);
 
 		await this._client.mod.logs.logCase(
 			user,
@@ -53,6 +51,7 @@ export class Events
 	/**
 	 * Handle potential mute evasion
 	 */
+	@on('guildMemberRemove')
 	private async _onGuildMemberRemove(member: GuildMember): Promise<void>
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
@@ -60,13 +59,14 @@ export class Events
 
 		const user: User = member.user;
 		this._client.mod.managers.mute.setEvasionFlag(member);
-		console.log(`Potential mute evasion: '${user.username}#${user.discriminator}' in '${member.guild.name}'`);
+		this.logger.log('Events', `Potential mute evasion: '${user.tag}' in '${member.guild.name}'`);
 	}
 
 	/**
 	 * Handle member joining, check if they were flagged for
 	 * mute evasion and reassign the muted role if so
 	 */
+	@on('guildMemberAdd')
 	private async _onGuildMemberAdd(member: GuildMember): Promise<void>
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
@@ -76,13 +76,14 @@ export class Events
 
 		const mutedRole: string = await storage.settings.get('mutedrole');
 		(<any> member)._roles.push(mutedRole);
-		member.addRole(mutedRole);
+		await member.setRoles((<any> member)._roles);
 		muteManager.clearEvasionFlag(member);
 	}
 
 	/**
 	 * Handle guild member ban event
 	 */
+	@on('guildBanAdd')
 	private async _onGuildBanAdd(guild: Guild, user: User): Promise<void>
 	{
 		let guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
@@ -112,6 +113,7 @@ export class Events
 	/**
 	 * Handle guild member unban event
 	 */
+	@on('guildBanRemove')
 	private async _onGuildBanRemove(guild: Guild, user: User): Promise<void>
 	{
 		let guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
@@ -162,7 +164,7 @@ export class Events
 		}
 		catch (err)
 		{
-			console.log(err);
+			this.logger.error('Events', err);
 			return;
 		}
 	}
