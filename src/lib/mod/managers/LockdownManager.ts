@@ -1,15 +1,18 @@
 import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
-import { KeyedStorage, JSONProvider } from 'yamdbf';
+import { KeyedStorage, JSONProvider, Logger, logger } from 'yamdbf';
 import { stringResource as res } from '../../Util';
 import { ModClient } from '../../ModClient';
+import { Timer } from '../../timer/Timer';
 
 /**
  * Contains methods for managing lockdowns on guild channels
  */
 export class LockdownManager
 {
+	@logger private readonly logger: Logger;
 	private _storage: KeyedStorage;
 	private _client: ModClient;
+	private _lockdownCheckTimer: Timer;
 	public constructor(client: ModClient)
 	{
 		this._storage = new KeyedStorage('managers/lockdown', JSONProvider);
@@ -22,6 +25,7 @@ export class LockdownManager
 	public async init(): Promise<void>
 	{
 		await this._storage.init();
+		this._lockdownCheckTimer = new Timer(this._client, 'lockdown', 5, async () => this._checkLockdowns());
 	}
 
 	/**
@@ -115,5 +119,21 @@ export class LockdownManager
 		let lockedChannels: Collection<string, TextChannel> = new Collection<string, TextChannel>();
 		for (const id of ids) lockedChannels.set(id, <TextChannel> this._client.channels.get(id));
 		return lockedChannels;
+	}
+
+	/**
+	 * Check active lockdowns and remove any that are expired
+	 */
+	private async _checkLockdowns(): Promise<void>
+	{
+		for (const channel of (await this.getLockedChannels()).values())
+		{
+			const channelText: string = `channel '${channel.name}' in guild '${channel.guild.name}'`;
+			if (!await this.isExpired(channel)) continue;
+			this.logger.log('LockdownManager', `Removing expired lockdown for ${channelText}'`);
+			await this.remove(channel);
+			try { await channel.send('**The lockdown on this channel has ended.**'); }
+			catch (err) { this.logger.error('LockdownManager', `Failed to send lockdown expiry message for ${channelText}`); }
+		}
 	}
 }

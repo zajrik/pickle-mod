@@ -6,7 +6,6 @@ import { LockdownManager } from './managers/LockdownManager';
 import { HistoryManager } from './managers/HistoryManager';
 import { MuteManager } from './managers/MuteManager';
 import { ModClient } from '../ModClient';
-import { Scheduler } from './Scheduler';
 import { Actions } from './Actions';
 import { Events } from './Events';
 import { ModLogs } from './ModLogs';
@@ -20,14 +19,13 @@ export class ModLoader
 {
 	private _client: ModClient;
 	private _events: Events;
-	private _scheduler: Scheduler;
 
 	public actions: Actions;
 	public logs: ModLogs;
 	public managers: {
+		mute: MuteManager,
 		history: HistoryManager,
 		lockdown: LockdownManager,
-		mute: MuteManager,
 		memberLog: MemberLogManager,
 		mentionSpam: MentionSpamManager
 	};
@@ -35,19 +33,18 @@ export class ModLoader
 	public constructor(client: ModClient)
 	{
 		this._client = client;
+		this._events = new Events(this._client);
+
 		this.actions = new Actions(this._client);
 		this.logs = new ModLogs(this._client);
 
 		this.managers = {
+			mute: new MuteManager(this._client),
 			history: new HistoryManager(),
 			lockdown: new LockdownManager(this._client),
-			mute: new MuteManager(this._client),
 			memberLog: new MemberLogManager(this._client),
 			mentionSpam: new MentionSpamManager(this._client)
 		};
-
-		this._events = new Events(this._client);
-		this._scheduler = new Scheduler(this._client);
 	}
 
 	/** Initialize storage-using classes */
