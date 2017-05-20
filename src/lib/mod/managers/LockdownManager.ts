@@ -128,12 +128,12 @@ export class LockdownManager
 	{
 		for (const channel of (await this.getLockedChannels()).values())
 		{
-			const channelText: string = `channel '${channel.name}' in guild '${channel.guild.name}'`;
+			const channelText: string = `'#${channel.name}' in '${channel.guild.name}'`;
 			if (!await this.isExpired(channel)) continue;
-			this.logger.log('LockdownManager', `Removing expired lockdown for ${channelText}'`);
+			this.logger.log('LockdownManager', `Removing expired lockdown: ${channelText}'`);
 			await this.remove(channel);
 			try { await channel.send('**The lockdown on this channel has ended.**'); }
-			catch (err) { this.logger.error('LockdownManager', `Failed to send lockdown expiry message for ${channelText}`); }
+			catch (err) { this.logger.error('LockdownManager', `Failed to send lockdown expiry message: ${channelText}`); }
 		}
 	}
 }
