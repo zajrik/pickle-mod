@@ -9,7 +9,7 @@ import { ModClient } from '../ModClient';
 import { Scheduler } from './Scheduler';
 import { Actions } from './Actions';
 import { Events } from './Events';
-import { Logger } from './Logger';
+import { ModLogs } from './ModLogs';
 
 /**
  * Handles loading the different moderation controllers
@@ -23,7 +23,7 @@ export class ModLoader
 	private _scheduler: Scheduler;
 
 	public actions: Actions;
-	public logger: Logger;
+	public logs: ModLogs;
 	public managers: {
 		history: HistoryManager,
 		lockdown: LockdownManager,
@@ -36,7 +36,7 @@ export class ModLoader
 	{
 		this._client = client;
 		this.actions = new Actions(this._client);
-		this.logger = new Logger(this._client);
+		this.logs = new ModLogs(this._client);
 
 		this.managers = {
 			history: new HistoryManager(),

@@ -37,8 +37,8 @@ export default class extends Command<ModClient>
 			.then((res: Message) => res.delete(5e3));
 
 		const user: User = await this.client.mod.actions.unban(id, message.guild);
-		const unbanCase: Message = <Message> await this.client.mod.logger.awaitBanCase(message.guild, user, 'Unban');
-		this.client.mod.logger.editCase(message.guild, unbanCase, message.author, 'Approved appeal');
+		const unbanCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Unban');
+		this.client.mod.logs.editCase(message.guild, unbanCase, message.author, 'Approved appeal');
 
 		message.channel.send(`Approved appeal \`${id}\`. Unbanned ${user.username}#${user.discriminator}`)
 			.then((res: Message) => res.delete(5e3));

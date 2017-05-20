@@ -48,7 +48,7 @@ export default class extends Command<ModClient>
 		}
 
 		await this.client.mod.actions.warn(member, message.guild);
-		await this.client.mod.logger.caseLog(user, message.guild, 'Warn', reason, message.author);
+		await this.client.mod.logs.logCase(user, message.guild, 'Warn', reason, message.author);
 		console.log(`Warned ${user.username}#${user.discriminator} in guild '${message.guild.name}'`);
 		warning.edit(`Warned ${user.username}#${user.discriminator}`);
 	}

@@ -47,7 +47,7 @@ export default class extends Command<ModClient>
 		}
 
 		await this.client.mod.actions.kick(member, message.guild);
-		await this.client.mod.logger.caseLog(user, message.guild, 'Kick', reason, message.author);
+		await this.client.mod.logs.logCase(user, message.guild, 'Kick', reason, message.author);
 		console.log(`Kicked ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
 		kicking.edit(`Kicked ${user.username}#${user.discriminator}`);
 	}

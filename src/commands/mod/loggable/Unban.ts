@@ -31,8 +31,8 @@ export default class extends Command<ModClient>
 		try
 		{
 			this.client.mod.actions.unban(id, message.guild);
-			const unbanCase: Message = <Message> await this.client.mod.logger.awaitBanCase(message.guild, user, 'Unban');
-			this.client.mod.logger.editCase(message.guild, unbanCase, message.author, reason);
+			const unbanCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Unban');
+			this.client.mod.logs.editCase(message.guild, unbanCase, message.author, reason);
 
 			return unbanning.edit(`Successfully unbanned ${user.username}#${user.discriminator}`);
 		}

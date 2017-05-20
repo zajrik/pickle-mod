@@ -60,8 +60,8 @@ export default class extends Command<ModClient>
 			`Banning ${user.username}#${user.discriminator}...`);
 
 		this.client.mod.actions.ban(user, message.guild);
-		let banCase: Message = <Message> await this.client.mod.logger.awaitBanCase(message.guild, user, 'Ban');
-		this.client.mod.logger.editCase(message.guild, banCase, message.author, reason);
+		let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Ban');
+		this.client.mod.logs.editCase(message.guild, banCase, message.author, reason);
 
 		console.log(`Banned ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
 		banning.edit(`Successfully banned ${user.username}#${user.discriminator}`);

@@ -48,7 +48,7 @@ export default class extends Command<ModClient>
 		const working: Message = <Message> await message.channel.send(
 			`Re-indexing cases, starting at #${caseNum}... *(This can take a while)*`);
 
-		try { await this.client.mod.logger.fixCases(startCase); }
+		try { await this.client.mod.logs.fixCases(startCase); }
 		catch (err) { return working.edit(err); }
 
 		working.edit('Finished re-indexing cases.');

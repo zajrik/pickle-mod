@@ -41,7 +41,7 @@ export class Events
 		user.send(`You've been muted in ${guild.name}`);
 		console.log(`Muted user: '${user.username}#${user.discriminator}' in '${guild.name}'`);
 
-		await this._client.mod.logger.caseLog(
+		await this._client.mod.logs.logCase(
 			user,
 			guild,
 			'Mute',
@@ -100,7 +100,7 @@ export class Events
 		});
 		await storage.set('activeBans', activeBans);
 
-		await this._client.mod.logger.caseLog(
+		await this._client.mod.logs.logCase(
 			user,
 			guild,
 			'Ban',
@@ -131,7 +131,7 @@ export class Events
 			await storage.set('activeBans', activeBans);
 		}
 
-		await this._client.mod.logger.caseLog(
+		await this._client.mod.logs.logCase(
 			user,
 			guild,
 			'Unban',

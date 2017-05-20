@@ -55,7 +55,7 @@ export default class extends Command<ModClient>
 		const errors: Map<int, string> = new Map();
 		for (let i: int = firstID; i <= secondID; i++)
 		{
-			const caseMessage: Message = await this.client.mod.logger.findCase(message.guild, i);
+			const caseMessage: Message = await this.client.mod.logs.findCase(message.guild, i);
 			if (!caseMessage)
 			{
 				errors.set(i, 'Failed to fetch case.');
@@ -89,7 +89,7 @@ export default class extends Command<ModClient>
 
 		await working.edit('Updating cases...');
 		for (const caseNum of cases.keys())
-			await this.client.mod.logger.editCase(message.guild, caseNum, message.author, reason);
+			await this.client.mod.logs.editCase(message.guild, caseNum, message.author, reason);
 
 		if (firstID < secondID)	working.edit(`Set reason for cases #${firstID}-${secondID}.`);
 		else working.edit(`Set reason for case #${firstID}.`);

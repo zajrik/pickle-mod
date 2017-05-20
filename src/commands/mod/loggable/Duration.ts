@@ -33,7 +33,7 @@ export default class extends Command<ModClient>
 
 		const caseNum: int = typeof toSelect === 'string' ?
 			await message.guild.storage.settings.get('cases') : toSelect;
-		const caseMessage: Message = await this.client.mod.logger.findCase(message.guild, caseNum);
+		const caseMessage: Message = await this.client.mod.logs.findCase(message.guild, caseNum);
 		if (!caseMessage) return message.channel.send('Failed to fetch case.');
 		if (caseMessage.author.id !== this.client.user.id) return message.channel.send(`I didn't post that case.`);
 
@@ -67,7 +67,7 @@ export default class extends Command<ModClient>
 
 		const started: Message = <Message> await message.channel.send('Setting mute duration...');
 		await this.client.mod.actions.setMuteDuration(member, message.guild, duration);
-		const editedCase: Message = await this.client.mod.logger.editCase(
+		const editedCase: Message = await this.client.mod.logs.editCase(
 			message.guild, caseMessage, message.author, null, Time.duration(duration).toSimplifiedString());
 		if (!editedCase) return started.edit('Failed to edit case.');
 

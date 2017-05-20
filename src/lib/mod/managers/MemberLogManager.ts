@@ -99,7 +99,7 @@ export class MemberLogManager
 	 * ratelimited. Use the `check` boolean param to check if the member
 	 * is ratelimited without updating their ratelimit
 	 */
-	public handleLog(member: GuildMember, type: 'join' | 'leave', check: boolean = false): boolean
+	private handleLog(member: GuildMember, type: 'join' | 'leave', check: boolean = false): boolean
 	{
 		const path: string[] = [member.guild.id, member.id, type];
 		if (!check)

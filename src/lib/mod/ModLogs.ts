@@ -4,10 +4,9 @@ import { CaseTypeColors } from '../Util';
 import { ModClient } from '../ModClient';
 
 /**
- * Contains methods and handles functionality pertaining
- * to logging moderation actions to a guild's logging channel
+ * Contains methods for creating, managing, and fetching moderation logs
  */
-export class Logger
+export class ModLogs
 {
 	private _client: ModClient;
 	public constructor(client: ModClient)
@@ -18,7 +17,7 @@ export class Logger
 	/**
 	 * Post the moderation case to the mod-logs channel
 	 */
-	public async caseLog(user: User, guild: Guild, type: CaseType, reason: string, issuer: User, duration?: string): Promise<Message>
+	public async logCase(user: User, guild: Guild, type: CaseType, reason: string, issuer: User, duration?: string): Promise<Message>
 	{
 		if (!await this._client.mod.hasLoggingChannel(guild)) return null;
 		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
