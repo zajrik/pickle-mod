@@ -1,15 +1,18 @@
-import { GuildStorage } from 'yamdbf/bin';
+import { GuildStorage, KeyedStorage, JSONProvider, Logger, logger } from 'yamdbf';
 import { GuildMember, Guild, Collection } from 'discord.js';
-import { KeyedStorage, JSONProvider } from 'yamdbf';
 import { ModClient } from '../../ModClient';
+import { Timer } from '../../timer/Timer';
 
 /**
- * Contains methods for managing guild member mutes
+ * Contains methods for managing guild member mutes. Also handles
+ * automatically checking for and removing expired mutes
  */
 export class MuteManager
 {
+	@logger private readonly logger: Logger;
 	private _storage: KeyedStorage;
 	private _client: ModClient;
+	private _muteCheckTimer: Timer;
 	public constructor(client: ModClient)
 	{
 		this._storage = new KeyedStorage('managers/mute', JSONProvider);
@@ -22,6 +25,7 @@ export class MuteManager
 	public async init(): Promise<void>
 	{
 		await this._storage.init();
+		this._muteCheckTimer = new Timer(this._client, 'mute', 15, async () => this._checkMutes());
 	}
 
 	/**
@@ -141,5 +145,28 @@ export class MuteManager
 			mutedMembers.set(id, member);
 		}
 		return mutedMembers;
+	}
+
+	/**
+	 * Check active mutes and remove any that are expired
+	 */
+	private async _checkMutes(): Promise<void>
+	{
+		for (const guild of this._client.guilds.values())
+		{
+			const mutedRole: string = await this._client.storage.guilds.get(guild.id).settings.get('mutedrole');
+			for (const member of (await this.getMutedMembers(guild)).values())
+			{
+				if (typeof member === 'string') continue;
+				if (!await this.isExpired(member)) continue;
+				if (await this.isEvasionFlagged(member)) continue;
+
+				this.logger.log('MuteManager', `Removed expired mute: '${member.user.tag}' in '${guild.name}'`);
+				await this.remove(member);
+				if (member.roles.has(mutedRole))
+					await member.removeRole(guild.roles.get(mutedRole));
+				member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
+			}
+		}
 	}
 }
