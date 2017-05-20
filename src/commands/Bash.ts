@@ -29,7 +29,7 @@ export default class extends Command<Client>
 		let result: string;
 		try
 		{
-			result = execSync(args.join(' '), { cwd: '../', timeout: 10000 }).toString();
+			result = execSync(args.join(' '), { timeout: 10000 }).toString();
 		}
 		catch (err)
 		{
@@ -50,6 +50,7 @@ export default class extends Command<Client>
 			.replace(/@/g, `@${String.fromCharCode(8203)}`)
 			.replace(/[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g, '[REDACTED]')
 			.replace(/email: '[^']+'/g, `email: '[REDACTED]'`)
+			.replace(this.client.token, '[REDACTED]')
 			: text;
 	}
 }
