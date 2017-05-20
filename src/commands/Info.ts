@@ -1,7 +1,6 @@
-import { Client, Command, version, Message } from 'yamdbf';
+import { Client, Command, version, Message, Time } from 'yamdbf';
 import { RichEmbed, Guild } from 'discord.js';
 import * as Discord from 'discord.js';
-import Time from '../lib/Time';
 
 export default class extends Command<Client>
 {
