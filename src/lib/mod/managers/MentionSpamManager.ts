@@ -48,8 +48,8 @@ export class MentionSpamManager
 		let points: int = mentions.size;
 		if (message.mentions.everyone) points += 2;
 
-		const threshold: int = Math.floor(Math.pow(
-			(Date.now() - member.joinedTimestamp) / 1000 / 60 / 60 / 24, 1 / 3)) + this.baseThreshold;
+		const threshold: int = Math.floor(Math.floor(Math.pow(
+			(Date.now() - member.joinedTimestamp) / 1000 / 60 / 60 / 24, 1 / 3)) + this.baseThreshold);
 
 		if (this.call(member, points, threshold))
 		{
@@ -59,16 +59,42 @@ export class MentionSpamManager
 			return;
 		}
 
-		try
-		{
-			await message.author.send(res('MSG_DM_AUTO_BAN', { guildName: message.guild.name }), { split: true });
-		}
-		catch (err) { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
+		const type: string = await storage.settings.get('mentionSpam:type');
+		const reason: string = `Automatic ${type}: Exceeded mention threshold`;
 
-		const reason: string = 'Automatic ban: Exceeded mention threshold';
-		this.client.mod.actions.ban(message.author, message.guild, reason);
-		let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, message.author, 'Ban');
-		this.client.mod.logs.editCase(message.guild, banCase, this.client.user, reason);
+		if (type === 'kick')
+		{
+			try
+			{
+				await message.author.send(
+					`**You have been kicked from ${message.guild.name}**\n\n**Reason:** ${reason}`);
+			}
+			catch (err)
+			{
+				this._logger.error('MentionSpamManager', `Failed to send kick DM to ${message.author.tag}`);
+			}
+
+			await this.client.mod.actions.kick(member, message.guild, reason);
+			this.client.mod.logs.logCase(message.author, message.guild, 'Kick', reason, this.client.user);
+		}
+		else if (type === 'mute')
+		{
+			this.client.mod.actions.mute(member, message.guild);
+			let muteCase: Message = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, message.author);
+			this.client.mod.logs.editCase(message.guild, muteCase, this.client.user, reason);
+		}
+		else if (type === 'ban')
+		{
+			try
+			{
+				await message.author.send(res('MSG_DM_AUTO_BAN', { guildName: message.guild.name }), { split: true });
+			}
+			catch (err) { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
+
+			this.client.mod.actions.ban(message.author, message.guild, reason);
+			let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, message.author, 'Ban');
+			this.client.mod.logs.editCase(message.guild, banCase, this.client.user, reason);
+		}
 	}
 
 	/**

@@ -40,6 +40,8 @@ export class ModClient extends Client
 		await this.setDefaultSetting('prefix', '?');
 		await this.setDefaultSetting('cases', 0);
 		await this.setDefaultSetting('mentionSpam', false);
+		await this.setDefaultSetting('mentionSpam:threshold', 6);
+		await this.setDefaultSetting('mentionSpam:type', 'kick');
 		this.emit('continue');
 	}
 
