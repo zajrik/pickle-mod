@@ -95,19 +95,19 @@ export class Actions
 	/**
 	 * Kick a user from a guild
 	 */
-	public async kick(member: GuildMember, guild: Guild): Promise<GuildMember>
+	public async kick(member: GuildMember, guild: Guild, reason: string): Promise<GuildMember>
 	{
 		await this.count(member.user, guild, 'kick');
-		return await member.kick();
+		return await member.kick(reason);
 	}
 
 	/**
 	 * Ban a user from a guild
 	 */
-	public async ban(user: User, guild: Guild): Promise<GuildMember>
+	public async ban(user: User, guild: Guild, reason: string): Promise<GuildMember>
 	{
 		await this.count(user, guild, 'ban');
-		return <GuildMember> await guild.ban((<User> user).id || <any> user, 7);
+		return <GuildMember> await guild.ban(user, { reason: reason, days: 7 });
 	}
 
 	/**
@@ -121,10 +121,10 @@ export class Actions
 	/**
 	 * Softban a user from a guild, removing the past 7 days of their messages
 	 */
-	public async softban(user: User, guild: Guild): Promise<User>
+	public async softban(user: User, guild: Guild, reason: string): Promise<User>
 	{
 		await this.count(user, guild, 'kick');
-		await guild.ban(user, 7);
+		await guild.ban(user, { reason: `Softban: ${reason}`, days: 7 });
 		await new Promise((r: any) => setTimeout(r, 5e3));
 		return await guild.unban(user.id);
 	}

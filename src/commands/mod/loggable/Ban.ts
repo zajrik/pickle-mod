@@ -59,7 +59,7 @@ export default class extends Command<ModClient>
 
 		const banning: Message = <Message> await message.channel.send(`Banning ${user.tag}...`);
 
-		this.client.mod.actions.ban(user, message.guild);
+		this.client.mod.actions.ban(user, message.guild, reason);
 		let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Ban');
 		await this.client.mod.logs.editCase(message.guild, banCase, message.author, reason);
 

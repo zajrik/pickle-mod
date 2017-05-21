@@ -65,10 +65,10 @@ export class MentionSpamManager
 		}
 		catch (err) { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
 
-		this.client.mod.actions.ban(message.author, message.guild);
+		const reason: string = 'Automatic ban: Exceeded mention threshold';
+		this.client.mod.actions.ban(message.author, message.guild, reason);
 		let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, message.author, 'Ban');
-		this.client.mod.logs.editCase(
-			message.guild, banCase, this.client.user, 'Automatic ban: Exceeded mention threshold');
+		this.client.mod.logs.editCase(message.guild, banCase, this.client.user, reason);
 	}
 
 	/**

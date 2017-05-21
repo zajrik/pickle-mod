@@ -46,7 +46,7 @@ export default class extends Command<ModClient>
 			this.logger.error('Command:Kick', `Failed to send kick DM to ${user.tag}`);
 		}
 
-		await this.client.mod.actions.kick(member, message.guild);
+		await this.client.mod.actions.kick(member, message.guild, reason);
 		await this.client.mod.logs.logCase(user, message.guild, 'Kick', reason, message.author);
 		this.logger.log(`Kicked: '${user.tag}' from '${message.guild.name}'`);
 		kicking.edit(`Kicked ${user.tag}`);
