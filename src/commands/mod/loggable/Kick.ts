@@ -35,8 +35,7 @@ export default class extends Command<ModClient>
 		if ((member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
-		const kicking: Message = <Message> await message.channel.send(
-			`Kicking ${user.username}#${user.discriminator}...`);
+		const kicking: Message = <Message> await message.channel.send(`Kicking ${user.tag}...`);
 
 		try
 		{

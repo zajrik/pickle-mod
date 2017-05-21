@@ -61,8 +61,7 @@ export class ModClient extends Client
 		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.commands);
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)
-			.setAuthor(`${message.author.username}#${message.author.discriminator} (${message.author.id})`,
-				message.author.avatarURL);
+			.setAuthor(`${message.author.tag} (${message.author.id})`, message.author.avatarURL);
 		if (message.guild) embed.addField('Guild', message.guild.name, true);
 		embed.addField('Exec time', `${execTime.toFixed(2)}ms`, true)
 			.addField('Command content', message.content)

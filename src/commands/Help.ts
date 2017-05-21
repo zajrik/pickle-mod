@@ -19,7 +19,7 @@ export default class extends Command<Client>
 	public async action(message: Message, args: string[]): Promise<any>
 	{
 		const dm: boolean = message.channel.type === 'dm' || message.channel.type === 'group';
-		const mentionName: string = `@${this.client.user.username}#${this.client.user.discriminator}`;
+		const mentionName: string = `@${this.client.user.tag}`;
 		const prefix: string = !dm ? await message.guild.storage.settings.get('prefix') : '';
 
 		let usableCommands: Collection<string, Command<any>> =

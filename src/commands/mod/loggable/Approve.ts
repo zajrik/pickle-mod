@@ -40,7 +40,7 @@ export default class extends Command<ModClient>
 		const unbanCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Unban');
 		this.client.mod.logs.editCase(message.guild, unbanCase, message.author, 'Approved appeal');
 
-		message.channel.send(`Approved appeal \`${id}\`. Unbanned ${user.username}#${user.discriminator}`)
+		message.channel.send(`Approved appeal \`${id}\`. Unbanned ${user.tag}`)
 			.then((res: Message) => res.delete(5e3));
 	}
 }

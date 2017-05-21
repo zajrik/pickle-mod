@@ -28,7 +28,7 @@ export default class extends Command<ModClient>
 		let offenses: any = await this.client.mod.actions.checkUserHistory(message.guild, user);
 		let embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)
-			.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
+			.setAuthor(user.tag, user.avatarURL)
 			.setFooter(offenses.toString());
 
 		if (user.id === message.author.id) return message.author.sendEmbed(embed);
@@ -49,7 +49,7 @@ export default class extends Command<ModClient>
 			offenses = await this.client.mod.actions.checkUserHistory(message.guild, user);
 			embed = new RichEmbed()
 				.setColor(offenses.color)
-				.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
+				.setAuthor(user.tag, user.avatarURL)
 				.setFooter(offenses.toString());
 		}
 

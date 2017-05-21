@@ -38,7 +38,7 @@ export class Events
 
 		this._client.mod.managers.mute.set(member);
 		user.send(`You've been muted in ${guild.name}`);
-		this.logger.log('Events', `Muted user: '${user.username}#${user.discriminator}' in '${guild.name}'`);
+		this.logger.log('Events', `Muted user: '${user.tag}' in '${guild.name}'`);
 
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
@@ -92,7 +92,7 @@ export class Events
 		if (!activeBans[user.id]) activeBans[user.id] = [];
 		activeBans[user.id].push({
 			user: user.id,
-			raw: `${user.username}#${user.discriminator}`,
+			raw: user.tag,
 			guild: guild.id,
 			guildName: guild.name,
 			timestamp: new Date().getTime()

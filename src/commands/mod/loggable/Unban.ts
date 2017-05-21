@@ -25,8 +25,7 @@ export default class extends Command<ModClient>
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		const id: string = user.id;
-		const unbanning: Message = <Message> await message.channel.send(
-			`Unbanning ${user.username}#${user.discriminator}...`);
+		const unbanning: Message = <Message> await message.channel.send(`Unbanning ${user.tag}...`);
 
 		try
 		{
@@ -34,7 +33,7 @@ export default class extends Command<ModClient>
 			const unbanCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Unban');
 			this.client.mod.logs.editCase(message.guild, unbanCase, message.author, reason);
 
-			return unbanning.edit(`Successfully unbanned ${user.username}#${user.discriminator}`);
+			return unbanning.edit(`Successfully unbanned ${user.tag}`);
 		}
 		catch (err)
 		{

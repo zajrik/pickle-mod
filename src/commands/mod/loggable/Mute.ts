@@ -40,8 +40,7 @@ export default class extends Command<ModClient>
 		if (member.roles.has(mutedRole))
 			return message.channel.send(`That user is already muted`);
 
-		const muting: Message = <Message> await message.channel.send(
-			`Muting ${user.username}#${user.discriminator}...`);
+		const muting: Message = <Message> await message.channel.send(`Muting ${user.tag}...`);
 
 		this.client.mod.actions.mute(member, message.guild);
 		let muteCase: Message = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, user);
@@ -49,6 +48,6 @@ export default class extends Command<ModClient>
 		await this.client.mod.logs.editCase(
 			message.guild, muteCase, message.author, reason, Time.duration(duration).toSimplifiedString());
 
-		return muting.edit(`Muted ${user.username}#${user.discriminator}`);
+		return muting.edit(`Muted ${user.tag}`);
 	}
 }

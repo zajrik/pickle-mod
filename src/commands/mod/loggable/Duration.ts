@@ -38,8 +38,8 @@ export default class extends Command<ModClient>
 		if (caseMessage.author.id !== this.client.user.id) return message.channel.send(`I didn't post that case.`);
 
 		const messageEmbed: MessageEmbed = caseMessage.embeds[0];
-		if (messageEmbed.author.name !== `${message.author.username}#${message.author.discriminator}`
-			&& messageEmbed.author.name !== `${this.client.user.username}#${this.client.user.discriminator}`
+		if (messageEmbed.author.name !== message.author.tag
+			&& messageEmbed.author.name !== this.client.user.tag
 			&& !message.member.hasPermission('MANAGE_GUILD'))
 			return message.channel.send('That is not your case to edit.');
 
@@ -71,6 +71,6 @@ export default class extends Command<ModClient>
 			message.guild, caseMessage, message.author, null, Time.duration(duration).toSimplifiedString());
 		if (!editedCase) return started.edit('Failed to edit case.');
 
-		return started.edit(`Set mute duration for ${member.user.username}#${member.user.discriminator}`);
+		return started.edit(`Set mute duration for ${member.user.tag}`);
 	}
 }

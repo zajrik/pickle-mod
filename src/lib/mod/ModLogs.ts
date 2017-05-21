@@ -26,8 +26,8 @@ export class ModLogs
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(CaseTypeColors[type])
-			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
-			.setDescription(`**Member:** ${user.username}#${user.discriminator} (${user.id})\n`
+			.setAuthor(issuer.tag, issuer.avatarURL)
+			.setDescription(`**Member:** ${user.tag} (${user.id})\n`
 				+ `**Action:** ${type}\n`
 				+ `${duration ? `**Length:** ${duration}\n` : ''}`
 				+ `**Reason:** ${reason}`)
@@ -64,8 +64,8 @@ export class ModLogs
 		if (!caseMessage) return null;
 
 		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
-		if (messageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`
-			&& messageEmbed.author.name !== `${this._client.user.username}#${this._client.user.discriminator}`
+		if (messageEmbed.author.name !== issuer.tag
+			&& messageEmbed.author.name !== this._client.user.tag
 			&& !(await guild.fetchMember(issuer)).permissions.has('MANAGE_GUILD'))
 			return null;
 
@@ -76,7 +76,7 @@ export class ModLogs
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(messageEmbed.color)
-			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL);
+			.setAuthor(issuer.tag, issuer.avatarURL);
 
 		if (reason) messageEmbed.description = messageEmbed.description
 			.replace(/\*\*Reason:\*\* [\s\S]+/, `**Reason:** ${reason}`);
@@ -104,8 +104,8 @@ export class ModLogs
 		if (!banCaseMessage) return null;
 
 		const banMessageEmbed: MessageEmbed = banCaseMessage.embeds[0];
-		if (banMessageEmbed.author.name !== `${this._client.user.username}#${this._client.user.discriminator}`
-			&& banMessageEmbed.author.name !== `${issuer.username}#${issuer.discriminator}`) return null;
+		if (banMessageEmbed.author.name !== this._client.user.tag
+			&& banMessageEmbed.author.name !== issuer.tag) return null;
 
 		let unbanCaseMessage: Message;
 		if (typeof unban !== 'number') unbanCaseMessage = <Message> unban;
@@ -114,7 +114,7 @@ export class ModLogs
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(CaseTypeColors.Softban)
-			.setAuthor(`${issuer.username}#${issuer.discriminator}`, issuer.avatarURL)
+			.setAuthor(issuer.tag, issuer.avatarURL)
 			.setDescription(banMessageEmbed.description
 				.replace(/\*\*Action:\*\* .+/, `**Action:** Softban`)
 				.replace(/\*\*Reason:\*\* .+/, `**Reason:** ${reason}`))

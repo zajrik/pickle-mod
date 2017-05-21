@@ -32,15 +32,14 @@ export default class extends Command<ModClient>
 		if (!member.roles.has(mutedRole)) return message.channel.send(`That user is not muted`);
 
 		const user: User = member.user;
-		const unmuting: Message = <Message> await message.channel.send(
-			`Unmuting ${user.username}#${user.discriminator}...`);
+		const unmuting: Message = <Message> await message.channel.send(`Unmuting ${user.tag}...`);
 
 		try
 		{
 			await this.client.mod.actions.unmute(member, message.guild);
 			await this.client.mod.managers.mute.remove(member);
 			user.send(`You have been unmuted on ${message.guild.name}. You may now send messages.`);
-			return unmuting.edit(`Unmuted ${user.username}#${user.discriminator}`);
+			return unmuting.edit(`Unmuted ${user.tag}`);
 		}
 		catch (err)
 		{

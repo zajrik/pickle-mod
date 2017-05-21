@@ -42,7 +42,7 @@ export default class extends Command<ModClient>
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(offenses.color)
 			.setDescription(`**Reason:** ${reason}`)
-			.setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL)
+			.setAuthor(user.tag, user.avatarURL)
 			.setFooter(offenses.toString());
 
 		const [result]: [PromptResult] = <[PromptResult]> await prompt(message,

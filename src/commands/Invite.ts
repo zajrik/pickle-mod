@@ -22,7 +22,7 @@ export default class extends Command<Client>
 			+ `Be sure to use the \`guide\` command for information `
 			+ `on setting up your server for moderation! The default prefix for commands is \`?\`. `
 			+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
-			+ `just use \`@${this.client.user.username}#${this.client.user.discriminator} prefix\`. `
+			+ `just use \`@${this.client.user.tag} prefix\`. `
 			+ `Thanks for choosing YAMDBF Mod for your server moderation control needs! 👏`);
 	}
 }
