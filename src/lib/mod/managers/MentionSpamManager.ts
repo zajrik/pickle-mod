@@ -8,7 +8,6 @@ export class MentionSpamManager
 	@logger private readonly _logger: Logger;
 	private client: ModClient;
 	private guilds: Collection<string, Collection<string, TrackedMention[]>>;
-	private baseThreshold: int = 6;
 	public constructor(client: ModClient)
 	{
 		this.client = client;
@@ -47,19 +46,21 @@ export class MentionSpamManager
 
 		let points: int = mentions.size;
 		if (message.mentions.everyone) points += 2;
+		if (points === 0) return;
 
+		const baseThreshold = await storage.settings.get('mentionSpam:threshold');
 		const threshold: int = Math.floor(Math.floor(Math.pow(
-			(Date.now() - member.joinedTimestamp) / 1000 / 60 / 60 / 24, 1 / 3)) + this.baseThreshold);
+			(Date.now() - member.joinedTimestamp) / 1000 / 60 / 60 / 24, 1 / 3)) + baseThreshold);
 
+		const type: string = await storage.settings.get('mentionSpam:type');
 		if (this.call(member, points, threshold))
 		{
 			if (this.getPoints(member) >= Math.round(threshold * .7))
 				message.channel.send(
-					`${message.author} Be careful. You're approaching the auto-ban threshold for mention spam.`);
+					`${message.author} Be careful. You're approaching the auto-${type} threshold for mention spam.`);
 			return;
 		}
 
-		const type: string = await storage.settings.get('mentionSpam:type');
 		const reason: string = `Automatic ${type}: Exceeded mention threshold`;
 
 		if (type === 'kick')
