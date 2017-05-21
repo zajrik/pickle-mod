@@ -49,11 +49,11 @@ export class MentionSpamManager
 		if (message.mentions.everyone) points += 2;
 
 		const threshold: int = Math.floor(Math.pow(
-			(Date.now() - message.member.joinedTimestamp) / 1000 / 60 / 60 / 24, 1 / 3)) + this.baseThreshold;
+			(Date.now() - member.joinedTimestamp) / 1000 / 60 / 60 / 24, 1 / 3)) + this.baseThreshold;
 
-		if (this.call(message.member, points, threshold))
+		if (this.call(member, points, threshold))
 		{
-			if (this.getPoints(message.member) >= Math.round(threshold * .7))
+			if (this.getPoints(member) >= Math.round(threshold * .7))
 				message.channel.send(
 					`${message.author} Be careful. You're approaching the auto-ban threshold for mention spam.`);
 			return;
