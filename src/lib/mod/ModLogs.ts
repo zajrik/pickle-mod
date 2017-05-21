@@ -176,7 +176,7 @@ export class ModLogs
 			{
 				case 'Ban':
 				case 'Unban':
-					collector.on(<any> 'message', (message: Message) =>
+					collector.on('collect', message =>
 					{
 						if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
 						if (found) collector.stop('found');
@@ -186,7 +186,7 @@ export class ModLogs
 				case 'Softban':
 					let softbanResult: boolean[] = [false, false];
 					found = [null, null];
-					collector.on(<any> 'message', (message: Message) =>
+					collector.on('collect', message =>
 					{
 						const caseType: string = message.embeds[0].description.match(actionRegex)[1];
 						const index: int = caseType === 'Ban' ? 0 : caseType === 'Unban' ? 1 : null;

@@ -61,7 +61,7 @@ export default class extends Command<ModClient>
 
 		this.client.mod.actions.ban(user, message.guild);
 		let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Ban');
-		this.client.mod.logs.editCase(message.guild, banCase, message.author, reason);
+		await this.client.mod.logs.editCase(message.guild, banCase, message.author, reason);
 
 		this.logger.log('Command:Ban', `Banned: '${user.tag}' from '${message.guild.name}'`);
 		banning.edit(`Successfully banned ${user.tag}`);
