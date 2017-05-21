@@ -1,5 +1,5 @@
 import { GuildMember, Guild, User } from 'discord.js';
-import { GuildStorage } from 'yamdbf';
+import { GuildStorage, Logger, logger } from 'yamdbf';
 import { ModClient } from '../ModClient';
 
 /**
@@ -7,6 +7,7 @@ import { ModClient } from '../ModClient';
  */
 export class Actions
 {
+	@logger private readonly logger: Logger;
 	private _client: ModClient;
 	public constructor(client: ModClient)
 	{
@@ -79,7 +80,7 @@ export class Actions
 	{
 		const user: User = member.user;
 		await this._client.mod.managers.mute.set(member, duration);
-		console.log(`Updated mute: '${user.username}#${user.discriminator}' in '${guild.name}'`);
+		this.logger.log('Actions', `Updated mute: '${user.tag}' in '${guild.name}'`);
 	}
 
 	/**

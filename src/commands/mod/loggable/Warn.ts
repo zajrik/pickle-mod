@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
 import { User, GuildMember } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
@@ -8,6 +8,7 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
+	@logger private readonly logger: Logger;
 	public constructor(client: ModClient)
 	{
 		super(client, {
@@ -34,8 +35,7 @@ export default class extends Command<ModClient>
 		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 			return message.channel.send('You may not use this command on that user.');
 
-		const warning: Message = <Message> await message.channel.send(
-			`Warning ${user.username}#${user.discriminator}...`);
+		const warning: Message = <Message> await message.channel.send(`Warning ${user.tag}...`);
 
 		try
 		{
@@ -44,12 +44,12 @@ export default class extends Command<ModClient>
 		catch (err)
 		{
 			message.channel.send(
-				`Logged case but failed to send warning DM to ${user.username}#${user.discriminator}.`);
+				`Logged case but failed to send warning DM to ${user.tag}.`);
 		}
 
 		await this.client.mod.actions.warn(member, message.guild);
 		await this.client.mod.logs.logCase(user, message.guild, 'Warn', reason, message.author);
-		console.log(`Warned ${user.username}#${user.discriminator} in guild '${message.guild.name}'`);
-		warning.edit(`Warned ${user.username}#${user.discriminator}`);
+		this.logger.log('Command:Warn', `Warned: '${user.tag}' in '${message.guild.name}'`);
+		warning.edit(`Warned ${user.tag}`);
 	}
 }

@@ -1,10 +1,11 @@
-import { Command, ClientStorage, Message } from 'yamdbf';
+import { Command, ClientStorage, Message, Logger, logger } from 'yamdbf';
 import { User } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { prompt, PromptResult, modOnly } from '../../../lib/Util';
 
 export default class extends Command<ModClient>
 {
+	@logger private readonly logger: Logger;
 	public constructor(client: ModClient)
 	{
 		super(client, {
@@ -71,7 +72,8 @@ export default class extends Command<ModClient>
 		if (activeAppeals[user.id])
 		{
 			message.channel.fetchMessage(activeAppeals[user.id])
-				.then((msg: Message) => msg.delete()).catch(console.log);
+				.then((msg: Message) => msg.delete())
+				.catch(err => this.logger.error('Command:Reject', err));
 			await storage.remove(`activeAppeals.${user.id}`);
 		}
 

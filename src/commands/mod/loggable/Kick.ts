@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
 import { GuildMember, User } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
@@ -8,6 +8,7 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
+	@logger private readonly logger: Logger;
 	public constructor(client: ModClient)
 	{
 		super(client, {
@@ -43,12 +44,12 @@ export default class extends Command<ModClient>
 		}
 		catch (err)
 		{
-			console.log(`Failed to send kick DM to ${user.username}#${user.discriminator}`);
+			this.logger.error('Command:Kick', `Failed to send kick DM to ${user.tag}`);
 		}
 
 		await this.client.mod.actions.kick(member, message.guild);
 		await this.client.mod.logs.logCase(user, message.guild, 'Kick', reason, message.author);
-		console.log(`Kicked ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
-		kicking.edit(`Kicked ${user.username}#${user.discriminator}`);
+		this.logger.log(`Kicked: '${user.tag}' from '${message.guild.name}'`);
+		kicking.edit(`Kicked ${user.tag}`);
 	}
 }

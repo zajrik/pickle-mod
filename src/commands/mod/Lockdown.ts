@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators, Time } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Time, Logger, logger } from 'yamdbf';
 import { TextChannel } from 'discord.js';
 import { ModClient } from '../../lib/ModClient';
 import { LockdownManager } from '../../lib/mod/managers/LockdownManager';
@@ -9,6 +9,7 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
+	@logger private readonly logger: Logger;
 	public constructor(client: ModClient)
 	{
 		super(client, {
@@ -45,7 +46,7 @@ export default class extends Command<ModClient>
 
 			await channel.send(`***This channel is locked down. (${durationString})***`);
 			await lockdownManager.set(channel, duration);
-			console.log(`Locked down channel '${channel.name}' in guild '${message.guild.name}'`);
+			this.logger.log('Command:Lockdown', `Lockdown: '${channel.name}' in guild '${message.guild.name}'`);
 
 			if (message.channel.id !== channel.id)
 				message.channel.send(`***Locked down ${channel}. (${durationString})***`);

@@ -42,12 +42,13 @@ export default class extends Command<ModClient>
 			.send(`Softbanning ${user.tag}... *(Waiting for unban)*`);
 
 		try { await user.send(res('MSG_DM_SOFTBAN', { guildName: message.guild.name, reason: reason })); }
-		catch (err) { this.logger.log('Command:Softban', `Failed to send softban DM to ${user.tag}`); }
+		catch (err) { this.logger.error('Command:Softban', `Failed to send softban DM to ${user.tag}`); }
 
 		this.client.mod.actions.softban(user, message.guild);
 		let cases: Message[] = <Message[]> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Softban');
 		this.client.mod.logs.mergeSoftban(message.guild, cases[0], cases[1], message.author, reason);
 
-		return kicking.edit(`Successfully softbanned ${user.username}#${user.discriminator}`);
+		this.logger.log(`Kicked: '${user.tag}' from '${message.guild.name}'`);
+		return kicking.edit(`Successfully softbanned ${user.tag}`);
 	}
 }

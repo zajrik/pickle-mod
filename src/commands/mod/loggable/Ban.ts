@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
 import { User, GuildMember, RichEmbed } from 'discord.js';
 import { prompt, PromptResult } from '../../../lib/Util';
 import { modOnly, stringResource as res } from '../../../lib/Util';
@@ -9,6 +9,7 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
+	@logger private readonly logger: Logger;
 	public constructor(client: ModClient)
 	{
 		super(client, {
@@ -54,16 +55,15 @@ export default class extends Command<ModClient>
 		{
 			await user.send(res('MSG_DM_BAN', { guildName: message.guild.name, reason: reason }), { split: true });
 		}
-		catch (err) { console.log(`Failed to send ban DM to ${user.username}#${user.discriminator}`); }
+		catch (err) { this.logger.error('Command:Ban', `Failed to send ban DM to ${user.tag}`); }
 
-		const banning: Message = <Message> await message.channel.send(
-			`Banning ${user.username}#${user.discriminator}...`);
+		const banning: Message = <Message> await message.channel.send(`Banning ${user.tag}...`);
 
 		this.client.mod.actions.ban(user, message.guild);
 		let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Ban');
 		this.client.mod.logs.editCase(message.guild, banCase, message.author, reason);
 
-		console.log(`Banned ${user.username}#${user.discriminator} from guild '${message.guild.name}'`);
-		banning.edit(`Successfully banned ${user.username}#${user.discriminator}`);
+		this.logger.log('Command:Ban', `Banned: '${user.tag}' from '${message.guild.name}'`);
+		banning.edit(`Successfully banned ${user.tag}`);
 	}
 }
