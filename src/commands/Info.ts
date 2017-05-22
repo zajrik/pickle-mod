@@ -36,7 +36,7 @@ export default class extends Command<Client>
 			.addField('Bot Invite', `[Click here](https://discordapp.com/oauth2/authorize`
 				+ `?permissions=297888791&scope=bot&client_id=${this.client.user.id})`, true)
 			.addField('\u200b', `Be sure to use the \`guide\` command for information `
-				+ `on setting up your server for moderation! The default prefix for commands is \`?\`. `
+				+ `on setting up your server for moderation! The default prefix for commands is \`-\`. `
 				+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
 				+ `just use \`@${this.client.user.tag} prefix\`.`)
 			.setFooter('YAMDBF', this.client.user.avatarURL)

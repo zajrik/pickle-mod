@@ -29,15 +29,12 @@ export class ModClient extends Client
 		});
 
 		this.config = config;
-
-		// this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
-		// this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
 	}
 
 	@once('pause')
 	private async _onPause(): Promise<void>
 	{
-		await this.setDefaultSetting('prefix', '?');
+		await this.setDefaultSetting('prefix', '-');
 		await this.setDefaultSetting('cases', 0);
 		await this.setDefaultSetting('mentionSpam', false);
 		await this.setDefaultSetting('mentionSpam:threshold', 6);
@@ -52,6 +49,8 @@ export class ModClient extends Client
 		await this.mod.init();
 
 		// this._dmManager = new DMManager(this, this.config.DMManager);
+		// this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
+		// this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
 	}
 
 	/**
