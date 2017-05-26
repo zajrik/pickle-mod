@@ -8,10 +8,8 @@ export default class extends Command<Client>
 	{
 		super(client, {
 			name: '$',
-			aliases: [],
 			description: 'Execute a bash command and print output',
 			usage: '<prefix>$ <command> [...args]',
-			extraHelp: '',
 			group: 'system',
 			ownerOnly: true
 		});
@@ -36,11 +34,9 @@ export default class extends Command<Client>
 			result = err;
 		}
 		const output: string = `**INPUT:**\n\`\`\`bash\n$ ${args.join(' ')}\n\`\`\`\n**OUTPUT:**`;
-		return execution.delete().then(() =>
-		{
-			message.channel.send(output);
-			message.channel.sendCode('ts', this._clean(result), { split: true });
-		});
+		await execution.delete();
+		await message.channel.send(output);
+		return message.channel.sendCode('ts', this._clean(result), { split: true });
 	}
 
 	private _clean(text: string): string
