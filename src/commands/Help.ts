@@ -16,7 +16,7 @@ export default class extends Command<Client>
 		});
 	}
 
-	public async action(message: Message, args: string[]): Promise<any>
+	public async action(message: Message, [commandName]: [string]): Promise<any>
 	{
 		const dm: boolean = message.channel.type === 'dm' || message.channel.type === 'group';
 		const mentionName: string = `@${this.client.user.tag}`;
@@ -28,7 +28,7 @@ export default class extends Command<Client>
 		let output: string = '';
 		let embed: RichEmbed = new RichEmbed();
 
-		if (!args[0])
+		if (!commandName)
 		{
 			embed.setAuthor('Moderation commands', this.client.user.avatarURL)
 				.addField(`${prefix}warn <member> <...reason>`, 'Give a formal warning to a user')
@@ -64,16 +64,15 @@ export default class extends Command<Client>
 		}
 		else
 		{
-			const filter: any = (c: Command<any>) =>
-				c.name === args[0] || c.aliases.includes(<string> args[0]);
-			if (!dm) command = (await this.client.commands
-				.filterGuildUsable(this.client, message)).filter(filter).first();
-			else command = this.client.commands
-				.filterDMHelp(this.client, message).filter(filter).first();
+			command = this.client.commands
+				.filter(c => !(!this.client.isOwner(message.author) && c.ownerOnly))
+				.find(c => c.name === commandName || c.aliases.includes(commandName));
 
 			if (!command) output = `A command by that name could not be found or you do\n`
-				+ `not have permissions to view it in this guild or channel`;
+				+ `not have permission to view it.`;
 			else output = '```ldif\n'
+				+ (command.guildOnly ? '[Server Only]\n' : '')
+				+ (command.ownerOnly ? '[Owner Only]\n' : '')
 				+ `Command: ${command.name}\n`
 				+ `Description: ${command.description}\n`
 				+ (command.aliases.length > 0 ? `Aliases: ${command.aliases.join(', ')}\n` : '')
@@ -85,12 +84,19 @@ export default class extends Command<Client>
 		output = dm ? output.replace(/<prefix>/g, '')
 			: output.replace(/<prefix>/g, await this.client.getPrefix(message.guild) || '');
 
-		embed.setColor(11854048);
-		if (output) embed.setDescription(output);
+		embed.setColor(11854048).setDescription(output);
 
-		if (!dm && command) message.reply(`Sent you a DM with help information.`);
-		if (!dm && !command) message.reply(`Sent you a DM with information.`);
-		message.author.sendEmbed(embed);
+		try
+		{
+			await message.author.sendEmbed(embed);
+			if (!dm && command) message.reply(`Sent you a DM with help information.`);
+			if (!dm && !command) message.reply(`Sent you a DM with information.`);
+
+		}
+		catch (err)
+		{
+			message.reply('Failed to DM help information. Do you have DMs blocked?');
+		}
 	}
 
 	private _padRight(text: string, width: int): string
