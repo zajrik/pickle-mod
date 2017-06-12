@@ -1,7 +1,8 @@
-import { Collection, GuildMember, Message, Role, User } from 'discord.js';
-import { GuildStorage, Logger, logger } from 'yamdbf';
+import { Collection, GuildMember, Message, Role, User, Guild } from 'discord.js';
+import { GuildStorage, Logger, logger, ListenerUtil } from 'yamdbf';
 import { stringResource as res } from '../../Util';
 import { ModClient } from '../../ModClient';
+const { on, registerListeners } = ListenerUtil;
 
 export class MentionSpamManager
 {
@@ -16,12 +17,22 @@ export class MentionSpamManager
 		for (const guild of this.client.guilds.values())
 			this.guilds.set(guild.id, new Collection<string, TrackedMention[]>());
 
-		this.client.on('message', message => this.onMessage(message));
+		registerListeners(this.client, this);
+	}
+
+	/**
+	 * Create a new TrackedMention[] Collection for new guilds
+	 */
+	@on('guildCreate')
+	private async onGuildCreate(guild: Guild): Promise<void>
+	{
+		this.guilds.set(guild.id, new Collection<string, TrackedMention[]>());
 	}
 
 	/**
 	 * Handle mentions within each message
 	 */
+	@on('message')
 	private async onMessage(message: Message): Promise<void>
 	{
 		if (!message.guild) return;
@@ -144,6 +155,8 @@ export class MentionSpamManager
 	private sweepExpired(member: GuildMember): void
 	{
 		const guild: Collection<string, TrackedMention[]> = this.guilds.get(member.guild.id);
+		if (!guild) return;
+
 		guild.set(member.user.id, this.get(member).filter(a => a.expires > Date.now()));
 	}
 }
