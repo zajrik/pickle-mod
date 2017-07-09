@@ -4,19 +4,18 @@ import { ModClient } from '../../lib/ModClient';
 import { prompt, PromptResult } from '../../lib/Util';
 import { ModLoader } from '../../lib/mod/ModLoader';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'config',
-			aliases: [],
-			description: 'Configure options for the server',
+			desc: 'Configure options for the server',
 			usage: '<prefix>config <option> [...value]\nOptions: mod | mute | logs | appeals | status | reset',
-			extraHelp: 'Uses a fuzzy-ish search to find channels and roles. For example, if you want to set your logging channel to a channel called "mod-logs" you can do:\n\n\t<prefix>config mod mod logs',
+			info: 'Uses a fuzzy-ish search to find channels and roles. For example, if you want to set your logging channel to a channel called "mod-logs" you can do:\n\n\t<prefix>config mod mod logs',
 			group: 'mod',
 			guildOnly: true
 		});
@@ -25,19 +24,19 @@ export default class extends Command<ModClient>
 	@using(function(message, args: string[])
 	{
 		if (args[0] && !['reset', 'status'].includes(args[0].toLowerCase()))
-			return expect({ '<option>': 'String', '[...value]': 'Any' })
+			return expect('option: String, ...value?: Any')
 				.call(this, message, args);
 
-		else return expect({ '<option>': 'String' }).call(this, message, args);
+		else return expect('option: String').call(this, message, args);
 	})
 	@using(function(message, args: string[])
 	{
 		if (['logs', 'appeals'].includes(args[0].toLowerCase()))
-			return resolveArgs({ '<option>': 'String', '[...value]': 'Channel' })
+			return resolve('option: String, ...value?: Channel')
 				.call(this, message, args);
 
 		else if (['mod', 'mute'].includes(args[0].toLowerCase()))
-			return resolveArgs({ '<option>': 'String', '[...value]': 'Role' })
+			return resolve('options: String, ...value?: Role')
 				.call(this, message, args);
 
 		else return [message, args];

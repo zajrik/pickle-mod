@@ -1,5 +1,6 @@
-import { KeyedStorage, JSONProvider } from 'yamdbf';
+import { KeyedStorage, Providers } from 'yamdbf';
 import { User, Guild } from 'discord.js';
+const { JSONProvider } = Providers;
 
 /**
  * Contains methods for managing moderation history

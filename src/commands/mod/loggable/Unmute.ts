@@ -3,26 +3,25 @@ import { User, GuildMember } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'unmute',
-			description: 'Unmute a user',
+			desc: 'Unmute a user',
 			usage: '<prefix>unmute <member>',
-			extraHelp: '',
 			group: 'mod',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<member>': 'Member' }))
-	@using(expect({ '<member>': 'Member' }))
+	@using(resolve('member: Member'))
+	@using(expect('member: Member'))
 	public async action(message: Message, [member]: [GuildMember]): Promise<any>
 	{
 		if (!await this.client.mod.hasSetMutedRole(message.guild)) return message.channel.send(

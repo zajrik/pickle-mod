@@ -3,26 +3,26 @@ import { GuildMember, User } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'mute',
-			description: 'Mute a user',
+			desc: 'Mute a user',
 			usage: '<prefix>mute <member> <duration> <...reason>',
-			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d',
+			info: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d',
 			group: 'mod',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<member>': 'Member', '<duration>': 'Duration', '<...reason>': 'String' }))
-	@using(expect({ '<member>': 'Member', '<duration>': 'Number', '<...reason>': 'String' }))
+	@using(resolve('member: Member, duration: Duration, ...reason: String'))
+	@using(expect('member: Member, duration: Number, ...reason: String'))
 	public async action(message: Message, [member, duration, reason]: [GuildMember, number, string]): Promise<any>
 	{
 		if (!await this.client.mod.hasSetMutedRole(message.guild)) return message.channel.send(

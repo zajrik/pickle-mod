@@ -3,27 +3,26 @@ import { MessageEmbed } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'reason',
-			aliases: [],
-			description: 'Set a reason for a case',
+			desc: 'Set a reason for a case or cases',
 			usage: '<prefix>reason <#|#-#|latest> <...reason>',
-			extraHelp: 'Can be used to edit your own cases or to set a reason for a ban/unban case that was posted by the bot',
+			info: 'Can be used to edit your own cases or to set a reason for a ban/unban case that was posted by the bot',
 			group: 'mod',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<case(s)>': 'String', '<...reason>': 'String' }))
-	@using(expect({ '<case(s)>': 'Any', '<...reason>': 'String' }))
+	@using(resolve('cases: String, ...reason: String'))
+	@using(expect('cases: String, ...reason: String'))
 	public async action(message: Message, [caseString, reason]: string[]): Promise<any>
 	{
 		const parseRange: RegExp = /(\d+)\-(\d+)/;

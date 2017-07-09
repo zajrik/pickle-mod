@@ -4,27 +4,27 @@ import { ModClient } from '../../../lib/ModClient';
 import { MuteManager } from '../../../lib/mod/managers/MuteManager';
 import { modOnly } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'duration',
 			aliases: ['dur'],
-			description: 'Set a duration for an active mute',
-			usage: '<prefix>duration <case#> <duration>',
-			extraHelp: 'This will restart a mute with an already set duration, applying the new duration.',
+			desc: 'Set a duration for an active mute',
+			usage: '<prefix>duration <caseNum> <duration>',
+			info: 'This will restart a mute with an already set duration, applying the new duration.',
 			group: 'mod',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<case#>': 'String', '<duration>': 'Duration' }))
-	@using(expect({ '<case#>': 'String', '<duration>': 'Number' }))
+	@using(resolve('caseNum: String, duration: Duration'))
+	@using(expect('caseNum: String, duration: Number'))
 	public async action(message: Message, [toSelect, duration]: [string | int, int]): Promise<any>
 	{
 		if (!isNaN(parseInt(<string> toSelect))) toSelect = parseInt(<string> toSelect);

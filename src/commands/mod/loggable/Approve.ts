@@ -4,14 +4,12 @@ import { ModClient } from '../../../lib/ModClient';
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'approve',
-			aliases: [],
-			description: 'Approve an appeal',
+			desc: 'Approve an appeal',
 			usage: '<prefix>approve <id>',
-			extraHelp: '',
 			group: 'mod',
 			guildOnly: true
 		});

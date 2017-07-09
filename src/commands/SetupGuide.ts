@@ -3,14 +3,12 @@ import { Client, Command, Message } from 'yamdbf';
 
 export default class extends Command<Client>
 {
-	public constructor(client: Client)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'guide',
-			aliases: [],
-			description: 'Get a guide for setting up the modbot on a server',
+			desc: 'Get a guide for setting up the modbot on a server',
 			usage: '<prefix>guide',
-			extraHelp: '',
 			group: 'mod'
 		});
 	}

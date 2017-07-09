@@ -6,14 +6,12 @@ import { prompt, PromptResult, modOnly } from '../../../lib/Util';
 export default class extends Command<ModClient>
 {
 	@logger private readonly logger: Logger;
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'reject',
-			aliases: [],
-			description: 'Reject an appeal',
+			desc: 'Reject an appeal',
 			usage: '<prefix>reject <id> <...reason>',
-			extraHelp: '',
 			group: 'mod',
 			guildOnly: true
 		});

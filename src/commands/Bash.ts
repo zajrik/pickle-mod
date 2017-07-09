@@ -4,11 +4,11 @@ import { execSync } from 'child_process';
 
 export default class extends Command<Client>
 {
-	public constructor(client: Client)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: '$',
-			description: 'Execute a bash command and print output',
+			desc: 'Execute a bash command and print output',
 			usage: '<prefix>$ <command> [...args]',
 			group: 'system',
 			ownerOnly: true

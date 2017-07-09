@@ -3,28 +3,26 @@ import { User, GuildMember } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
 	@logger private readonly logger: Logger;
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'warn',
-			aliases: [],
-			description: 'Give a formal warning to a user',
+			desc: 'Give a formal warning to a user',
 			usage: '<prefix>warn <member> <...reason>',
-			extraHelp: '',
 			group: 'mod',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<member>': 'Member', '<...reason>': 'String' }))
-	@using(expect({ '<member>': 'Member', '<...reason>': 'String' }))
+	@using(resolve('member: Member, ...reason: String'))
+	@using(expect('member: Member, ...reason: String'))
 	public async action(message: Message, [member, reason]: [GuildMember, string]): Promise<any>
 	{
 		const user: User = member.user;

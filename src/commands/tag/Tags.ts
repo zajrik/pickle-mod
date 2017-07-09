@@ -2,14 +2,12 @@ import { Client, Command, GuildStorage, Message } from 'yamdbf';
 
 export default class extends Command<Client>
 {
-	public constructor(client: Client)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'tags',
-			aliases: [],
-			description: 'List all stored tags',
+			desc: 'List all stored tags',
 			usage: '<prefix>tags',
-			extraHelp: '',
 			group: 'tag',
 			guildOnly: true
 		});

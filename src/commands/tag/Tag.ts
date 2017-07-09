@@ -2,14 +2,12 @@ import { Client, Command, GuildStorage, Message } from 'yamdbf';
 
 export default class extends Command<Client>
 {
-	public constructor(client: Client)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'tag',
-			aliases: [],
-			description: 'Create/recall/update/delete tags',
+			desc: 'Create/recall/update/delete tags',
 			usage: '<prefix>tag [add|del|update] <name> [details]',
-			extraHelp: '',
 			group: 'tag',
 			guildOnly: true
 		});
@@ -19,11 +17,12 @@ export default class extends Command<Client>
 	{
 		const action: string = args[0];
 		const storage: GuildStorage = message.guild.storage;
+		const modRole: string = await storage.settings.get('modrole') || '';
 		if (!await storage.exists('tags')) await storage.set('tags', {});
 		switch (action)
 		{
 			case 'add':
-				if (!message.member.roles.find('name', 'Mod')) return;
+				if (!message.member.roles.has(modRole)) return;
 				if (await storage.exists(`tags.${args[1]}`))
 					return message.channel.send(
 						`Tag "${args[1]}" already exists. Use \`tag update ${args[1]}\` to update it.`);
@@ -32,14 +31,14 @@ export default class extends Command<Client>
 					`Created tag "${args[1]}"`);
 
 			case 'del':
-				if (!message.member.roles.find('name', 'Mod')) return;
+				if (!message.member.roles.has(modRole)) return;
 				if (!await storage.exists(`tags.${args[1]}`))
 					return message.channel.send(`Tag "${args[1]}" does not exist.`);
 				await storage.remove(`tags.${args[1]}`);
 				return message.channel.send(`Tag "${args[1]}" deleted`);
 
 			case 'update':
-				if (!message.member.roles.find('name', 'Mod')) return;
+				if (!message.member.roles.has(modRole)) return;
 				if (!await storage.exists(`tags.${args[1]}`))
 					return message.channel.send(`Tag "${args[1]}" does not exist.`);
 				await storage.set(`tags.${args[1]}`, args.slice(2).join(' '));

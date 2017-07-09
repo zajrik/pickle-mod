@@ -4,11 +4,11 @@ import { ModClient } from '../../../lib/ModClient';
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'appeal',
-			description: 'Appeal a ban',
+			desc: 'Appeal a ban',
 			usage: '<prefix>appeal <message>',
 			ratelimit: '1/10m',
 			group: 'mod'

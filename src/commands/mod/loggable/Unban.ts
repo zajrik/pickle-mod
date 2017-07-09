@@ -3,16 +3,16 @@ import { User } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
 	public constructor(client: ModClient)
 	{
-		super(client, {
+		super({
 			name: 'unban',
-			description: 'Unban a user by id',
+			desc: 'Unban a user by id',
 			usage: '<prefix>unban <user> <...reason>',
 			group: 'mod',
 			guildOnly: true
@@ -20,8 +20,8 @@ export default class extends Command<ModClient>
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<user>': 'BannedUser', '<...reason>': 'String' }))
-	@using(expect({ '<user>': 'User', '<...reason>': 'String' }))
+	@using(resolve('user: BannedUser, ...reason: String'))
+	@using(expect('user: User, ...reason: String'))
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		const id: string = user.id;

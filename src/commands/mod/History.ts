@@ -5,20 +5,20 @@ import { prompt, PromptResult } from '../../lib/Util';
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'history',
-			description: 'Check a user\'s offense history',
+			desc: 'Check a user\'s offense history',
 			usage: '<prefix>history [user [\'reset\']]',
-			extraHelp: `To reset a user's history, just add the word 'reset' after the user to look up. If no user is provided, or you do not have permission to use mod commands, you will be DM'd your own history.`,
+			info: `To reset a user's history, just add the word 'reset' after the user to look up. If no user is provided, or you do not have permission to use mod commands, you will be DM'd your own history.`,
 			group: 'mod',
 			guildOnly: true
 		});
 
 		this.use(async (message, args) => {
 			if (!await this.client.mod.canCallModCommand(message)) return [message, []];
-			else return Middleware.resolveArgs({ '[user]': 'User' }).call(this, message, args);
+			else return Middleware.resolve('user?: User').call(this, message, args);
 		});
 	}
 

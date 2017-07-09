@@ -3,28 +3,26 @@ import { User, GuildMember } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly, stringResource as res } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
 	@logger private readonly logger: Logger;
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'softban',
-			aliases: [],
-			description: 'Softban a user',
+			desc: 'Softban a user',
 			usage: '<prefix>softban <user> <...reason>',
-			extraHelp: '',
 			group: 'mod',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }))
-	@using(expect({ '<user>': 'User', '<...reason>': 'String' }))
+	@using(resolve('user: User, ...reason: String'))
+	@using(expect('user: User, ...reason: String'))
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		if (user.id === message.author.id)

@@ -4,18 +4,18 @@ import { prompt, PromptResult } from '../../../lib/Util';
 import { modOnly, stringResource as res } from '../../../lib/Util';
 import { ModClient } from '../../../lib/ModClient';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
 	@logger private readonly logger: Logger;
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'ban',
 			aliases: ['b&', 'banne'],
-			description: 'Ban a user',
+			desc: 'Ban a user',
 			usage: '<prefix>ban <user> <...reason>',
 			group: 'mod',
 			guildOnly: true
@@ -23,8 +23,8 @@ export default class extends Command<ModClient>
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<user>': 'User', '<...reason>': 'String' }))
-	@using(expect({ '<user>': 'User', '<...reason>': 'String' }))
+	@using(resolve('user: User, ...reason: String'))
+	@using(expect('user: User, ...reason: String'))
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
 		if (user.id === message.author.id)

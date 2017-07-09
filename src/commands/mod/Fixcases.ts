@@ -7,16 +7,15 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'fixcases',
-			description: 'Re-index case numbers',
+			desc: 'Re-index case numbers',
 			usage: '<prefix>fixcases <case msg id>',
-			extraHelp: 'Must be given the message ID of a case that is known to have a correct number. All the cases after the provided case will be re-indexed in ascending order.',
+			info: 'Must be given the message ID of a case that is known to have a correct number. All the cases after the provided case will be re-indexed in ascending order.',
 			group: 'mod',
-			guildOnly: true,
-			ownerOnly: false
+			guildOnly: true
 		});
 	}
 

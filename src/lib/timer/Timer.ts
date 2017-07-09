@@ -1,4 +1,5 @@
-import { Client, KeyedStorage, JSONProvider } from 'yamdbf';
+import { Client, KeyedStorage, Providers } from 'yamdbf';
+const { JSONProvider } = Providers;
 
 /**
  * A timer for bots that allows registering callback functions that

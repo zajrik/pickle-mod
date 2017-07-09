@@ -15,10 +15,8 @@ export class ModClient extends Client
 	public constructor()
 	{
 		super({
-			name: 'YAMDBF Mod',
 			token: config.token,
 			owner: config.owner,
-			version: pkg.version,
 			unknownCommandError: false,
 			statusText: 'Obey the law.',
 			readyText: 'Ready\u0007',
@@ -39,7 +37,7 @@ export class ModClient extends Client
 		await this.setDefaultSetting('mentionSpam', false);
 		await this.setDefaultSetting('mentionSpam:threshold', 6);
 		await this.setDefaultSetting('mentionSpam:type', 'kick');
-		this.emit('continue');
+		this.continue();
 	}
 
 	@once('clientReady')

@@ -5,14 +5,12 @@ import { prompt, PromptResult } from '../../lib/Util';
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'clearlogs',
-			aliases: [],
-			description: 'Clear the moderation logs channel, resetting cases to 0',
+			desc: 'Clear the moderation logs channel, resetting cases to 0',
 			usage: '<prefix>clearlogs',
-			extraHelp: '',
 			group: 'mod'
 		});
 	}

@@ -4,14 +4,12 @@ import * as Discord from 'discord.js';
 
 export default class extends Command<Client>
 {
-	public constructor(client: Client)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'info',
-			aliases: [],
-			description: 'Bot information',
+			desc: 'Bot information',
 			usage: '<prefix>info',
-			extraHelp: '',
 			group: 'base'
 		});
 	}

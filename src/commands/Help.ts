@@ -3,15 +3,13 @@ import { Client, Command, GuildStorage, Message } from 'yamdbf';
 
 export default class extends Command<Client>
 {
-	public constructor(client: Client)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'help',
-			description: 'Provides information on bot commands',
-			aliases: [],
+			desc: 'Provides information on bot commands',
 			usage: `<prefix>help [command]`,
-			extraHelp: 'Will DM bot command help information to the user to keep clutter down in guild channels. If you use the help command from within a DM you will only receive information for the commands you can use within the DM. If you want help with commands usable in a guild, call the help command in a guild channel. You will receive a list of the commands that you have permissions/roles for in that channel.',
-			group: 'base',
+			info: 'Will DM bot command help information to the user to keep clutter down in guild channels. If you use the help command from within a DM you will only receive information for the commands you can use within the DM. If you want help with commands usable in a guild, call the help command in a guild channel. You will receive a list of the commands that you have permissions/roles for in that channel.',
 			overloads: 'help'
 		});
 	}
@@ -74,10 +72,10 @@ export default class extends Command<Client>
 				+ (command.guildOnly ? '[Server Only]\n' : '')
 				+ (command.ownerOnly ? '[Owner Only]\n' : '')
 				+ `Command: ${command.name}\n`
-				+ `Description: ${command.description}\n`
+				+ `Description: ${command.desc}\n`
 				+ (command.aliases.length > 0 ? `Aliases: ${command.aliases.join(', ')}\n` : '')
 				+ `Usage: ${command.usage}\n`
-				+ (command.extraHelp ? `\n${command.extraHelp}` : '')
+				+ (command.info ? `\n${command.info}` : '')
 				+ '\n```';
 		}
 

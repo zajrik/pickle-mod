@@ -3,27 +3,26 @@ import { GuildMember } from 'discord.js';
 import { ModClient } from '../../../lib/ModClient';
 import { modOnly } from '../../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'prune',
-			aliases: [],
-			description: 'Remove the last given quantity of messages for the provided member',
+			desc: 'Remove the last given quantity of messages for the provided member',
 			usage: '<prefix>prune <quantity> <member>',
-			extraHelp: 'Removes as many messages as possible from the given member within the given quantity of messages. Can delete up to 100 messages per command call',
+			info: 'Removes as many messages as possible from the given member within the given quantity of messages. Can delete up to 100 messages per command call',
 			group: 'prune',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<quantity>': 'Number', '<member>': 'Member' }))
-	@using(expect({ '<quantity>': 'Number', '<member>': 'Member' }))
+	@using(resolve('quantity: Number, member: Member'))
+	@using(expect('quantity: Number, member: Member'))
 	public async action(message: Message, [quantity, member]: [int, GuildMember]): Promise<any>
 	{
 		if (!quantity || quantity < 1)

@@ -4,26 +4,26 @@ import { ModClient } from '../../lib/ModClient';
 import { LockdownManager } from '../../lib/mod/managers/LockdownManager';
 import { modOnly } from '../../lib/Util';
 
-const { resolveArgs, expect } = Middleware;
+const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
 	@logger private readonly logger: Logger;
-	public constructor(client: ModClient)
+	public constructor()
 	{
-		super(client, {
+		super({
 			name: 'lockdown',
-			description: 'Lock down a channel for a set time',
-			usage: '<prefix>lockdown <duration|\'clear\'> [#channel]',
-			extraHelp: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown.\n\nCalling the lockdown command when a channel is already locked down will restart the lockdown with the new duration.',
+			desc: 'Lock down a channel for a set time',
+			usage: '<prefix>lockdown <duration|\'clear\'> [channel]',
+			info: 'Uses duration shorthand to determine duration. Examples:\n\n\t30s\n\t10m\n\t5h\n\t1d\n\nUse `lockdown clear` to remove the channel lockdown.\n\nCalling the lockdown command when a channel is already locked down will restart the lockdown with the new duration.',
 			group: 'mod',
 			guildOnly: true
 		});
 	}
 
 	@modOnly
-	@using(resolveArgs({ '<duration|clear>': 'String', '[#channel]': 'Channel' }))
+	@using(resolve({ '<duration|clear>': 'String', '[channel]': 'Channel' }))
 	@using(expect({ '<duration|clear>': 'String' }))
 	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{

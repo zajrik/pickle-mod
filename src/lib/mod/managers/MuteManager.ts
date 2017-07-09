@@ -1,7 +1,8 @@
-import { GuildStorage, KeyedStorage, JSONProvider, Logger, logger } from 'yamdbf';
+import { GuildStorage, KeyedStorage, Providers, Logger, logger } from 'yamdbf';
 import { GuildMember, Guild, Collection } from 'discord.js';
 import { ModClient } from '../../ModClient';
 import { Timer } from '../../timer/Timer';
+const { JSONProvider } = Providers;
 
 /**
  * Contains methods for managing guild member mutes. Also handles

@@ -1,8 +1,9 @@
 import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
-import { KeyedStorage, JSONProvider, Logger, logger } from 'yamdbf';
+import { KeyedStorage, Providers, Logger, logger } from 'yamdbf';
 import { stringResource as res } from '../../Util';
 import { ModClient } from '../../ModClient';
 import { Timer } from '../../timer/Timer';
+const { JSONProvider } = Providers;
 
 /**
  * Contains methods for managing lockdowns on guild channels
