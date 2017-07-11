@@ -1,6 +1,6 @@
 import { Client, ListenerUtil, LogLevel } from 'yamdbf';
 import { TextChannel, RichEmbed, Message, Guild } from 'discord.js';
-// import { DMManager } from 'yamdbf-addon-dm-manager';
+import { DMManager } from 'yamdbf-addon-dm-manager';
 import { ModLoader } from './mod/ModLoader';
 const config: any = require('../config.json');
 const pkg: any = require('../../package.json');
@@ -9,7 +9,7 @@ const { on, once } = ListenerUtil;
 
 export class ModClient extends Client
 {
-	// private _dmManager: DMManager;
+	private _dmManager: DMManager;
 	public config: any;
 	public mod: ModLoader;
 	public constructor()
@@ -46,9 +46,10 @@ export class ModClient extends Client
 		this.mod = new ModLoader(this);
 		await this.mod.init();
 
-		// this._dmManager = new DMManager(this, this.config.DMManager);
-		// this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
-		// this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
+		this._dmManager = new DMManager(this, this.config.DMManager);
+		await this._dmManager.init();
+		this.on('blacklistAdd', (user, global) => { if (global) this._dmManager.blacklist(user); });
+		this.on('blacklistRemove', (user, global) => { if (global) this._dmManager.whitelist(user); });
 	}
 
 	/**
