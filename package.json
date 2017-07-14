@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/zajrik/modbot#readme",
   "dependencies": {
-    "yamdbf": "github:zajrik/yamdbf#b9cc3967dec08920f9278aa62d0745b737d7facc",
-    "yamdbf-addon-dm-manager": "github:zajrik/yamdbf-addon-dm-manager"
+    "yamdbf": "github:zajrik/yamdbf",
+    "yamdbf-dm-manager": "github:zajrik/yamdbf-dm-manager"
   },
   "devDependencies": {
     "@types/node": "^6.0.73",
