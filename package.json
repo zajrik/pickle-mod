@@ -25,16 +25,17 @@
   "homepage": "https://github.com/zajrik/modbot#readme",
   "dependencies": {
     "yamdbf": "github:zajrik/yamdbf",
+    "yamdbf-command-usage": "github:zajrik/yamdbf-command-usage",
     "yamdbf-dm-manager": "github:zajrik/yamdbf-dm-manager"
   },
   "devDependencies": {
-    "@types/node": "^6.0.73",
+    "@types/node": "^6.0.85",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-sourcemaps": "^2.4.0",
     "gulp-tslint": "^8.0.0",
-    "gulp-typescript": "^3.1.6",
+    "gulp-typescript": "^3.2.1",
     "tslint": "^5.2.0",
-    "typescript": "^2.3.2"
+    "typescript": "^2.4.2"
   }
 }

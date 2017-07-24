@@ -1,6 +1,7 @@
 import { Client, ListenerUtil, LogLevel } from 'yamdbf';
 import { TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 import { dmManager } from 'yamdbf-dm-manager';
+import { commandUsage } from 'yamdbf-command-usage';
 import { ModLoader } from './mod/ModLoader';
 const config: any = require('../config.json');
 const pkg: any = require('../../package.json');
@@ -23,7 +24,10 @@ export class ModClient extends Client
 			ratelimit: '10/1m',
 			pause: true,
 			logLevel: LogLevel.DEBUG,
-			plugins: [dmManager(config.DMManager)]
+			plugins: [
+				dmManager(config.DMManager),
+				commandUsage(config.commandLog)
+			]
 		});
 
 		this.config = config;
@@ -45,24 +49,6 @@ export class ModClient extends Client
 	{
 		this.mod = new ModLoader(this);
 		await this.mod.init();
-	}
-
-	/**
-	 * Log command usage to command logging channel
-	 */
-	@on('command')
-	private _logCommand(name: string, args: any, execTime: number, message: Message): Promise<Message>
-	{
-		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.commands);
-		const embed: RichEmbed = new RichEmbed()
-			.setColor(11854048)
-			.setAuthor(`${message.author.tag} (${message.author.id})`, message.author.avatarURL);
-		if (message.guild) embed.addField('Guild', message.guild.name, true);
-		embed.addField('Exec time', `${execTime.toFixed(2)}ms`, true)
-			.addField('Command content', message.content)
-			.setFooter(message.channel.type.toUpperCase(), this.user.avatarURL)
-			.setTimestamp();
-		return logChannel.sendEmbed(embed);
 	}
 
 	/**
