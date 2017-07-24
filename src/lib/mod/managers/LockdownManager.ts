@@ -127,8 +127,15 @@ export class LockdownManager
 	 */
 	private async _checkLockdowns(): Promise<void>
 	{
-		for (const channel of (await this.getLockedChannels()).values())
+		for (const [id, channel] of (await this.getLockedChannels()).entries())
 		{
+			if (!channel)
+			{
+				await this._storage.remove(id);
+				this.logger.log('LockdownManager', `Locked down channel '${id}' no longer exists.`);
+				continue;
+			}
+
 			const channelText: string = `'#${channel.name}' in '${channel.guild.name}'`;
 			if (!await this.isExpired(channel)) continue;
 			this.logger.log('LockdownManager', `Removing expired lockdown: ${channelText}'`);
