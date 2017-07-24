@@ -50,7 +50,7 @@ export default class extends Command<ModClient>
 
 		const guildStorage: GuildStorage = this.client.storage.guilds.get(guild.id);
 		const appeal: Message = <Message> await (<TextChannel> guild.channels
-			.get(await guildStorage.settings.get('appeals'))).sendEmbed(embed);
+			.get(await guildStorage.settings.get('appeals'))).send({ embed });
 
 		activeAppeals[message.author.id] = appeal.id;
 		await storage.set('activeAppeals', activeAppeals);

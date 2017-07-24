@@ -40,6 +40,6 @@ export default class extends Command<Client>
 			.setFooter('YAMDBF', this.client.user.avatarURL)
 			.setTimestamp();
 
-		message.channel.sendEmbed(embed);
+		message.channel.send({ embed });
 	}
 }

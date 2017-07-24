@@ -31,7 +31,7 @@ export default class extends Command<ModClient>
 			.setAuthor(user.tag, user.avatarURL)
 			.setFooter(offenses.toString());
 
-		if (user.id === message.author.id) return message.author.sendEmbed(embed);
+		if (user.id === message.author.id) return message.author.send({ embed });
 
 		if (reset === 'reset')
 		{
@@ -53,6 +53,6 @@ export default class extends Command<ModClient>
 				.setFooter(offenses.toString());
 		}
 
-		message.channel.sendEmbed(embed);
+		message.channel.send({ embed });
 	}
 }

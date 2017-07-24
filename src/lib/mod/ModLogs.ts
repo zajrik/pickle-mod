@@ -34,7 +34,8 @@ export class ModLogs
 			.setFooter(`Case ${caseNum}`)
 			.setTimestamp();
 
-		return (<TextChannel> guild.channels.get(await storage.settings.get('modlogs'))).sendEmbed(embed);
+		return <Promise<Message>> (<TextChannel> guild.channels
+			.get(await storage.settings.get('modlogs'))).send({ embed });
 	}
 
 	/**

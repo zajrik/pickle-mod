@@ -33,7 +33,7 @@ export class MemberLogManager
 	 */
 	@on('guildMemberAdd')
 	@on('guildMemberRemove', false)
-	private logMember(member: GuildMember, joined: boolean = true): Promise<Message>
+	private logMember(member: GuildMember, joined: boolean = true): void
 	{
 		if (!member.guild.channels.exists('name', 'member-log')) return;
 		const type: 'join' | 'leave' = joined ? 'join' : 'leave';
@@ -45,7 +45,7 @@ export class MemberLogManager
 			.setFooter(joined ? 'User joined' : 'User left' , '')
 			.setTimestamp();
 		this.handleLog(member, type);
-		return memberLog.sendEmbed(embed);
+		memberLog.send({ embed });
 	}
 
 	/**

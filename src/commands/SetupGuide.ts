@@ -50,6 +50,6 @@ export default class extends Command<Client>
 			.addField('\u200b', 'At any time you can check if your server has these '
 				+ `config options set with the command:\n\`${prefix}config status\``);
 
-			message.channel.sendEmbed(embed);
+			message.channel.send({ embed });
 	}
 }

@@ -86,7 +86,7 @@ export default class extends Command<Client>
 
 		try
 		{
-			await message.author.sendEmbed(embed);
+			await message.author.send({ embed });
 			if (!dm && command) message.reply(`Sent you a DM with help information.`);
 			if (!dm && !command) message.reply(`Sent you a DM with information.`);
 

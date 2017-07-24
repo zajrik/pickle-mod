@@ -56,7 +56,7 @@ export class ModClient extends Client
 	 */
 	@on('guildCreate')
 	@on('guildDelete', false)
-	private _logGuild(guild: Guild, joined: boolean = true): Promise<Message>
+	private _logGuild(guild: Guild, joined: boolean = true): void
 	{
 		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.guilds);
 		const embed: RichEmbed = new RichEmbed()
@@ -64,6 +64,7 @@ export class ModClient extends Client
 			.setAuthor(`${guild.name} (${guild.id})`, guild.iconURL)
 			.setFooter(joined ? 'Joined guild' : 'Left guild')
 			.setTimestamp();
-		return logChannel.sendEmbed(embed);
+
+		logChannel.send({ embed });
 	}
 }

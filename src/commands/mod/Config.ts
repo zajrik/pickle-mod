@@ -87,7 +87,7 @@ export default class extends Command<ModClient>
 					.setAuthor('Server config status', this.client.user.avatarURL)
 					.setDescription(`${check(modRoleSet)} **Mod role\n${check(logs)} Logs channel\n`
 						+ `${check(appeals)} Appeals channel\n${check(mute)} Mute role**`);
-				return message.channel.sendEmbed(embed);
+				return message.channel.send({ embed });
 
 			case 'reset':
 				const [result]: [PromptResult] = <[PromptResult]> await prompt(message,
