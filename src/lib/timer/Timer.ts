@@ -1,5 +1,5 @@
 import { Client, KeyedStorage, Providers } from 'yamdbf';
-const { JSONProvider } = Providers;
+const { SQLiteProvider } = Providers;
 
 /**
  * A timer for bots that allows registering callback functions that
@@ -20,10 +20,13 @@ export class Timer
 	public constructor(bot: Client, name: string, interval: int, callback: () => Promise<void>)
 	{
 		this.name = name;
-		this._storage = new KeyedStorage(`timers/${this.name}`, JSONProvider);
 		this._bot = bot;
 		this._interval = interval;
 		this._callback = callback;
+
+		const storageName: string = `timer_${this.name}`;
+		const storagePath: string = 'sqlite://./storage/timers.sqlite';
+		this._storage = new KeyedStorage(storageName, SQLiteProvider(storagePath));
 
 		this.create();
 	}
@@ -40,8 +43,8 @@ export class Timer
 			this._ticks = await this._storage.get(this.name) || 0;
 
 		if (this._timer) throw new Error('Timer has already been created.');
-		this._timer = this._bot.setInterval(async () =>
-		{
+
+		this._timer = this._bot.setInterval(async () => {
 			if (this._ticks >= this._interval) this._ticks = 0;
 			if (this._ticks++ === 0) this._callback().catch(console.error);
 			await this._storage.set(this.name, this._ticks);

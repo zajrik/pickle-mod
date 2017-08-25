@@ -23,7 +23,7 @@ export class ModClient extends Client
 			commandsDir: './bin/commands',
 			ratelimit: '10/1m',
 			pause: true,
-			logLevel: LogLevel.DEBUG,
+			logLevel: LogLevel.ERROR,
 			plugins: [
 				dmManager(config.DMManager),
 				commandUsage(config.commandLog)
