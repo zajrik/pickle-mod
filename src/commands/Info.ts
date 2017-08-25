@@ -30,7 +30,7 @@ export default class extends Command<Client>
 			.addField('Discord.js', `v${Discord.version}`, true)
 			.addField('\u200b', '\u200b', true)
 			.addField('Modbot Source', '[Available on GitHub](https://github.com/zajrik/modbot)', true)
-			.addField('Modbot Support', '[Channel Invite](https://discord.gg/ZYZuKsW)', true)
+			.addField('Modbot Support', '[Server Invite](https://discord.gg/CW48Pkp)', true)
 			.addField('Bot Invite', `[Click here](https://discordapp.com/oauth2/authorize`
 				+ `?permissions=297888791&scope=bot&client_id=${this.client.user.id})`, true)
 			.addField('\u200b', `Be sure to use the \`guide\` command for information `
