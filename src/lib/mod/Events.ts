@@ -26,6 +26,7 @@ export class Events
 	private async _onGuildMemberUpdate(oldMember: GuildMember, newMember: GuildMember): Promise<void>
 	{
 		const guildStorage: GuildStorage = this._client.storage.guilds.get(oldMember.guild.id);
+		if (!guildStorage) return;
 		if (!await guildStorage.settings.exists('mutedrole')) return;
 		const mutedRole: string = await guildStorage.settings.get('mutedrole');
 		if (!(!oldMember.roles.has(mutedRole) && newMember.roles.has(mutedRole))) return;
