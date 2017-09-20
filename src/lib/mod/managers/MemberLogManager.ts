@@ -1,5 +1,5 @@
 import { GuildMember, Message, TextChannel, RichEmbed } from 'discord.js';
-import { Time, ListenerUtil } from 'yamdbf';
+import { Time, ListenerUtil, RateLimiter } from 'yamdbf';
 import { ModClient } from '../../ModClient';
 import { Timer } from '../../timer/Timer';
 
@@ -14,16 +14,17 @@ const { on, registerListeners } = ListenerUtil;
  */
 export class MemberLogManager
 {
-	private _client: ModClient;
-	private _rl: { [guild: string]: { [member: string]: { [type: string]: int } } };
-	private _rlTimer: Timer;
+	private client: ModClient;
+	private joinRateLimiter: RateLimiter;
+	private leaveRateLimiter: RateLimiter;
 
 	public constructor(client: ModClient)
 	{
-		this._client = client;
-		this._rl = {};
-		this._rlTimer = new Timer(this._client, 'memberlog-ratelimit', 5, async () => this.sweepMemberLogLimits());
-		registerListeners(this._client, this);
+		this.client = client;
+		this.joinRateLimiter = new RateLimiter('1/5m', false);
+		this.leaveRateLimiter = new RateLimiter('1/5m', false);
+
+		registerListeners(this.client, this);
 	}
 
 	/**
@@ -36,84 +37,23 @@ export class MemberLogManager
 	private logMember(member: GuildMember, joined: boolean = true): void
 	{
 		if (!member.guild.channels.exists('name', 'member-log')) return;
-		const type: 'join' | 'leave' = joined ? 'join' : 'leave';
-		if (this.canLog(member, type)) return;
+
 		const memberLog: TextChannel = <TextChannel> member.guild.channels.find('name', 'member-log');
+		if (!memberLog.permissionsFor(this.client.user).has('SEND_MESSAGES')) return;
+
+		// Hacky solution until I make breaking changes to RateLimiter to support
+		// use-cases that don't involve messages, but at least this cleans up
+		// the mess that was my original implementation of member-log ratelimiting
+		const messageSpoof: any = { guild: member.guild, channel: memberLog };
+		if (joined && !this.joinRateLimiter.get(messageSpoof, member.user).call()) return;
+		else if (!joined && !this.leaveRateLimiter.get(messageSpoof, member.user).call()) return;
+
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(joined ? 8450847 : 16039746)
 			.setAuthor(`${member.user.tag} (${member.id})`, member.user.avatarURL)
 			.setFooter(joined ? 'User joined' : 'User left' , '')
 			.setTimestamp();
-		this.handleLog(member, type);
+
 		memberLog.send({ embed });
-	}
-
-	/**
-	 * Determine if a nested object path does not end abruptly and can have
-	 * a value assigned to the final property in the path
-	 */
-	private validatePath(obj: object, props: string[]): boolean
-	{
-		let prev: { [prop: string]: any } = obj;
-		let valid: boolean = false;
-		let lastProp: string;
-		for (const prop of props)
-		{
-			lastProp = prop;
-			if (prev[prop] !== undefined)
-			{
-				valid = true;
-				prev = prev[prop];
-			}
-			else
-			{
-				valid = false;
-				break;
-			}
-		}
-		if (lastProp === props[props.length - 1]) valid = true;
-		return valid;
-	}
-
-	/**
-	 * Check current ratelimits and remove any expired
-	 */
-	private async sweepMemberLogLimits(): Promise<void>
-	{
-		for (const guild of Object.keys(this._rl))
-			for (const member of Object.keys(this._rl[guild]))
-				for (const type of ['join', 'leave'])
-					if (this._rl[guild][member][type]
-						&& Time.difference(this._rl[guild][member][type], Date.now()).ms < 1)
-						delete this._rl[guild][member][type];
-	}
-
-	/**
-	 * Shortcut to check if the member join/leave can be logged
-	 */
-	private canLog(member: GuildMember, type: 'join' | 'leave'): boolean
-	{
-		return this.handleLog(member, type, true);
-	}
-
-	/**
-	 * Handle storing of ratelimits for the given guild member for the given type
-	 * of action. Returns whether or not the given guild member is currently
-	 * ratelimited. Use the `check` boolean param to check if the member
-	 * is ratelimited without updating their ratelimit
-	 */
-	private handleLog(member: GuildMember, type: 'join' | 'leave', check: boolean = false): boolean
-	{
-		const path: string[] = [member.guild.id, member.id, type];
-		if (!check)
-		{
-			if (!this._rl[member.guild.id]) this._rl[member.guild.id] = {};
-			if (!this._rl[member.guild.id][member.id]) this._rl[member.guild.id][member.id] = {};
-			this._rl[member.guild.id][member.id][type] = Date.now() + (5 * 60e3);
-			return true;
-		}
-		if (this.validatePath(this._rl, path)
-			&& this._rl[member.guild.id][member.id][type]) return true;
-		return false;
 	}
 }
