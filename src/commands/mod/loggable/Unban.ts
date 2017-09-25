@@ -24,20 +24,27 @@ export default class extends Command<ModClient>
 	@using(expect('user: User, ...reason: String'))
 	public async action(message: Message, [user, reason]: [User, string]): Promise<any>
 	{
-		const id: string = user.id;
-		const unbanning: Message = <Message> await message.channel.send(`Unbanning ${user.tag}...`);
+		if (this.client.mod.actions.isLocked(message.guild, user))
+			return message.channel.send('That user is currently being moderated by someone else');
 
+		this.client.mod.actions.setLock(message.guild, user);
 		try
 		{
-			this.client.mod.actions.unban(id, message.guild);
-			const unbanCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Unban');
-			this.client.mod.logs.editCase(message.guild, unbanCase, message.author, reason);
+			const id: string = user.id;
+			const unbanning: Message = <Message> await message.channel.send(`Unbanning ${user.tag}...`);
 
-			return unbanning.edit(`Successfully unbanned ${user.tag}`);
+			try
+			{
+				const unbanCase: Message = <Message> await this.client.mod.logs.awaitCase(message.guild, user, 'Unban', reason);
+				this.client.mod.logs.editCase(message.guild, unbanCase, message.author, reason);
+
+				return unbanning.edit(`Successfully unbanned ${user.tag}`);
+			}
+			catch (err)
+			{
+				return unbanning.edit(`Failed to unban user with id \`${id}\``);
+			}
 		}
-		catch (err)
-		{
-			return unbanning.edit(`Failed to unban user with id \`${id}\``);
-		}
+		finally { this.client.mod.actions.removeLock(message.guild, user); }
 	}
 }

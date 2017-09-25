@@ -1,4 +1,4 @@
-import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector } from 'discord.js';
+import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector, GuildMember } from 'discord.js';
 import { GuildStorage, Message } from 'yamdbf';
 import { CaseTypeColors } from '../Util';
 import { ModClient } from '../ModClient';
@@ -9,6 +9,7 @@ import { ModClient } from '../ModClient';
 export class ModLogs
 {
 	private _client: ModClient;
+
 	public constructor(client: ModClient)
 	{
 		this._client = client;
@@ -131,9 +132,9 @@ export class ModLogs
 	 * Return a promise that resolves with a logged moderation
 	 * case for a mute
 	 */
-	public async awaitMuteCase(guild: Guild, user: User): Promise<Message>
+	public async awaitMuteCase(guild: Guild, member: GuildMember): Promise<Message>
 	{
-		return new Promise<Message>(async resolve =>
+		return new Promise<Message>(async (resolve, reject) =>
 		{
 			const logs: TextChannel = <TextChannel> guild.channels.get(
 				await this._client.storage.guilds.get(guild.id).settings.get('modlogs'));
@@ -141,7 +142,7 @@ export class ModLogs
 			const actionRegex: RegExp = /\*\*Action:\*\* (Mute)/;
 
 			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._client.user.id
-				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 60e3 });
+				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === member.id), { time: 60e3 });
 
 			let found: Message;
 			collector.on('end', () => resolve(found));
@@ -151,24 +152,33 @@ export class ModLogs
 				if (/Mute/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
 				if (found) collector.stop('found');
 			});
+
+			try { await this._client.mod.actions.mute(member, guild); }
+			catch (err) { reject(err.toString()); }
 		});
 	}
 
 	/**
-	 * Return a promise that resolves with a logged moderation
-	 * case or cases (softban) for bans/unbans
+	 * Set up a message collector, ban/unban/softban, and resolve
+	 * with the collected case messages. Reason should be given
+	 * for bans and softbans for audit logs
 	 */
-	public async awaitBanCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Softban'): Promise<Message | Message[]>
+	public awaitCase(
+		guild: Guild,
+		user: User | string,
+		type: 'Ban' | 'Unban' | 'Softban',
+		reason?: string): Promise<Message | Message[]>
 	{
-		return new Promise<Message | Message[]>(async resolve =>
+		return new Promise(async resolve =>
 		{
+			if (typeof user === 'string') user = await this._client.fetchUser(user);
 			const logs: TextChannel = <TextChannel> guild.channels.get(
 				await this._client.storage.guilds.get(guild.id).settings.get('modlogs'));
 			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
 			const actionRegex: RegExp = /\*\*Action:\*\* (Ban|Unban|Softban)/;
 
 			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._client.user.id
-				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === user.id), { time: 60e3 });
+				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === (<User> user).id), { time: 60e3 });
 
 			let found: Message | Message[];
 			collector.on('end', () => resolve(found));
@@ -197,6 +207,10 @@ export class ModLogs
 						if (softbanResult.reduce((a, b) => a && b)) collector.stop('found');
 					});
 			}
+
+			if (type === 'Ban') await this._client.mod.actions.ban(user, guild, reason);
+			if (type === 'Unban') await this._client.mod.actions.unban(user.id, guild);
+			if (type === 'Softban') await this._client.mod.actions.softban(user, guild, reason);
 		});
 	}
 

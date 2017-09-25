@@ -9,6 +9,7 @@ export class MentionSpamManager
 	@logger private readonly _logger: Logger;
 	private client: ModClient;
 	private guilds: Collection<string, Collection<string, TrackedMention[]>>;
+
 	public constructor(client: ModClient)
 	{
 		this.client = client;
@@ -74,7 +75,7 @@ export class MentionSpamManager
 
 		const reason: string = `Automatic ${type}: Exceeded mention threshold`;
 
-		if (type === 'kick')
+		async function kick(): Promise<void>
 		{
 			try
 			{
@@ -89,10 +90,15 @@ export class MentionSpamManager
 			await this.client.mod.actions.kick(member, message.guild, reason);
 			this.client.mod.logs.logCase(message.author, message.guild, 'Kick', reason, this.client.user);
 		}
+
+		if (type === 'kick') await kick();
 		else if (type === 'mute')
 		{
-			this.client.mod.actions.mute(member, message.guild);
-			let muteCase: Message = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, message.author);
+			let muteCase: Message;
+			try { muteCase = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, member); }
+			// Fall back to kick if muting fails
+			catch { return kick(); }
+
 			this.client.mod.logs.editCase(message.guild, muteCase, this.client.user, reason);
 		}
 		else if (type === 'ban')
@@ -101,10 +107,9 @@ export class MentionSpamManager
 			{
 				await message.author.send(res('MSG_DM_AUTO_BAN', { guildName: message.guild.name }), { split: true });
 			}
-			catch (err) { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
+			catch { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
 
-			this.client.mod.actions.ban(message.author, message.guild, reason);
-			let banCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, message.author, 'Ban');
+			let banCase: Message = <Message> await this.client.mod.logs.awaitCase(message.guild, message.author, 'Ban', reason);
 			this.client.mod.logs.editCase(message.guild, banCase, this.client.user, reason);
 		}
 	}

@@ -21,12 +21,12 @@ export enum PromptResult
  */
 export async function prompt(
 	message: Message,
-	prompt: string,
+	promptStr: string,
 	success: RegExp,
 	failure: RegExp,
 	options?: MessageOptions): Promise<[PromptResult, Message, Message]>
 {
-	const ask: Message = <Message> await message.channel.send(prompt, options);
+	const ask: Message = <Message> await message.channel.send(promptStr, options);
 	const confirmation: Message = (await message.channel.awaitMessages(a =>	a.author.id === message.author.id
 		&& (success.test(a.content) || failure.test(a.content)), { max: 1, time: 20e3 })).first();
 

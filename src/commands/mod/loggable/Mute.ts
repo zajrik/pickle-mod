@@ -25,29 +25,39 @@ export default class extends Command<ModClient>
 	@using(expect('member: Member, duration: Number, ...reason: String'))
 	public async action(message: Message, [member, duration, reason]: [GuildMember, number, string]): Promise<any>
 	{
-		if (!await this.client.mod.hasSetMutedRole(message.guild)) return message.channel.send(
-			`This server doesn't have a role set for muting.`);
+		if (this.client.mod.actions.isLocked(message.guild, member.user))
+			return message.channel.send('That user is currently being moderated by someone else');
 
-		const user: User = member.user;
-		if (user.id === message.author.id)
-			return message.channel.send(`I don't think you want to mute yourself.`);
+		this.client.mod.actions.setLock(message.guild, member.user);
+		try
+		{
+			if (!await this.client.mod.hasSetMutedRole(message.guild)) return message.channel.send(
+				`This server doesn't have a role set for muting.`);
 
-		const modRole: string = await message.guild.storage.settings.get('modrole');
-		if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
-			return message.channel.send('You may not use this command on that user.');
+			const user: User = member.user;
+			if (user.id === message.author.id)
+				return message.channel.send(`I don't think you want to mute yourself.`);
 
-		const mutedRole: string = await message.guild.storage.settings.get('mutedrole');
-		if (member.roles.has(mutedRole))
-			return message.channel.send(`That user is already muted`);
+			const modRole: string = await message.guild.storage.settings.get('modrole');
+			if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
+				return message.channel.send('You may not use this command on that user.');
 
-		const muting: Message = <Message> await message.channel.send(`Muting ${user.tag}...`);
+			const mutedRole: string = await message.guild.storage.settings.get('mutedrole');
+			if (member.roles.has(mutedRole))
+				return message.channel.send(`That user is already muted`);
 
-		this.client.mod.actions.mute(member, message.guild);
-		let muteCase: Message = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, user);
-		await this.client.mod.actions.setMuteDuration(member, message.guild, duration);
-		await this.client.mod.logs.editCase(
-			message.guild, muteCase, message.author, reason, Time.duration(duration).toSimplifiedString());
+			const muting: Message = <Message> await message.channel.send(`Muting ${user.tag}...`);
 
-		return muting.edit(`Muted ${user.tag}`);
+			let muteCase: Message;
+			try { muteCase = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, member); }
+			catch (err) { return muting.edit(`Error while muting: ${err}`); }
+
+			await this.client.mod.actions.setMuteDuration(member, message.guild, duration);
+			await this.client.mod.logs.editCase(
+				message.guild, muteCase, message.author, reason, Time.duration(duration).toSimplifiedString());
+
+			return muting.edit(`Muted ${user.tag}`);
+		}
+		finally { this.client.mod.actions.removeLock(message.guild, member.user); }
 	}
 }

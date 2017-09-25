@@ -12,6 +12,7 @@ export class ModClient extends Client
 {
 	public config: any;
 	public mod: ModLoader;
+
 	public constructor()
 	{
 		super({

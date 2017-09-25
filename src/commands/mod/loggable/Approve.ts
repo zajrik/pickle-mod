@@ -34,9 +34,9 @@ export default class extends Command<ModClient>
 		if (!appeal) return message.channel.send('Could not find an appeal with that ID.')
 			.then((res: Message) => res.delete(5e3));
 
-		const user: User = await this.client.mod.actions.unban(id, message.guild);
-		const unbanCase: Message = <Message> await this.client.mod.logs.awaitBanCase(message.guild, user, 'Unban');
+		const unbanCase: Message = <Message> await this.client.mod.logs.awaitCase(message.guild, id, 'Unban');
 		this.client.mod.logs.editCase(message.guild, unbanCase, message.author, 'Approved appeal');
+		const user: User = await this.client.fetchUser(id);
 
 		message.channel.send(`Approved appeal \`${id}\`. Unbanned ${user.tag}`)
 			.then((res: Message) => res.delete(5e3));

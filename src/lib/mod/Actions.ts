@@ -1,5 +1,5 @@
 import { GuildMember, Guild, User } from 'discord.js';
-import { GuildStorage, Logger, logger } from 'yamdbf';
+import { GuildStorage, Logger, logger, Util } from 'yamdbf';
 import { ModClient } from '../ModClient';
 
 /**
@@ -9,9 +9,36 @@ export class Actions
 {
 	@logger private readonly logger: Logger;
 	private _client: ModClient;
+	private _actionLocks: { [guild: string]: { [user: string]: boolean } };
+
 	public constructor(client: ModClient)
 	{
 		this._client = client;
+		this._actionLocks = {};
+	}
+
+	/**
+	 * Set an action lock for a user in a guild
+	 */
+	public setLock(guild: Guild, user: User): void
+	{
+		Util.assignNestedValue(this._actionLocks, [guild.id, user.id], true);
+	}
+
+	/**
+	 * Remove an action lock for a user in a guild
+	 */
+	public removeLock(guild: Guild, user: User): void
+	{
+		Util.removeNestedValue(this._actionLocks, [guild.id, user.id]);
+	}
+
+	/**
+	 * Return whether or not a user has an action lock in a guild
+	 */
+	public isLocked(guild: Guild, user: User): boolean
+	{
+		return Util.getNestedValue(this._actionLocks, [guild.id, user.id]);
 	}
 
 	/**
@@ -41,7 +68,7 @@ export class Actions
 			16462404
 		];
 		const colorIndex: int = Math.min(values
-			.reduce((a: int, b: int) => a + b), colors.length - 1);
+			.reduce((a, b) => a + b), colors.length - 1);
 
 		return {
 			toString: () => `This user has ${warn} warning${
@@ -68,9 +95,10 @@ export class Actions
 	 */
 	public async mute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
-		await this.count(member.user, guild, 'mute');
 		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
-		return await member.addRoles([guild.roles.get(await storage.settings.get('mutedrole'))]);
+		await member.addRoles([guild.roles.get(await storage.settings.get('mutedrole'))]);
+		await this.count(member.user, guild, 'mute');
+		return member;
 	}
 
 	/**
@@ -97,17 +125,28 @@ export class Actions
 	 */
 	public async kick(member: GuildMember, guild: Guild, reason: string): Promise<GuildMember>
 	{
-		await this.count(member.user, guild, 'kick');
-		return await member.kick(reason);
+		try
+		{
+			await member.kick(reason);
+			await this.count(member.user, guild, 'kick');
+		}
+		catch { return; }
+		return member;
 	}
 
 	/**
 	 * Ban a user from a guild
 	 */
-	public async ban(user: User, guild: Guild, reason: string): Promise<GuildMember>
+	public async ban(user: User, guild: Guild, reason: string): Promise<string | User | GuildMember>
 	{
-		await this.count(user, guild, 'ban');
-		return <GuildMember> await guild.ban(user, { reason: reason, days: 7 });
+		let toReturn: string | User | GuildMember;
+		try
+		{
+			toReturn = await guild.ban(user, { reason: reason, days: 7 });
+			await this.count(user, guild, 'ban');
+		}
+		catch { return; }
+		return toReturn;
 	}
 
 	/**
@@ -123,9 +162,15 @@ export class Actions
 	 */
 	public async softban(user: User, guild: Guild, reason: string): Promise<User>
 	{
-		await this.count(user, guild, 'kick');
-		await guild.ban(user, { reason: `Softban: ${reason}`, days: 7 });
-		await new Promise((r: any) => setTimeout(r, 5e3));
-		return await guild.unban(user.id);
+		let toReturn: User;
+		try
+		{
+			await guild.ban(user, { reason: `Softban: ${reason}`, days: 7 });
+			await this.count(user, guild, 'kick');
+			await new Promise((r: any) => setTimeout(r, 5e3));
+			toReturn = await guild.unban(user.id);
+		}
+		catch { return; }
+		return toReturn;
 	}
 }
