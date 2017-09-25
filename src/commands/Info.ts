@@ -18,7 +18,7 @@ export default class extends Command<Client>
 	{
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)
-			.setAuthor('YAMDBF Mod Info', this.client.user.avatarURL)
+			.setAuthor(`${this.client.user.username} Info`, this.client.user.avatarURL)
 			.addField('Mem Usage', `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`, true)
 			.addField('Uptime', Time.difference(this.client.uptime * 2, this.client.uptime).toString(), true)
 			.addField('\u200b', '\u200b', true)
@@ -37,7 +37,7 @@ export default class extends Command<Client>
 				+ `on setting up your server for moderation! The default prefix for commands is \`-\`. `
 				+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
 				+ `just use \`@${this.client.user.tag} prefix\`.`)
-			.setFooter('YAMDBF', this.client.user.avatarURL)
+			.setFooter('Pickle', this.client.user.avatarURL)
 			.setTimestamp();
 
 		message.channel.send({ embed });

@@ -23,7 +23,7 @@ export default class extends Command<Client>
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(11854048)
-			.setAuthor('YAMDBF Mod Setup Guide', this.client.user.avatarURL)
+			.setAuthor(`${this.client.user.username} Setup Guide`, this.client.user.avatarURL)
 			.setDescription(`In order to be able to use moderation commands on your server there `
 				+ `are some steps you'll need to take. In all cases, if a valid value is not found `
 				+ `for any of the config commands, you will be notified and can try again.`)

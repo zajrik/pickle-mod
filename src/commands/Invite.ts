@@ -20,6 +20,6 @@ export default class extends Command<Client>
 			+ `on setting up your server for moderation! The default prefix for commands is \`-\`. `
 			+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
 			+ `just use \`@${this.client.user.tag} prefix\`. `
-			+ `Thanks for choosing YAMDBF Mod for your server moderation control needs! 👏`);
+			+ `Thanks for choosing ${this.client.user.username} for your server moderation control needs! 👏`);
 	}
 }

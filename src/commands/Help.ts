@@ -43,8 +43,8 @@ export default class extends Command<Client>
 					`Lock down the channel the command is called in, or the provided channel for a specified duration\n`
 					+ 'Duration format examples: `30m`, `2h`, `1d`');
 
-			for (const cmd of ['warn', 'mute', 'unmute', 'kick', 'softban',
-				'ban', 'unban', 'reason', 'lockdown', 'eval', '$', 'appeal'])
+			for (const cmd of ['warn', 'mute', 'unmute', 'kick', 'softban', 'ban', 'unban', 'reason', 'lockdown',
+				'eval', 'eval:ts', '$', 'setlang', 'reload', 'usagestats'])
 				usableCommands.delete(cmd);
 
 			if (message.guild)
@@ -91,7 +91,7 @@ export default class extends Command<Client>
 			if (!dm && !command) message.reply(`Sent you a DM with information.`);
 
 		}
-		catch (err)
+		catch
 		{
 			message.reply('Failed to DM help information. Do you have DMs blocked?');
 		}
