@@ -156,7 +156,7 @@ export class Events
 			catch (err)
 			{
 				await storage.remove(`activeAppeals.${user.id}`);
-				this.logger.error('Events', err);
+				this.logger.error('Events', err.stack);
 			}
 		}
 

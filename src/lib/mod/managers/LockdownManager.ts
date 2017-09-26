@@ -142,7 +142,7 @@ export class LockdownManager
 			this.logger.log('LockdownManager', `Removing expired lockdown: ${channelText}'`);
 			await this.remove(channel);
 			try { await channel.send('**The lockdown on this channel has ended.**'); }
-			catch (err) { this.logger.error('LockdownManager', `Failed to send lockdown expiry message: ${channelText}`); }
+			catch { this.logger.error('LockdownManager', `Failed to send lockdown expiry message: ${channelText}`); }
 		}
 	}
 }

@@ -71,7 +71,7 @@ export default class extends Command<ModClient>
 		{
 			message.channel.fetchMessage(activeAppeals[user.id])
 				.then((msg: Message) => msg.delete())
-				.catch(err => this.logger.error('Command:Reject', err));
+				.catch(err => this.logger.error('Command:Reject', err.stack));
 			await storage.remove(`activeAppeals.${user.id}`);
 		}
 
