@@ -14,6 +14,7 @@ export class MuteManager
 	private _storage: KeyedStorage;
 	private _client: ModClient;
 	private _muteCheckTimer: Timer;
+
 	public constructor(client: ModClient)
 	{
 		this._storage = new KeyedStorage('managers/mute', JSONProvider);

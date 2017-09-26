@@ -13,6 +13,7 @@ export class Events
 {
 	@logger private readonly logger: Logger;
 	private _client: ModClient;
+
 	public constructor(client: ModClient)
 	{
 		this._client = client;
@@ -33,7 +34,6 @@ export class Events
 
 		const guild: Guild = newMember.guild;
 		const member: GuildMember = newMember;
-		if (!await this._client.mod.hasLoggingChannel(guild)) return;
 		if (member.roles.has(await guildStorage.settings.get('modrole'))) return;
 		const user: User = member.user;
 
@@ -43,6 +43,8 @@ export class Events
 
 		if (this._client.mod.logs.isCaseCached(guild, user, 'Mute'))
 			return this._client.mod.logs.removeCachedCase(guild, user, 'Mute');
+
+		if (!await this._client.mod.hasLoggingChannel(guild)) return;
 
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
@@ -148,11 +150,8 @@ export class Events
 				const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
 				await storage.remove(`activeAppeals.${user.id}`);
 				appeal.delete();
-				if (activeAppeals[user.id])
-				{
-					const invite: Invite = await guild.defaultChannel.createInvite({ maxAge: 86400, maxUses: 1 });
-					await user.send(res('MSG_DM_APPROVED_APPEAL', { guildName: guild.name, invite: invite.url }));
-				}
+				const invite: Invite = await guild.defaultChannel.createInvite({ maxAge: 86400, maxUses: 1 });
+				await user.send(res('MSG_DM_APPROVED_APPEAL', { guildName: guild.name, invite: invite.url }));
 			}
 			catch (err)
 			{

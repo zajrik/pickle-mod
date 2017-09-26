@@ -14,6 +14,7 @@ export class LockdownManager
 	private _storage: KeyedStorage;
 	private _client: ModClient;
 	private _lockdownCheckTimer: Timer;
+
 	public constructor(client: ModClient)
 	{
 		this._storage = new KeyedStorage('managers/lockdown', JSONProvider);

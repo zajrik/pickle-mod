@@ -8,8 +8,6 @@ import { Timer } from './Timer';
  */
 export class TimerCollection extends Collection<string, Timer>
 {
-	public constructor() { super(); }
-
 	/**
 	 * Add the Timer to the collection using Timer#name as
 	 * the key while preventing duplicates or overwriting

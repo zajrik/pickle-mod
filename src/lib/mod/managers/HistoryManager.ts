@@ -9,6 +9,7 @@ const { JSONProvider } = Providers;
 export class HistoryManager
 {
 	private _storage: KeyedStorage;
+
 	public constructor()
 	{
 		this._storage = new KeyedStorage('managers/history', JSONProvider);
