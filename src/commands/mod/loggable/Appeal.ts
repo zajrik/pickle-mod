@@ -10,7 +10,7 @@ export default class extends Command<ModClient>
 			name: 'appeal',
 			desc: 'Appeal a ban',
 			usage: '<prefix>appeal <message>',
-			ratelimit: '1/10m',
+			ratelimit: '5/10m',
 			group: 'mod'
 		});
 	}
@@ -49,8 +49,13 @@ export default class extends Command<ModClient>
 			.setTimestamp();
 
 		const guildStorage: GuildStorage = this.client.storage.guilds.get(guild.id);
-		const appeal: Message = <Message> await (<TextChannel> guild.channels
-			.get(await guildStorage.settings.get('appeals'))).send({ embed });
+		const appealsChannel: TextChannel = <TextChannel> guild.channels.get(await guildStorage.settings.get('appeals'));
+		if (!appealsChannel) return message.channel.send(
+			'The server you are trying to appeal to does not have appeals configured.');
+
+		let appeal: Message;
+		try { appeal = <Message> await appealsChannel.send({ embed }); }
+		catch { return message.channel.send('There was an error submitting your appeal.'); }
 
 		activeAppeals[message.author.id] = appeal.id;
 		await storage.set('activeAppeals', activeAppeals);

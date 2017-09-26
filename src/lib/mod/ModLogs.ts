@@ -1,5 +1,5 @@
 import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector, GuildMember } from 'discord.js';
-import { GuildStorage, Message } from 'yamdbf';
+import { GuildStorage, Message, Util } from 'yamdbf';
 import { CaseTypeColors } from '../Util';
 import { ModClient } from '../ModClient';
 
@@ -9,10 +9,38 @@ import { ModClient } from '../ModClient';
 export class ModLogs
 {
 	private _client: ModClient;
+	private _cachedCases: { [guild: string]: { [user: string]: { [type: string]: boolean } } };
 
 	public constructor(client: ModClient)
 	{
 		this._client = client;
+		this._cachedCases = {};
+	}
+
+	/**
+	 * Cache a case type for a user in a guild as having
+	 * already been logged
+	 */
+	public setCachedCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Mute'): void
+	{
+		Util.assignNestedValue(this._cachedCases, [guild.id, user.id, type], true);
+	}
+
+	/**
+	 * Remove a cached case type for a user in a guild
+	 */
+	public removeCachedCase(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Mute'): void
+	{
+		Util.removeNestedValue(this._cachedCases, [guild.id, user.id, type]);
+	}
+
+	/**
+	 * Return whether or not a user in a guild has a cached
+	 * logged case type
+	 */
+	public isCaseCached(guild: Guild, user: User, type: 'Ban' | 'Unban' | 'Mute'): boolean
+	{
+		return Util.getNestedValue(this._cachedCases, [guild.id, user.id, type]);
 	}
 
 	/**
@@ -93,127 +121,6 @@ export class ModLogs
 		else embed.setTimestamp(new Date(messageEmbed.createdTimestamp));
 
 		return caseMessage.edit('', { embed });
-	}
-
-	/**
-	 * Merge two cases (ban and unban) together with a new reason
-	 */
-	public async mergeSoftban(guild: Guild, ban: int | Message, unban: int | Message, issuer: User, reason: string): Promise<Message>
-	{
-		let banCaseMessage: Message;
-		if (typeof ban !== 'number') banCaseMessage = <Message> ban;
-		else banCaseMessage = await this.findCase(guild, <int> ban);
-		if (!banCaseMessage) return null;
-
-		const banMessageEmbed: MessageEmbed = banCaseMessage.embeds[0];
-		if (banMessageEmbed.author.name !== this._client.user.tag
-			&& banMessageEmbed.author.name !== issuer.tag) return null;
-
-		let unbanCaseMessage: Message;
-		if (typeof unban !== 'number') unbanCaseMessage = <Message> unban;
-		else unbanCaseMessage = await this.findCase(guild, <int> unban);
-		if (!unbanCaseMessage) return null;
-
-		const embed: RichEmbed = new RichEmbed()
-			.setColor(CaseTypeColors.Softban)
-			.setAuthor(issuer.tag, issuer.avatarURL)
-			.setDescription(banMessageEmbed.description
-				.replace(/\*\*Action:\*\* .+/, `**Action:** Softban`)
-				.replace(/\*\*Reason:\*\* .+/, `**Reason:** ${reason}`))
-			.setFooter(banMessageEmbed.footer.text)
-			.setTimestamp(new Date(banMessageEmbed.createdTimestamp));
-
-		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
-		await storage.settings.set('cases', await storage.settings.get('cases') - 1);
-		return banCaseMessage.edit('', { embed }).then(() => unbanCaseMessage.delete());
-	}
-
-	/**
-	 * Return a promise that resolves with a logged moderation
-	 * case for a mute
-	 */
-	public async awaitMuteCase(guild: Guild, member: GuildMember): Promise<Message>
-	{
-		return new Promise<Message>(async (resolve, reject) =>
-		{
-			const logs: TextChannel = <TextChannel> guild.channels.get(
-				await this._client.storage.guilds.get(guild.id).settings.get('modlogs'));
-			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
-			const actionRegex: RegExp = /\*\*Action:\*\* (Mute)/;
-
-			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._client.user.id
-				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === member.id), { time: 60e3 });
-
-			let found: Message;
-			collector.on('end', () => resolve(found));
-
-			collector.on('collect', message =>
-			{
-				if (/Mute/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
-				if (found) collector.stop('found');
-			});
-
-			try { await this._client.mod.actions.mute(member, guild); }
-			catch (err) { reject(err.toString()); }
-		});
-	}
-
-	/**
-	 * Set up a message collector, ban/unban/softban, and resolve
-	 * with the collected case messages. Reason should be given
-	 * for bans and softbans for audit logs
-	 */
-	public awaitCase(
-		guild: Guild,
-		user: User | string,
-		type: 'Ban' | 'Unban' | 'Softban',
-		reason?: string): Promise<Message | Message[]>
-	{
-		return new Promise(async (resolve, reject) =>
-		{
-			if (typeof user === 'string') user = await this._client.fetchUser(user);
-			const logs: TextChannel = <TextChannel> guild.channels.get(
-				await this._client.storage.guilds.get(guild.id).settings.get('modlogs'));
-			const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
-			const actionRegex: RegExp = /\*\*Action:\*\* (Ban|Unban|Softban)/;
-
-			const collector: MessageCollector = logs.createCollector((m: Message) => m.author.id === this._client.user.id
-				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === (<User> user).id), { time: 60e3 });
-
-			let found: Message | Message[];
-			collector.on('end', () =>
-				resolve(found));
-
-			if (type === 'Ban' || type === 'Unban')
-				collector.on('collect', message =>
-				{
-					if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
-					if (found) collector.stop('found');
-				});
-
-			if (type === 'Softban')
-			{
-				let softbanResult: boolean[] = [false, false];
-				found = [null, null];
-				collector.on('collect', message =>
-				{
-					const caseType: string = message.embeds[0].description.match(actionRegex)[1];
-					const index: int = caseType === 'Ban' ? 0 : caseType === 'Unban' ? 1 : null;
-					if (typeof index !== 'number') return;
-					(<Message[]> found)[index] = message;
-					softbanResult[index] = true;
-					if (softbanResult.reduce((a, b) => a && b)) collector.stop('found');
-				});
-			}
-
-			try
-			{
-				if (type === 'Ban') await this._client.mod.actions.ban(user, guild, reason);
-				if (type === 'Unban') await this._client.mod.actions.unban(user.id, guild);
-				if (type === 'Softban') await this._client.mod.actions.softban(user, guild, reason);
-			}
-			catch (err) { reject(err.toString()); }
-		});
 	}
 
 	/**

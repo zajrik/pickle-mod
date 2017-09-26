@@ -75,31 +75,33 @@ export class MentionSpamManager
 
 		const reason: string = `Automatic ${type}: Exceeded mention threshold`;
 
-		async function kick(): Promise<void>
-		{
+		const kick: () => Promise<void> = async () => {
 			try
 			{
 				await message.author.send(
 					`**You have been kicked from ${message.guild.name}**\n\n**Reason:** ${reason}`);
 			}
-			catch (err)
+			catch
 			{
 				this._logger.error('MentionSpamManager', `Failed to send kick DM to ${message.author.tag}`);
 			}
 
 			await this.client.mod.actions.kick(member, message.guild, reason);
 			this.client.mod.logs.logCase(message.author, message.guild, 'Kick', reason, this.client.user);
-		}
+		};
 
 		if (type === 'kick') await kick();
 		else if (type === 'mute')
 		{
-			let muteCase: Message;
-			try { muteCase = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, member); }
-			// Fall back to kick if muting fails
-			catch { return kick(); }
-
-			this.client.mod.logs.editCase(message.guild, muteCase, this.client.user, reason);
+			this.client.mod.logs.setCachedCase(message.guild, message.author, 'Mute');
+			try { await this.client.mod.actions.mute(member, message.guild); }
+			catch (err)
+			{
+				this.client.mod.logs.removeCachedCase(message.guild, message.author, 'Mute');
+				// Fall back to kicking if muting fails
+				return kick();
+			}
+			await this.client.mod.logs.logCase(message.author, message.guild, 'Mute', reason, this.client.user);
 		}
 		else if (type === 'ban')
 		{
@@ -109,8 +111,11 @@ export class MentionSpamManager
 			}
 			catch { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
 
-			let banCase: Message = <Message> await this.client.mod.logs.awaitCase(message.guild, message.author, 'Ban', reason);
-			this.client.mod.logs.editCase(message.guild, banCase, this.client.user, reason);
+			this.client.mod.logs.setCachedCase(message.guild, message.author, 'Ban');
+			try { await this.client.mod.actions.ban(message.author, message.guild, reason); }
+			catch { return this.client.mod.logs.removeCachedCase(message.guild, message.author, 'Ban'); }
+
+			await this.client.mod.logs.logCase(message.author, message.guild, 'Ban', reason, this.client.user);
 		}
 	}
 

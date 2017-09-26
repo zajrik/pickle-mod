@@ -38,8 +38,11 @@ export class Events
 		const user: User = member.user;
 
 		this._client.mod.managers.mute.set(member);
-		user.send(`You've been muted in ${guild.name}`);
+		try { await user.send(`You've been muted in ${guild.name}`); } catch {}
 		this.logger.log('Events', `Muted user: '${user.tag}' in '${guild.name}'`);
+
+		if (this._client.mod.logs.isCaseCached(guild, user, 'Mute'))
+			return this._client.mod.logs.removeCachedCase(guild, user, 'Mute');
 
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
@@ -69,7 +72,7 @@ export class Events
 	private async _onGuildMemberAdd(member: GuildMember): Promise<void>
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
-		let muteManager: MuteManager = this._client.mod.managers.mute;
+		const muteManager: MuteManager = this._client.mod.managers.mute;
 		if (!await muteManager.isMuted(member)) return;
 		if (!await muteManager.isEvasionFlagged(member)) return;
 
@@ -85,8 +88,7 @@ export class Events
 	@on('guildBanAdd')
 	private async _onGuildBanAdd(guild: Guild, user: User): Promise<void>
 	{
-		let guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
-		if (!await this._client.mod.hasLoggingChannel(guild)) return;
+		const guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
 		const storage: ClientStorage = this._client.storage;
 
 		const activeBans: ActiveBans = await storage.get('activeBans') || {};
@@ -100,6 +102,11 @@ export class Events
 		});
 		await storage.set('activeBans', activeBans);
 
+		if (this._client.mod.logs.isCaseCached(guild, user, 'Ban'))
+			return this._client.mod.logs.removeCachedCase(guild, user, 'Ban');
+
+		if (!await this._client.mod.hasLoggingChannel(guild)) return;
+
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
 		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
@@ -112,8 +119,7 @@ export class Events
 	@on('guildBanRemove')
 	private async _onGuildBanRemove(guild: Guild, user: User): Promise<void>
 	{
-		let guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
-		if (!await this._client.mod.hasLoggingChannel(guild)) return;
+		const guildStorage: GuildStorage = this._client.storage.guilds.get(guild.id);
 		const storage: ClientStorage = this._client.storage;
 
 		const activeBans: ActiveBans = await storage.get('activeBans') || {};
@@ -129,35 +135,36 @@ export class Events
 			await storage.set('activeBans', activeBans);
 		}
 
+		// Try to remove an active appeal for the user if there
+		// was one in the guild
+		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
+		if (activeAppeals[user.id])
+		{
+			const appealsChannel: TextChannel = <TextChannel> guild.channels
+				.get(await guildStorage.settings.get('appeals'));
+
+			try
+			{
+				const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
+				await storage.remove(`activeAppeals.${user.id}`);
+				appeal.delete();
+				if (activeAppeals[user.id])
+				{
+					const invite: Invite = await guild.defaultChannel.createInvite({ maxAge: 86400, maxUses: 1 });
+					await user.send(res('MSG_DM_APPROVED_APPEAL', { guildName: guild.name, invite: invite.url }));
+				}
+			}
+			catch (err) { this.logger.error('Events', err); }
+		}
+
+		if (this._client.mod.logs.isCaseCached(guild, user, 'Unban'))
+			return this._client.mod.logs.removeCachedCase(guild, user, 'Unban');
+
+		if (!await this._client.mod.hasLoggingChannel(guild)) return;
+
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
 		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
 		await this._client.mod.logs.logCase(user, guild, 'Unban', reason, this._client.user);
-
-		// Try to remove an active appeal for the user if there
-		// was one in the guild
-		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
-		if (!activeAppeals[user.id]) return;
-
-		const appealsChannel: TextChannel = <TextChannel> guild.channels
-			.get(await guildStorage.settings.get('appeals'));
-
-		try
-		{
-			const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
-			await storage.remove(`activeAppeals.${user.id}`);
-			appeal.delete();
-			if (activeAppeals[user.id])
-			{
-				const invite: Invite = await guild.defaultChannel
-					.createInvite({ maxAge: 86400, maxUses: 1 });
-				await user.send(res('MSG_DM_APPROVED_APPEAL', { guildName: guild.name, invite: invite.url }));
-			}
-		}
-		catch (err)
-		{
-			this.logger.error('Events', err);
-			return;
-		}
 	}
 }

@@ -33,17 +33,15 @@ export default class extends Command<ModClient>
 			const id: string = user.id;
 			const unbanning: Message = <Message> await message.channel.send(`Unbanning ${user.tag}...`);
 
-			try
+			this.client.mod.logs.setCachedCase(message.guild, user, 'Unban');
+			try { await this.client.mod.actions.unban(user.id, message.guild); }
+			catch
 			{
-				const unbanCase: Message = <Message> await this.client.mod.logs.awaitCase(message.guild, user, 'Unban', reason);
-				this.client.mod.logs.editCase(message.guild, unbanCase, message.author, reason);
-
-				return unbanning.edit(`Successfully unbanned ${user.tag}`);
-			}
-			catch (err)
-			{
+				this.client.mod.logs.removeCachedCase(message.guild, user, 'Unban');
 				return unbanning.edit(`Failed to unban user with id \`${id}\``);
 			}
+			await this.client.mod.logs.logCase(user, message.guild, 'Unban', reason, message.author);
+			return unbanning.edit(`Successfully unbanned ${user.tag}`);
 		}
 		finally { this.client.mod.actions.removeLock(message.guild, user); }
 	}

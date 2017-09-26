@@ -48,14 +48,18 @@ export default class extends Command<ModClient>
 
 			const muting: Message = <Message> await message.channel.send(`Muting ${user.tag}...`);
 
-			let muteCase: Message;
-			try { muteCase = <Message> await this.client.mod.logs.awaitMuteCase(message.guild, member); }
-			catch (err) { return muting.edit(`Error while muting: ${err}`); }
+			this.client.mod.logs.setCachedCase(message.guild, user, 'Mute');
+			try { await this.client.mod.actions.mute(member, message.guild); }
+			catch (err)
+			{
+				this.client.mod.logs.removeCachedCase(message.guild, user, 'Mute');
+				return muting.edit(`Error while muting: ${err}`);
+			}
+
+			await this.client.mod.logs.logCase(
+				user, message.guild, 'Mute', reason, message.author, Time.duration(duration).toSimplifiedString());
 
 			await this.client.mod.actions.setMuteDuration(member, message.guild, duration);
-			await this.client.mod.logs.editCase(
-				message.guild, muteCase, message.author, reason, Time.duration(duration).toSimplifiedString());
-
 			return muting.edit(`Muted ${user.tag}`);
 		}
 		finally { this.client.mod.actions.removeLock(message.guild, member.user); }
