@@ -147,7 +147,7 @@ export class ModLogs
 			let found: Message;
 			collector.on('end', () => resolve(found));
 
-			collector.on(<any> 'message', (message: Message) =>
+			collector.on('collect', message =>
 			{
 				if (/Mute/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
 				if (found) collector.stop('found');
@@ -169,7 +169,7 @@ export class ModLogs
 		type: 'Ban' | 'Unban' | 'Softban',
 		reason?: string): Promise<Message | Message[]>
 	{
-		return new Promise(async resolve =>
+		return new Promise(async (resolve, reject) =>
 		{
 			if (typeof user === 'string') user = await this._client.fetchUser(user);
 			const logs: TextChannel = <TextChannel> guild.channels.get(
@@ -181,36 +181,38 @@ export class ModLogs
 				&& (m.embeds[0] && m.embeds[0].description.match(memberIDRegex)[1] === (<User> user).id), { time: 60e3 });
 
 			let found: Message | Message[];
-			collector.on('end', () => resolve(found));
+			collector.on('end', () =>
+				resolve(found));
 
-			switch (type)
+			if (type === 'Ban' || type === 'Unban')
+				collector.on('collect', message =>
+				{
+					if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
+					if (found) collector.stop('found');
+				});
+
+			if (type === 'Softban')
 			{
-				case 'Ban':
-				case 'Unban':
-					collector.on('collect', message =>
-					{
-						if (/Ban|Unban/.test(message.embeds[0].description.match(actionRegex)[1])) found = message;
-						if (found) collector.stop('found');
-					});
-					break;
-
-				case 'Softban':
-					let softbanResult: boolean[] = [false, false];
-					found = [null, null];
-					collector.on('collect', message =>
-					{
-						const caseType: string = message.embeds[0].description.match(actionRegex)[1];
-						const index: int = caseType === 'Ban' ? 0 : caseType === 'Unban' ? 1 : null;
-						if (typeof index !== 'number') return;
-						(<Message[]> found)[index] = message;
-						softbanResult[index] = true;
-						if (softbanResult.reduce((a, b) => a && b)) collector.stop('found');
-					});
+				let softbanResult: boolean[] = [false, false];
+				found = [null, null];
+				collector.on('collect', message =>
+				{
+					const caseType: string = message.embeds[0].description.match(actionRegex)[1];
+					const index: int = caseType === 'Ban' ? 0 : caseType === 'Unban' ? 1 : null;
+					if (typeof index !== 'number') return;
+					(<Message[]> found)[index] = message;
+					softbanResult[index] = true;
+					if (softbanResult.reduce((a, b) => a && b)) collector.stop('found');
+				});
 			}
 
-			if (type === 'Ban') await this._client.mod.actions.ban(user, guild, reason);
-			if (type === 'Unban') await this._client.mod.actions.unban(user.id, guild);
-			if (type === 'Softban') await this._client.mod.actions.softban(user, guild, reason);
+			try
+			{
+				if (type === 'Ban') await this._client.mod.actions.ban(user, guild, reason);
+				if (type === 'Unban') await this._client.mod.actions.unban(user.id, guild);
+				if (type === 'Softban') await this._client.mod.actions.softban(user, guild, reason);
+			}
+			catch (err) { reject(err.toString()); }
 		});
 	}
 

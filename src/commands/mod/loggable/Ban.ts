@@ -67,7 +67,11 @@ export default class extends Command<ModClient>
 			catch { this.logger.error('Command:Ban', `Failed to send ban DM to ${user.tag}`); }
 
 			const banning: Message = <Message> await message.channel.send(`Banning ${user.tag}...`);
-			let banCase: Message = <Message> await this.client.mod.logs.awaitCase(message.guild, user, 'Ban', reason);
+
+			let banCase: Message;
+			try { banCase = <Message> await this.client.mod.logs.awaitCase(message.guild, user, 'Ban', reason); }
+			catch (err) { return banning.edit(`Error while banning: ${err}`); }
+
 			await this.client.mod.logs.editCase(message.guild, banCase, message.author, reason);
 
 			this.logger.log('Command:Ban', `Banned: '${user.tag}' from '${message.guild.name}'`);
