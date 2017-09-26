@@ -1,4 +1,4 @@
-import { Client, KeyedStorage, Providers } from 'yamdbf';
+import { Client, KeyedStorage, Providers, Logger } from 'yamdbf';
 const { SQLiteProvider } = Providers;
 
 /**
@@ -46,7 +46,8 @@ export class Timer
 
 		this._timer = this._bot.setInterval(async () => {
 			if (this._ticks >= this._interval) this._ticks = 0;
-			if (this._ticks++ === 0) this._callback().catch(console.error);
+			if (this._ticks++ === 0) this._callback()
+				.catch(e => Logger.instance().error(`Timer:${this.name}`, e));
 			await this._storage.set(this.name, this._ticks);
 		}, 1000);
 	}
