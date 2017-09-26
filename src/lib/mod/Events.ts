@@ -154,7 +154,11 @@ export class Events
 					await user.send(res('MSG_DM_APPROVED_APPEAL', { guildName: guild.name, invite: invite.url }));
 				}
 			}
-			catch (err) { this.logger.error('Events', err); }
+			catch (err)
+			{
+				await storage.remove(`activeAppeals.${user.id}`);
+				this.logger.error('Events', err);
+			}
 		}
 
 		if (this._client.mod.logs.isCaseCached(guild, user, 'Unban'))
