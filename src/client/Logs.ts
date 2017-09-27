@@ -149,7 +149,7 @@ export class Logs
 			if (fetched.length < 100) break;
 		}
 
-		if (!cases.every(c => c.author.id !== this._client.user.id))
+		if (!cases.every(c => c.author.id === this._client.user.id))
 			throw `Operation failed: Found at least one case that cannot be edited.`;
 
 		for (const loggedCase of cases)
