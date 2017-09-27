@@ -1,4 +1,4 @@
-# Pickle Mod
+# :cucumber: Pickle Mod
 Discord bot for server moderation purposes.
 
 This source is made available explicitly for purposes of transparency with regards
