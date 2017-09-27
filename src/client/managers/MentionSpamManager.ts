@@ -1,8 +1,9 @@
 import { Collection, GuildMember, Message, Role, User, Guild } from 'discord.js';
-import { GuildStorage, Logger, logger, ListenerUtil } from 'yamdbf';
-import { stringResource as res } from '../../util/Util';
+import { GuildStorage, Logger, logger, ListenerUtil, Lang, ResourceLoader } from 'yamdbf';
 import { ModClient } from '../../client/ModClient';
+
 const { on, registerListeners } = ListenerUtil;
+const res: ResourceLoader = Lang.createResourceLoader('en_us');
 
 export class MentionSpamManager
 {

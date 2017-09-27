@@ -1,11 +1,12 @@
-import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
 import { User, GuildMember, RichEmbed, Collection } from 'discord.js';
 import { prompt, PromptResult } from '../../../util/Util';
-import { modOnly, stringResource as res } from '../../../util/Util';
+import { modOnly } from '../../../util/Util';
 import { ModClient } from '../../../client/ModClient';
 
 const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
+const res: ResourceLoader = Lang.createResourceLoader('en_us');
 
 export default class extends Command<ModClient>
 {
@@ -62,10 +63,7 @@ export default class extends Command<ModClient>
 			if (result === PromptResult.TIMEOUT) return message.channel.send('Command timed out, aborting ban.');
 			if (result === PromptResult.FAILURE) return message.channel.send('Okay, aborting ban.');
 
-			try
-			{
-				await user.send(res('MSG_DM_BAN', { guildName: message.guild.name, reason: reason }), { split: true });
-			}
+			try { await user.send(res('MSG_DM_BAN', { guildName: message.guild.name, reason }), { split: true }); }
 			catch { this._logger.error(`Failed to send ban DM to ${user.tag}`); }
 
 			const banning: Message = <Message> await message.channel.send(`Banning ${user.tag}...`);

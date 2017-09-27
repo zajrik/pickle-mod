@@ -1,9 +1,10 @@
 import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
-import { KeyedStorage, Providers, Logger, logger } from 'yamdbf';
-import { stringResource as res } from '../../util/Util';
+import { KeyedStorage, Providers, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
 import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
+
 const { JSONProvider } = Providers;
+const res: ResourceLoader = Lang.createResourceLoader('en_us');
 
 /**
  * Contains methods for managing lockdowns on guild channels

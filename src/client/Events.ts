@@ -1,10 +1,10 @@
-import { ClientStorage, GuildStorage, Message, ListenerUtil, Logger, logger } from 'yamdbf';
+import { ClientStorage, GuildStorage, Message, ListenerUtil, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 import { MuteManager } from './managers/MuteManager';
 import { ModClient } from '../client/ModClient';
-import { stringResource as res } from '../util/Util';
 
 const { on, registerListeners } = ListenerUtil;
+const res: ResourceLoader = Lang.createResourceLoader('en_us');
 
 /**
  * Handles received moderation related client events
@@ -49,7 +49,7 @@ export class Events
 
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
-		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
+		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix, caseNum });
 		await this._client.mod.logs.logCase( user, guild, 'Mute', reason, this._client.user);
 	}
 
@@ -112,7 +112,7 @@ export class Events
 
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
-		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
+		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix, caseNum });
 		await this._client.mod.logs.logCase( user, guild, 'Ban', reason, this._client.user);
 	}
 
@@ -168,7 +168,7 @@ export class Events
 
 		const prefix: string = await guildStorage.settings.get('prefix');
 		const caseNum: string = (<int> await guildStorage.settings.get('cases') + 1).toString();
-		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix: prefix, caseNum: caseNum });
+		const reason: string = res('STR_DEFAULT_CASE_REASON', { prefix, caseNum });
 		await this._client.mod.logs.logCase(user, guild, 'Unban', reason, this._client.user);
 	}
 }

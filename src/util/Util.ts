@@ -13,6 +13,20 @@ export enum PromptResult
 }
 
 /**
+ * Contains the different colors to be used
+ * for moderation case logging
+ */
+export enum CaseTypeColors
+{
+	Unban = 8450847,
+	Warn = 16776960,
+	Mute = 16763904,
+	Kick = 16745216,
+	Softban = 16745216,
+	Ban = 16718080
+}
+
+/**
  * Provide a prompt with simple success/failure expressions that
  * succeeds/fails if the respective expression is matched. Resolves
  * with a tuple containing the PromptResult, as well as the message
@@ -52,35 +66,4 @@ export function modOnly(target: Command<ModClient>, key: string, descriptor: Pro
 		else return await original.apply(this, [message, args]);
 	};
 	return descriptor;
-}
-
-/**
- * Contains the different colors to be used
- * for moderation case logging
- */
-export enum CaseTypeColors
-{
-	'Unban' = 8450847,
-	'Warn' = 16776960,
-	'Mute' = 16763904,
-	'Kick' = 16745216,
-	'Softban' = 16745216,
-	'Ban' = 16718080
-}
-
-/**
- * Load a string resource from `static/Strings.json`, replacing
- * tokens with the given `TokenReplaceData` value, if any
- */
-export function stringResource(key: string, data?: TokenReplaceData): string
-{
-	const strings: { [key: string]: string } = require('../static/Strings.json');
-	let loadedString: string = strings[key];
-
-	if (typeof data === 'undefined') return loadedString;
-
-	for (const token of Object.keys(data))
-		loadedString = loadedString.replace(new RegExp(`{{ *${token} *}}`, 'g'), data[token]);
-
-	return loadedString;
 }

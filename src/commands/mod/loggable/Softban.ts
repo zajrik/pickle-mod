@@ -1,10 +1,11 @@
-import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
 import { User, GuildMember, Collection } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
-import { modOnly, stringResource as res } from '../../../util/Util';
+import { modOnly } from '../../../util/Util';
 
 const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;
+const res: ResourceLoader = Lang.createResourceLoader('en_us');
 
 export default class extends Command<ModClient>
 {

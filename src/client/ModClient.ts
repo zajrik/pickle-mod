@@ -22,6 +22,7 @@ export class ModClient extends Client
 			statusText: 'Obey the law.',
 			readyText: 'Ready\u0007',
 			commandsDir: './bin/commands',
+			localeDir: './bin/locale',
 			ratelimit: '10/1m',
 			pause: true,
 			logLevel: LogLevel.ERROR,
