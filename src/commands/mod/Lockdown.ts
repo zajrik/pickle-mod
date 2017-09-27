@@ -1,8 +1,8 @@
 import { Command, Message, Middleware, CommandDecorators, Time, Logger, logger } from 'yamdbf';
 import { TextChannel } from 'discord.js';
-import { ModClient } from '../../lib/ModClient';
-import { LockdownManager } from '../../lib/mod/managers/LockdownManager';
-import { modOnly } from '../../lib/Util';
+import { ModClient } from '../../client/ModClient';
+import { LockdownManager } from '../../client/managers/LockdownManager';
+import { modOnly } from '../../util/Util';
 
 const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;

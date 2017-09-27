@@ -1,7 +1,7 @@
 import { Command, ClientStorage, Message, Logger, logger } from 'yamdbf';
 import { User } from 'discord.js';
-import { ModClient } from '../../../lib/ModClient';
-import { prompt, PromptResult, modOnly } from '../../../lib/Util';
+import { ModClient } from '../../../client/ModClient';
+import { prompt, PromptResult, modOnly } from '../../../util/Util';
 
 export default class extends Command<ModClient>
 {

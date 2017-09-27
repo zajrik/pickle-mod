@@ -1,8 +1,8 @@
 import { Command, Message, Middleware, CommandDecorators, Time } from 'yamdbf';
 import { GuildMember, MessageEmbed } from 'discord.js';
-import { ModClient } from '../../../lib/ModClient';
-import { MuteManager } from '../../../lib/mod/managers/MuteManager';
-import { modOnly } from '../../../lib/Util';
+import { ModClient } from '../../../client/ModClient';
+import { MuteManager } from '../../../client/managers/MuteManager';
+import { modOnly } from '../../../util/Util';
 
 const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;

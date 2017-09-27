@@ -1,6 +1,6 @@
 import { Command, ClientStorage, GuildStorage } from 'yamdbf';
 import { Message, TextChannel, Guild, RichEmbed } from 'discord.js';
-import { ModClient } from '../../../lib/ModClient';
+import { ModClient } from '../../../client/ModClient';
 
 export default class extends Command<ModClient>
 {

@@ -1,6 +1,6 @@
 import { GuildStorage, KeyedStorage, Providers, Logger, logger } from 'yamdbf';
 import { GuildMember, Guild, Collection } from 'discord.js';
-import { ModClient } from '../../ModClient';
+import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
 const { JSONProvider } = Providers;
 

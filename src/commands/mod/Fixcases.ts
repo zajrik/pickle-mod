@@ -1,7 +1,7 @@
 import { Command, Message, GuildStorage, Middleware, CommandDecorators } from 'yamdbf';
 import { TextChannel } from 'discord.js';
-import { ModClient } from '../../lib/ModClient';
-import { modOnly } from '../../lib/Util';
+import { ModClient } from '../../client/ModClient';
+import { modOnly } from '../../util/Util';
 
 const { using } = CommandDecorators;
 

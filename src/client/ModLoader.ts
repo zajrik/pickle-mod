@@ -5,10 +5,10 @@ import { MemberLogManager } from './managers/MemberLogManager';
 import { LockdownManager } from './managers/LockdownManager';
 import { HistoryManager } from './managers/HistoryManager';
 import { MuteManager } from './managers/MuteManager';
-import { ModClient } from '../ModClient';
+import { ModClient } from '../client/ModClient';
 import { Actions } from './Actions';
 import { Events } from './Events';
-import { ModLogs } from './ModLogs';
+import { Logs } from './Logs';
 
 /**
  * Handles loading the different moderation controllers
@@ -21,7 +21,7 @@ export class ModLoader
 	private readonly _events: Events;
 
 	public readonly actions: Actions;
-	public readonly logs: ModLogs;
+	public readonly logs: Logs;
 	public readonly managers: {
 		mute: MuteManager,
 		history: HistoryManager,
@@ -36,7 +36,7 @@ export class ModLoader
 		this._events = new Events(this._client);
 
 		this.actions = new Actions(this._client);
-		this.logs = new ModLogs(this._client);
+		this.logs = new Logs(this._client);
 
 		this.managers = {
 			mute: new MuteManager(this._client),

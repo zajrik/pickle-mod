@@ -1,4 +1,4 @@
-import { ModClient } from './lib/ModClient';
+import { ModClient } from './client/ModClient';
 import { Logger } from 'yamdbf';
 
 const client: ModClient = new ModClient();

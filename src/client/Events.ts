@@ -1,8 +1,8 @@
 import { ClientStorage, GuildStorage, Message, ListenerUtil, Logger, logger } from 'yamdbf';
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 import { MuteManager } from './managers/MuteManager';
-import { ModClient } from '../ModClient';
-import { stringResource as res } from '../Util';
+import { ModClient } from '../client/ModClient';
+import { stringResource as res } from '../util/Util';
 
 const { on, registerListeners } = ListenerUtil;
 

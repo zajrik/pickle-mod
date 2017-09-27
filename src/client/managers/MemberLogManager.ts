@@ -1,6 +1,6 @@
 import { GuildMember, Message, TextChannel, RichEmbed } from 'discord.js';
 import { Time, ListenerUtil, RateLimiter } from 'yamdbf';
-import { ModClient } from '../../ModClient';
+import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
 
 const { on, registerListeners } = ListenerUtil;

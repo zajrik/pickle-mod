@@ -1,7 +1,7 @@
 import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
 import { KeyedStorage, Providers, Logger, logger } from 'yamdbf';
-import { stringResource as res } from '../../Util';
-import { ModClient } from '../../ModClient';
+import { stringResource as res } from '../../util/Util';
+import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
 const { JSONProvider } = Providers;
 

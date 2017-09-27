@@ -1,6 +1,6 @@
 import { GuildMember, Guild, User } from 'discord.js';
 import { GuildStorage, Logger, logger, Util } from 'yamdbf';
-import { ModClient } from '../ModClient';
+import { ModClient } from '../client/ModClient';
 
 /**
  * Contains methods for taking moderation action

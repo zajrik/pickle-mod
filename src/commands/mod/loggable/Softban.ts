@@ -1,7 +1,7 @@
 import { Command, Message, Middleware, CommandDecorators, Logger, logger } from 'yamdbf';
 import { User, GuildMember, Collection } from 'discord.js';
-import { ModClient } from '../../../lib/ModClient';
-import { modOnly, stringResource as res } from '../../../lib/Util';
+import { ModClient } from '../../../client/ModClient';
+import { modOnly, stringResource as res } from '../../../util/Util';
 
 const { resolve, expect } = Middleware;
 const { using } = CommandDecorators;

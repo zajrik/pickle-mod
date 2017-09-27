@@ -1,12 +1,12 @@
 import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector, GuildMember } from 'discord.js';
 import { GuildStorage, Message, Util } from 'yamdbf';
-import { CaseTypeColors } from '../Util';
-import { ModClient } from '../ModClient';
+import { CaseTypeColors } from '../util/Util';
+import { ModClient } from '../client/ModClient';
 
 /**
  * Contains methods for creating, managing, and fetching moderation logs
  */
-export class ModLogs
+export class Logs
 {
 	private readonly _client: ModClient;
 	private _cachedCases: { [guild: string]: { [user: string]: { [type: string]: boolean } } };

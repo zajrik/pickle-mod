@@ -1,7 +1,7 @@
 import { Command, Message, Middleware } from 'yamdbf';
 import { User, RichEmbed } from 'discord.js';
-import { ModClient } from '../../lib/ModClient';
-import { prompt, PromptResult } from '../../lib/Util';
+import { ModClient } from '../../client/ModClient';
+import { prompt, PromptResult } from '../../util/Util';
 
 export default class extends Command<ModClient>
 {

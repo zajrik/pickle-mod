@@ -1,6 +1,6 @@
 import { Message, MessageOptions } from 'discord.js';
 import { Command } from 'yamdbf';
-import { ModClient } from '../lib/ModClient';
+import { ModClient } from '../client/ModClient';
 
 /**
  * Represents possible results of Util#prompt
