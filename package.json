@@ -1,5 +1,5 @@
 {
-  "name": "modbot",
+  "name": "pickle-mod",
   "version": "3.0.0",
   "description": "Discord bot for server moderation purposes",
   "main": "bin/bot.js",
@@ -8,21 +8,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zajrik/modbot.git"
+    "url": "git+https://github.com/zajrik/pickle-mod.git"
   },
   "keywords": [
     "discord",
     "bot",
     "yamdbf",
     "node",
-    "modbot"
+	"modbot",
+	"pickle"
   ],
   "author": "Zackary Campbell <zajrik@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zajrik/modbot/issues"
+    "url": "https://github.com/zajrik/pickle-mod/issues"
   },
-  "homepage": "https://github.com/zajrik/modbot#readme",
+  "homepage": "https://github.com/zajrik/pickle-mod#readme",
   "dependencies": {
     "sequelize": "^4.7.5",
     "sqlite3": "^3.1.9",
