@@ -9,7 +9,9 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	@logger private readonly logger: Logger;
+	@logger('Command:Ban')
+	private readonly _logger: Logger;
+
 	public constructor()
 	{
 		super({
@@ -64,7 +66,7 @@ export default class extends Command<ModClient>
 			{
 				await user.send(res('MSG_DM_BAN', { guildName: message.guild.name, reason: reason }), { split: true });
 			}
-			catch { this.logger.error('Command:Ban', `Failed to send ban DM to ${user.tag}`); }
+			catch { this._logger.error(`Failed to send ban DM to ${user.tag}`); }
 
 			const banning: Message = <Message> await message.channel.send(`Banning ${user.tag}...`);
 			this.client.mod.logs.setCachedCase(message.guild, user, 'Ban');
@@ -77,7 +79,7 @@ export default class extends Command<ModClient>
 			}
 
 			await this.client.mod.logs.logCase(user, message.guild, 'Ban', reason, message.author);
-			this.logger.log('Command:Ban', `Banned: '${user.tag}' from '${message.guild.name}'`);
+			this._logger.log(`Banned: '${user.tag}' from '${message.guild.name}'`);
 			return banning.edit(`Successfully banned ${user.tag}`);
 		}
 		finally { this.client.mod.actions.removeLock(message.guild, user); }

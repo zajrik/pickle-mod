@@ -6,19 +6,20 @@ const { on, registerListeners } = ListenerUtil;
 
 export class MentionSpamManager
 {
-	@logger private readonly _logger: Logger;
-	private client: ModClient;
-	private guilds: Collection<string, Collection<string, TrackedMention[]>>;
+	@logger('MentionSpamManager')
+	private readonly _logger: Logger;
+	private readonly _client: ModClient;
+	private readonly _guilds: Collection<string, Collection<string, TrackedMention[]>>;
 
 	public constructor(client: ModClient)
 	{
-		this.client = client;
-		this.guilds = new Collection<string, Collection<string, TrackedMention[]>>();
+		this._client = client;
+		this._guilds = new Collection<string, Collection<string, TrackedMention[]>>();
 
-		for (const guild of this.client.guilds.values())
-			this.guilds.set(guild.id, new Collection<string, TrackedMention[]>());
+		for (const guild of this._client.guilds.values())
+			this._guilds.set(guild.id, new Collection<string, TrackedMention[]>());
 
-		registerListeners(this.client, this);
+		registerListeners(this._client, this);
 	}
 
 	/**
@@ -27,7 +28,7 @@ export class MentionSpamManager
 	@on('guildCreate')
 	private async onGuildCreate(guild: Guild): Promise<void>
 	{
-		this.guilds.set(guild.id, new Collection<string, TrackedMention[]>());
+		this._guilds.set(guild.id, new Collection<string, TrackedMention[]>());
 	}
 
 	/**
@@ -37,7 +38,7 @@ export class MentionSpamManager
 	private async onMessage(message: Message): Promise<void>
 	{
 		if (!message.guild) return;
-		const storage: GuildStorage = this.client.storage.guilds.get(message.guild.id);
+		const storage: GuildStorage = this._client.storage.guilds.get(message.guild.id);
 		if (message.system
 			|| message.webhookID
 			|| message.author.bot
@@ -83,25 +84,25 @@ export class MentionSpamManager
 			}
 			catch
 			{
-				this._logger.error('MentionSpamManager', `Failed to send kick DM to ${message.author.tag}`);
+				this._logger.error(`Failed to send kick DM to ${message.author.tag}`);
 			}
 
-			await this.client.mod.actions.kick(member, message.guild, reason);
-			this.client.mod.logs.logCase(message.author, message.guild, 'Kick', reason, this.client.user);
+			await this._client.mod.actions.kick(member, message.guild, reason);
+			this._client.mod.logs.logCase(message.author, message.guild, 'Kick', reason, this._client.user);
 		};
 
 		if (type === 'kick') await kick();
 		else if (type === 'mute')
 		{
-			this.client.mod.logs.setCachedCase(message.guild, message.author, 'Mute');
-			try { await this.client.mod.actions.mute(member, message.guild); }
+			this._client.mod.logs.setCachedCase(message.guild, message.author, 'Mute');
+			try { await this._client.mod.actions.mute(member, message.guild); }
 			catch (err)
 			{
-				this.client.mod.logs.removeCachedCase(message.guild, message.author, 'Mute');
+				this._client.mod.logs.removeCachedCase(message.guild, message.author, 'Mute');
 				// Fall back to kicking if muting fails
 				return kick();
 			}
-			await this.client.mod.logs.logCase(message.author, message.guild, 'Mute', reason, this.client.user);
+			await this._client.mod.logs.logCase(message.author, message.guild, 'Mute', reason, this._client.user);
 		}
 		else if (type === 'ban')
 		{
@@ -109,13 +110,13 @@ export class MentionSpamManager
 			{
 				await message.author.send(res('MSG_DM_AUTO_BAN', { guildName: message.guild.name }), { split: true });
 			}
-			catch { this._logger.log('MentionSpamManager', `Failed to send ban DM to ${message.author.tag}`); }
+			catch { this._logger.log(`Failed to send ban DM to ${message.author.tag}`); }
 
-			this.client.mod.logs.setCachedCase(message.guild, message.author, 'Ban');
-			try { await this.client.mod.actions.ban(message.author, message.guild, reason); }
-			catch { return this.client.mod.logs.removeCachedCase(message.guild, message.author, 'Ban'); }
+			this._client.mod.logs.setCachedCase(message.guild, message.author, 'Ban');
+			try { await this._client.mod.actions.ban(message.author, message.guild, reason); }
+			catch { return this._client.mod.logs.removeCachedCase(message.guild, message.author, 'Ban'); }
 
-			await this.client.mod.logs.logCase(message.author, message.guild, 'Ban', reason, this.client.user);
+			await this._client.mod.logs.logCase(message.author, message.guild, 'Ban', reason, this._client.user);
 		}
 	}
 
@@ -150,13 +151,13 @@ export class MentionSpamManager
 	 */
 	private get(member: GuildMember): TrackedMention[]
 	{
-		if (!this.guilds.has(member.guild.id))
-			this.guilds.set(member.guild.id, new Collection<string, TrackedMention[]>());
+		if (!this._guilds.has(member.guild.id))
+			this._guilds.set(member.guild.id, new Collection<string, TrackedMention[]>());
 
-		if (!this.guilds.get(member.guild.id).has(member.user.id))
-			this.guilds.get(member.guild.id).set(member.user.id, []);
+		if (!this._guilds.get(member.guild.id).has(member.user.id))
+			this._guilds.get(member.guild.id).set(member.user.id, []);
 
-		return this.guilds.get(member.guild.id).get(member.user.id);
+		return this._guilds.get(member.guild.id).get(member.user.id);
 	}
 
 	/**
@@ -164,7 +165,7 @@ export class MentionSpamManager
 	 */
 	private sweepExpired(member: GuildMember): void
 	{
-		const guild: Collection<string, TrackedMention[]> = this.guilds.get(member.guild.id);
+		const guild: Collection<string, TrackedMention[]> = this._guilds.get(member.guild.id);
 		if (!guild) return;
 
 		guild.set(member.user.id, this.get(member).filter(a => a.expires > Date.now()));

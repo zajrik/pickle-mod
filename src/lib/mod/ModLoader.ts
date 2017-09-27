@@ -17,12 +17,12 @@ import { ModLogs } from './ModLogs';
  */
 export class ModLoader
 {
-	private _client: ModClient;
-	private _events: Events;
+	private readonly _client: ModClient;
+	private readonly _events: Events;
 
-	public actions: Actions;
-	public logs: ModLogs;
-	public managers: {
+	public readonly actions: Actions;
+	public readonly logs: ModLogs;
+	public readonly managers: {
 		mute: MuteManager,
 		history: HistoryManager,
 		lockdown: LockdownManager,

@@ -11,8 +11,9 @@ const { on, registerListeners } = ListenerUtil;
  */
 export class Events
 {
-	@logger private readonly logger: Logger;
-	private _client: ModClient;
+	@logger('Events')
+	private readonly _logger: Logger;
+	private readonly _client: ModClient;
 
 	public constructor(client: ModClient)
 	{
@@ -39,7 +40,7 @@ export class Events
 
 		this._client.mod.managers.mute.set(member);
 		try { await user.send(`You've been muted in ${guild.name}`); } catch {}
-		this.logger.log('Events', `Muted user: '${user.tag}' in '${guild.name}'`);
+		this._logger.log(`Muted user: '${user.tag}' in '${guild.name}'`);
 
 		if (this._client.mod.logs.isCaseCached(guild, user, 'Mute'))
 			return this._client.mod.logs.removeCachedCase(guild, user, 'Mute');
@@ -63,7 +64,7 @@ export class Events
 
 		const user: User = member.user;
 		this._client.mod.managers.mute.setEvasionFlag(member);
-		this.logger.log('Events', `Potential mute evasion: '${user.tag}' in '${member.guild.name}'`);
+		this._logger.log(`Potential mute evasion: '${user.tag}' in '${member.guild.name}'`);
 	}
 
 	/**
@@ -156,7 +157,7 @@ export class Events
 			catch (err)
 			{
 				await storage.remove(`activeAppeals.${user.id}`);
-				this.logger.error('Events', err.stack);
+				this._logger.error(err.stack);
 			}
 		}
 

@@ -5,7 +5,9 @@ import { prompt, PromptResult, modOnly } from '../../../lib/Util';
 
 export default class extends Command<ModClient>
 {
-	@logger private readonly logger: Logger;
+	@logger('Command:Reject')
+	private readonly _logger: Logger;
+
 	public constructor()
 	{
 		super({
@@ -71,7 +73,7 @@ export default class extends Command<ModClient>
 		{
 			message.channel.fetchMessage(activeAppeals[user.id])
 				.then((msg: Message) => msg.delete())
-				.catch(err => this.logger.error('Command:Reject', err.stack));
+				.catch(err => this._logger.error(err.stack));
 			await storage.remove(`activeAppeals.${user.id}`);
 		}
 

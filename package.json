@@ -26,7 +26,7 @@
   "dependencies": {
     "sequelize": "^4.7.5",
     "sqlite3": "^3.1.9",
-    "yamdbf": "^3.0.1",
+    "yamdbf": "github:zajrik/yamdbf",
     "yamdbf-command-usage": "github:zajrik/yamdbf-command-usage",
     "yamdbf-dm-manager": "github:zajrik/yamdbf-dm-manager"
   },

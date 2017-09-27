@@ -14,17 +14,17 @@ const { on, registerListeners } = ListenerUtil;
  */
 export class MemberLogManager
 {
-	private client: ModClient;
-	private joinRateLimiter: RateLimiter;
-	private leaveRateLimiter: RateLimiter;
+	private readonly _client: ModClient;
+	private readonly _joinRateLimiter: RateLimiter;
+	private readonly _leaveRateLimiter: RateLimiter;
 
 	public constructor(client: ModClient)
 	{
-		this.client = client;
-		this.joinRateLimiter = new RateLimiter('1/5m', false);
-		this.leaveRateLimiter = new RateLimiter('1/5m', false);
+		this._client = client;
+		this._joinRateLimiter = new RateLimiter('1/5m', false);
+		this._leaveRateLimiter = new RateLimiter('1/5m', false);
 
-		registerListeners(this.client, this);
+		registerListeners(this._client, this);
 	}
 
 	/**
@@ -39,14 +39,14 @@ export class MemberLogManager
 		if (!member.guild.channels.exists('name', 'member-log')) return;
 
 		const memberLog: TextChannel = <TextChannel> member.guild.channels.find('name', 'member-log');
-		if (!memberLog.permissionsFor(this.client.user).has('SEND_MESSAGES')) return;
+		if (!memberLog.permissionsFor(this._client.user).has('SEND_MESSAGES')) return;
 
 		// Hacky solution until I make breaking changes to RateLimiter to support
 		// use-cases that don't involve messages, but at least this cleans up
 		// the mess that was my original implementation of member-log ratelimiting
 		const messageSpoof: any = { guild: member.guild, channel: memberLog };
-		if (joined && !this.joinRateLimiter.get(messageSpoof, member.user).call()) return;
-		else if (!joined && !this.leaveRateLimiter.get(messageSpoof, member.user).call()) return;
+		if (joined && !this._joinRateLimiter.get(messageSpoof, member.user).call()) return;
+		else if (!joined && !this._leaveRateLimiter.get(messageSpoof, member.user).call()) return;
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(joined ? 8450847 : 16039746)

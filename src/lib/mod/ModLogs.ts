@@ -8,7 +8,7 @@ import { ModClient } from '../ModClient';
  */
 export class ModLogs
 {
-	private _client: ModClient;
+	private readonly _client: ModClient;
 	private _cachedCases: { [guild: string]: { [user: string]: { [type: string]: boolean } } };
 
 	public constructor(client: ModClient)

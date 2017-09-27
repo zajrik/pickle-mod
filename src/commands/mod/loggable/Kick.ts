@@ -8,7 +8,9 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	@logger private readonly logger: Logger;
+	@logger('Command:Kick')
+	private readonly _logger: Logger;
+
 	public constructor()
 	{
 		super({
@@ -47,12 +49,12 @@ export default class extends Command<ModClient>
 			}
 			catch (err)
 			{
-				this.logger.error('Command:Kick', `Failed to send kick DM to ${user.tag}`);
+				this._logger.error(`Failed to send kick DM to ${user.tag}`);
 			}
 
 			await this.client.mod.actions.kick(member, message.guild, reason);
 			await this.client.mod.logs.logCase(user, message.guild, 'Kick', reason, message.author);
-			this.logger.log('Command:Kick', `Kicked: '${user.tag}' from '${message.guild.name}'`);
+			this._logger.log(`Kicked: '${user.tag}' from '${message.guild.name}'`);
 			kicking.edit(`Kicked ${user.tag}`);
 		}
 		finally { this.client.mod.actions.removeLock(message.guild, member.user); }

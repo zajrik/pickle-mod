@@ -20,19 +20,17 @@ export default class extends Command<Client>
 		if (!args[0])
 			return message.channel.send('You must provide a command to execute.')
 				.then((res: Message) => res.delete(5000));
+
 		if (args.includes('rm') || args.includes('sudo') || args.includes('su'))
 			return message.channel.send('Forbidden.')
 				.then((res: Message) => res.delete(5000));
-		const execution: Message = <Message> await message.channel.send('_Executing..._');
+
 		let result: string;
-		try
-		{
-			result = execSync(args.join(' '), { timeout: 10000 }).toString();
-		}
-		catch (err)
-		{
-			result = err;
-		}
+		const execution: Message = <Message> await message.channel.send('_Executing..._');
+
+		try { result = execSync(args.join(' '), { timeout: 10000 }).toString(); }
+		catch (err) { result = err; }
+
 		const output: string = `**INPUT:**\n\`\`\`bash\n$ ${args.join(' ')}\n\`\`\`\n**OUTPUT:**`;
 		await execution.delete();
 		await message.channel.send(output);

@@ -8,7 +8,8 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	@logger private readonly logger: Logger;
+	@logger('Command:Softban')
+	private readonly _logger: Logger;
 
 	public constructor()
 	{
@@ -50,7 +51,7 @@ export default class extends Command<ModClient>
 				.send(`Softbanning ${user.tag}... *(Waiting for unban)*`);
 
 			try { await user.send(res('MSG_DM_SOFTBAN', { guildName: message.guild.name, reason: reason })); }
-			catch { this.logger.error('Command:Softban', `Failed to send softban DM to ${user.tag}`); }
+			catch { this._logger.error(`Failed to send softban DM to ${user.tag}`); }
 
 			this.client.mod.logs.setCachedCase(message.guild, user, 'Ban');
 			this.client.mod.logs.setCachedCase(message.guild, user, 'Unban');
@@ -63,7 +64,7 @@ export default class extends Command<ModClient>
 			}
 
 			await this.client.mod.logs.logCase(user, message.guild, 'Softban', reason, message.author);
-			this.logger.log('Command:Softban', `Kicked: '${user.tag}' from '${message.guild.name}'`);
+			this._logger.log(`Kicked: '${user.tag}' from '${message.guild.name}'`);
 			return kicking.edit(`Successfully softbanned ${user.tag}`);
 		}
 		finally { this.client.mod.actions.removeLock(message.guild, user); }

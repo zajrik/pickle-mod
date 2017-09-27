@@ -9,7 +9,6 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	@logger private readonly logger: Logger;
 	public constructor()
 	{
 		super({

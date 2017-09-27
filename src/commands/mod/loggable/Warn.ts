@@ -8,7 +8,9 @@ const { using } = CommandDecorators;
 
 export default class extends Command<ModClient>
 {
-	@logger private readonly logger: Logger;
+	@logger('Command:Warn')
+	private readonly _logger: Logger;
+
 	public constructor()
 	{
 		super({
@@ -53,8 +55,8 @@ export default class extends Command<ModClient>
 
 			await this.client.mod.actions.warn(member, message.guild);
 			await this.client.mod.logs.logCase(user, message.guild, 'Warn', reason, message.author);
-			this.logger.log('Command:Warn', `Warned: '${user.tag}' in '${message.guild.name}'`);
-			warning.edit(`Warned ${user.tag}`);
+			this._logger.log(`Warned: '${user.tag}' in '${message.guild.name}'`);
+			return warning.edit(`Warned ${user.tag}`);
 		}
 		finally { this.client.mod.actions.removeLock(message.guild, member.user); }
 	}

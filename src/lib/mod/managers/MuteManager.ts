@@ -10,9 +10,10 @@ const { JSONProvider } = Providers;
  */
 export class MuteManager
 {
-	@logger private readonly logger: Logger;
-	private _storage: KeyedStorage;
-	private _client: ModClient;
+	@logger('MuteManager')
+	private readonly _logger: Logger;
+	private readonly _storage: KeyedStorage;
+	private readonly _client: ModClient;
 	private _muteCheckTimer: Timer;
 
 	public constructor(client: ModClient)
@@ -163,7 +164,7 @@ export class MuteManager
 				if (!await this.isExpired(member)) continue;
 				if (await this.isEvasionFlagged(member)) continue;
 
-				this.logger.log('MuteManager', `Removed expired mute: '${member.user.tag}' in '${guild.name}'`);
+				this._logger.log(`Removed expired mute: '${member.user.tag}' in '${guild.name}'`);
 				await this.remove(member);
 				if (member.roles.has(mutedRole))
 					await member.removeRole(guild.roles.get(mutedRole));

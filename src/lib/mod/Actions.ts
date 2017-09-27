@@ -7,8 +7,9 @@ import { ModClient } from '../ModClient';
  */
 export class Actions
 {
-	@logger private readonly logger: Logger;
-	private _client: ModClient;
+	@logger('Actions')
+	private readonly _logger: Logger;
+	private readonly _client: ModClient;
 	private _actionLocks: { [guild: string]: { [user: string]: boolean } };
 
 	public constructor(client: ModClient)
@@ -108,7 +109,7 @@ export class Actions
 	{
 		const user: User = member.user;
 		await this._client.mod.managers.mute.set(member, duration);
-		this.logger.log('Actions', `Updated mute: '${user.tag}' in '${guild.name}'`);
+		this._logger.log(`Updated mute: '${user.tag}' in '${guild.name}'`);
 	}
 
 	/**

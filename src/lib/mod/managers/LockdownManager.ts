@@ -10,9 +10,10 @@ const { JSONProvider } = Providers;
  */
 export class LockdownManager
 {
-	@logger private readonly logger: Logger;
-	private _storage: KeyedStorage;
-	private _client: ModClient;
+	@logger('LockdownManager')
+	private readonly _logger: Logger;
+	private readonly _storage: KeyedStorage;
+	private readonly _client: ModClient;
 	private _lockdownCheckTimer: Timer;
 
 	public constructor(client: ModClient)
@@ -45,6 +46,7 @@ export class LockdownManager
 			deny: oldPayload.deny,
 			expires: Date.now() + duration
 		};
+
 		await this._storage.set(channel.id, lockdown);
 		await channel.overwritePermissions(
 			channel.guild.roles.get(channel.guild.id), { SEND_MESSAGES: false });
@@ -55,22 +57,22 @@ export class LockdownManager
 	 */
 	public async remove(channel: TextChannel): Promise<void>
 	{
-			let lockdown: LockdownObject = await this._storage.get(channel.id);
+			const guildName: string = channel.guild.name;
+			const channelName: string = channel.name;
+			const lockdown: LockdownObject = await this._storage.get(channel.id);
 			const payload: any = {
 				id: channel.guild.id,
 				type: 'role',
 				allow: lockdown.allow,
 				deny: lockdown.deny
 			};
+
 			try { await (<any> this._client).rest.methods.setChannelOverwrite(channel, payload); }
-			catch (err)
+			catch
 			{
-				try
-				{
-					await channel.guild.owner.send(
-						res('MSG_DM_INVALID_LOCKDOWN', { guildName: channel.guild.name, channelName: channel.name }));
-				}
-				catch (err) {}
+				this._logger.warn(`Failed to remove lockdown in '${guildName}#${channelName}'`);
+				try { await channel.guild.owner.send(res('MSG_DM_INVALID_LOCKDOWN', { guildName, channelName })); }
+				catch {}
 			}
 			await this._storage.remove(channel.id);
 	}
@@ -133,16 +135,16 @@ export class LockdownManager
 			if (!channel)
 			{
 				await this._storage.remove(id);
-				this.logger.log('LockdownManager', `Locked down channel '${id}' no longer exists.`);
+				this._logger.warn(`Locked down channel '${id}' no longer exists.`);
 				continue;
 			}
 
 			const channelText: string = `'#${channel.name}' in '${channel.guild.name}'`;
 			if (!await this.isExpired(channel)) continue;
-			this.logger.log('LockdownManager', `Removing expired lockdown: ${channelText}'`);
+			this._logger.log(`Removing expired lockdown: ${channelText}'`);
 			await this.remove(channel);
 			try { await channel.send('**The lockdown on this channel has ended.**'); }
-			catch { this.logger.error('LockdownManager', `Failed to send lockdown expiry message: ${channelText}`); }
+			catch { this._logger.warn(`Failed to send lockdown expiry message: ${channelText}`); }
 		}
 	}
 }
