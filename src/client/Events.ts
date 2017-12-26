@@ -82,6 +82,7 @@ export class Events
 		const mutedRole: string = await storage.settings.get('mutedrole');
 		(<any> member)._roles.push(mutedRole);
 		await member.setRoles((<any> member)._roles);
+		this._logger.log(`Reassigned evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
 		muteManager.clearEvasionFlag(member);
 	}
 

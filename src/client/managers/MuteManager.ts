@@ -143,8 +143,8 @@ export class MuteManager
 		for (const id of ids)
 		{
 			let member: GuildMember | string;
-			try { member = guild.member(id) || await guild.fetchMember(id); }
-			catch (err) { member = id; }
+			try { member = await guild.fetchMember(id); }
+			catch { member = id; }
 			mutedMembers.set(id, member);
 		}
 		return mutedMembers;
@@ -158,16 +158,33 @@ export class MuteManager
 		for (const guild of this._client.guilds.values())
 		{
 			const mutedRole: string = await this._client.storage.guilds.get(guild.id).settings.get('mutedrole');
-			for (const member of (await this.getMutedMembers(guild)).values())
+			for (let member of (await this.getMutedMembers(guild)).values())
 			{
-				if (typeof member === 'string') continue;
+				if (typeof member === 'string')
+				{
+					try { member = await guild.fetchMember(member); }
+					catch
+					{
+						this._logger.error(`Error fetching member to check mute: ${member}`);
+						continue;
+					}
+				}
 				if (!await this.isExpired(member)) continue;
 				if (await this.isEvasionFlagged(member)) continue;
 
-				this._logger.log(`Removed expired mute: '${member.user.tag}' in '${guild.name}'`);
-				await this.remove(member);
 				if (member.roles.has(mutedRole))
-					await member.removeRole(guild.roles.get(mutedRole));
+				{
+					try { await member.removeRole(guild.roles.get(mutedRole)); }
+					catch
+					{
+						this._logger.error(`Failed to remove expired mute: '${member.user.tag}' in '${member.guild.name}'`);
+						continue;
+					}
+				}
+
+				this._logger.log(`Removed expired mute: '${member.user.tag}' in '${guild.name}'`);
+
+				await this.remove(member);
 				member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
 			}
 		}
