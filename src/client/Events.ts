@@ -82,8 +82,17 @@ export class Events
 		if (!await muteManager.isEvasionFlagged(guild, member.id)) return;
 
 		const mutedRole: string = await storage.settings.get('mutedrole');
-		(<any> member)._roles.push(mutedRole);
-		await member.setRoles((<any> member)._roles);
+		try
+		{
+			(<any> member)._roles.push(mutedRole);
+			await member.setRoles((<any> member)._roles);
+		}
+		catch
+		{
+			(<any> member)._roles = (<any> member)._roles.filter((r: string) => r !== mutedRole);
+			this._logger.error(`Failed to reassign evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
+			return;
+		}
 		this._logger.log(`Reassigned evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
 		muteManager.clearEvasionFlag(guild, member.id);
 	}

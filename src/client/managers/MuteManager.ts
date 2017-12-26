@@ -181,8 +181,27 @@ export class MuteManager
 						continue;
 					}
 				}
+
 				if (!await this.isExpired(guild, member.id)) continue;
-				if (await this.isEvasionFlagged(guild, member.id)) continue;
+				if (await this.isEvasionFlagged(guild, member.id))
+				{
+					if (!member.roles.has(mutedRole))
+					{
+						try
+						{
+							(<any> member)._roles.push(mutedRole);
+							await member.setRoles((<any> member)._roles);
+							this._logger.log(`Reassigned evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
+							await this.clearEvasionFlag(guild, member.id);
+						}
+						catch
+						{
+							(<any> member)._roles = (<any> member)._roles.filter((r: string) => r !== mutedRole);
+							this._logger.error(`Failed to reassign evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
+						}
+					}
+					continue;
+				}
 
 				if (member.roles.has(mutedRole))
 				{
