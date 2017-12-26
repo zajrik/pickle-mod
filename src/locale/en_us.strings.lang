@@ -53,12 +53,20 @@ A softban is a kick that uses ban+unban to remove your messages from the server.
 You may rejoin momentarily.
 
 [MSG_DM_INVALID_LOCKDOWN]
-Due to incorrect server permissions, I am unable to remove a lockdown in your
+Due to incorrect server permissions I am unable to remove a lockdown in your
 server `{{ guildName }}` for channel `#{{ channelName }}`.
 
 In the future you must make sure I have `Manage Roles`, `Manage Channels`, and
 `Send Messages` permissions at all times, in all channels, as well as have my
 managed bot role higher than other roles to ensure this does not happen again.
+
+[MSG_DM_INVALID_MUTE_PERMS_EVASION]
+Due to missing permissions I am unable to reassign a potentially evaded mute in your server `{{ guildName }}` for `{{ member }}`.
+I will no longer continue tracking this mute.
+
+[MSG_DM_INVALID_MUTE_PERMS_REMOVAL]
+Due to missing permissions I am unable to remove a mute in your server `{{ guildName }}` for `{{ member }}`.
+I will no longer continue tracking this mute.
 
 [MSG_DM_APPROVED_APPEAL]
 Your appeal has been approved. You have been unbanned from {{ guildName }}.

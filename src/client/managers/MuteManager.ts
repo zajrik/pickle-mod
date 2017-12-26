@@ -1,4 +1,4 @@
-import { GuildStorage, KeyedStorage, Providers, Logger, logger } from 'yamdbf';
+import { GuildStorage, KeyedStorage, Providers, Logger, logger, Lang } from 'yamdbf';
 import { GuildMember, Guild, Collection } from 'discord.js';
 import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
@@ -72,6 +72,27 @@ export class MuteManager
 		if (!await this.isMuted(guild, member)) return false;
 		return await this._storage.exists(`${guild.id}.${member}.leftGuild`)
 			&& await this._storage.get(`${guild.id}.${member}.leftGuild`);
+	}
+
+	/**
+	 * Increment attempts on a stored mute object for a guild member.
+	 * This can be for evaded mute reassignment attempts or mute removal
+	 * attemps
+	 */
+	public async incrementAttempts(guild: Guild, member: string): Promise<void>
+	{
+		if (!this.getMute(guild, member)) return;
+		let old: number = await this._storage.get(`${guild.id}.${member}.attempts`);
+		await this._storage.set(`${guild.id}.${member}.attempts`, old ? old + 1 : 1);
+	}
+
+	/**
+	 * Get attempts on a stored mute object for a guild member
+	 */
+	public async getAttempts(guild: Guild, member: string): Promise<int>
+	{
+		if (!this.getMute(guild, member)) return 0;
+		return await this._storage.get(`${guild.id}.${member}.attempts`);
 	}
 
 	/**
@@ -196,8 +217,24 @@ export class MuteManager
 						}
 						catch
 						{
+							this._logger.error(
+								`Failed to reassign evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
 							(<any> member)._roles = (<any> member)._roles.filter((r: string) => r !== mutedRole);
-							this._logger.error(`Failed to reassign evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
+
+							await this.incrementAttempts(guild, member.id);
+							if (await this.getAttempts(guild, member.id) >= 4)
+							{
+								await this.remove(guild, member.id);
+								this._logger.log(
+									`Removed tracked mute: '${member.user.tag}' in '${member.guild.name}'`);
+
+								try
+								{
+									await guild.owner.send(Lang.res('en_us', 'MSG_DM_INVALID_MUTE_PERMS_EVASION',
+										{ guildName: guild.name, member: member.user.tag }));
+								}
+								catch {}
+							}
 						}
 					}
 					continue;
@@ -208,7 +245,23 @@ export class MuteManager
 					try { await member.removeRole(guild.roles.get(mutedRole)); }
 					catch
 					{
-						this._logger.error(`Failed to remove expired mute: '${member.user.tag}' in '${member.guild.name}'`);
+						this._logger.error(
+							`Failed to remove expired mute: '${member.user.tag}' in '${member.guild.name}'`);
+
+						await this.incrementAttempts(guild, member.id);
+						if (await this.getAttempts(guild, member.id) >= 4)
+						{
+							await this.remove(guild, member.id);
+							this._logger.log(
+								`Removed tracked mute: '${member.user.tag}' in '${member.guild.name}'`);
+
+							try
+							{
+								await guild.owner.send(Lang.res('en_us', 'MSG_DM_INVALID_MUTE_PERMS_REMOVAL',
+									{ guildName: guild.name, member: member.user.tag }));
+							}
+							catch {}
+						}
 						continue;
 					}
 				}
