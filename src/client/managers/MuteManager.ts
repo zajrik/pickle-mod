@@ -217,7 +217,7 @@ export class MuteManager
 						}
 						catch
 						{
-							this._logger.error(
+							if (await this.getAttempts(guild, member.id) < 1) this._logger.error(
 								`Failed to reassign evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
 							(<any> member)._roles = (<any> member)._roles.filter((r: string) => r !== mutedRole);
 
@@ -245,7 +245,7 @@ export class MuteManager
 					try { await member.removeRole(guild.roles.get(mutedRole)); }
 					catch
 					{
-						this._logger.error(
+						if (await this.getAttempts(guild, member.id) < 1) this._logger.error(
 							`Failed to remove expired mute: '${member.user.tag}' in '${member.guild.name}'`);
 
 						await this.incrementAttempts(guild, member.id);
