@@ -34,102 +34,110 @@ export class MuteManager
 	/**
 	 * Store or update a mute object for a member being muted
 	 */
-	public async set(member: GuildMember, duration?: int): Promise<void>
+	public async set(guild: Guild, member: string, duration?: int): Promise<void>
 	{
-		let guild: Guild = member.guild;
 		let mute: MuteObject;
-		if (await this.isMuted(member)) mute = await this.getMute(member);
+		if (await this.isMuted(guild, member)) mute = await this.getMute(guild, member);
 		else mute = {
-			member: member.user.id,
+			member: member,
 			guild: guild.id
 		};
 		if (duration) mute.expires = Date.now() + duration;
-		await this._storage.set(`${guild.id}.${member.id}`, mute);
+		await this._storage.set(`${guild.id}.${member}`, mute);
 	}
 
 	/**
 	 * Add the `leftGuild` flag to a member's mute object
 	 */
-	public async setEvasionFlag(member: GuildMember): Promise<void>
+	public async setEvasionFlag(guild: Guild, member: string): Promise<void>
 	{
-		if (!await this.isMuted(member)) return;
-		await this._storage.set(`${member.guild.id}.${member.user.id}.leftGuild`, true);
+		if (!await this.isMuted(guild, member)) return;
+		await this._storage.set(`${guild.id}.${member}.leftGuild`, true);
 	}
 
 	/**
 	 * Remove the `leftGuild` flag from a member's mute object
 	 */
-	public async clearEvasionFlag(member: GuildMember): Promise<void>
+	public async clearEvasionFlag(guild: Guild, member: string): Promise<void>
 	{
-		if (!await this.isMuted(member)) return;
-		await this._storage.remove(`${member.guild.id}.${member.user.id}.leftGuild`);
+		if (!await this.isMuted(guild, member)) return;
+		await this._storage.remove(`${guild.id}.${member}.leftGuild`);
 	}
 
 	/**
 	 * Return whether or not a member is flagged for mute evasion
 	 */
-	public async isEvasionFlagged(member: GuildMember): Promise<boolean>
+	public async isEvasionFlagged(guild: Guild, member: string): Promise<boolean>
 	{
-		if (!await this.isMuted(member)) return false;
-		return await this._storage.exists(`${member.guild.id}.${member.user.id}.leftGuild`)
-			&& await this._storage.get(`${member.guild.id}.${member.user.id}.leftGuild`);
+		if (!await this.isMuted(guild, member)) return false;
+		return await this._storage.exists(`${guild.id}.${member}.leftGuild`)
+			&& await this._storage.get(`${guild.id}.${member}.leftGuild`);
 	}
 
 	/**
 	 * Remove a mute from storage
 	 */
-	public async remove(member: GuildMember): Promise<void>
+	public async remove(guild: Guild, member: string): Promise<void>
 	{
-		await this._storage.remove(`${member.guild.id}.${member.user.id}`);
+		await this._storage.remove(`${guild.id}.${member}`);
 	}
 
 	/**
 	 * Returns whether or not the member currently has a stored mute
 	 */
-	public async isMuted(member: GuildMember): Promise<boolean>
+	public async isMuted(guild: Guild, member: string): Promise<boolean>
 	{
-		return await this._storage.exists(`${member.guild.id}.${member.user.id}`);
+		return await this._storage.exists(`${guild.id}.${member}`);
 	}
 
 	/**
 	 * Returns whether or not the member currently has the mute role
 	 */
-	public async hasMuteRole(member: GuildMember): Promise<boolean>
+	public async hasMuteRole(guild: Guild, member: string): Promise<boolean>
 	{
-		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
+		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
+		let guildMember: GuildMember;
+		try { guildMember = await guild.fetchMember(member); }
+		catch { return false; }
+
 		if (!await storage.settings.exists('mutedrole')) return false;
-		if (member.roles.has(await storage.settings.get('mutedrole'))) return true;
+		if (guildMember.roles.has(await storage.settings.get('mutedrole'))) return true;
 		return false;
 	}
 
 	/**
 	 * Returns the mute object for the muted member
 	 */
-	public async getMute(member: GuildMember): Promise<MuteObject>
+	public async getMute(guild: Guild, member: string): Promise<MuteObject>
 	{
-		if (!await this.isMuted(member)) return null;
-		return await this._storage.get(`${member.guild.id}.${member.user.id}`);
+		if (!await this.isMuted(guild, member)) return null;
+		return await this._storage.get(`${guild.id}.${member}`);
 	}
 
 	/**
 	 * Returns whether or not a mute for a member is expired
 	 */
-	public async isExpired(member: GuildMember): Promise<boolean>
+	public async isExpired(guild: Guild, member: string): Promise<boolean>
 	{
-		if (!await this.isMuted(member)) return null;
-		const mute: MuteObject = await this.getMute(member);
-		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
+		if (!await this.isMuted(guild, member)) return null;
+		const mute: MuteObject = await this.getMute(guild, member);
+		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
 		const mutedRole: string = await storage.settings.get('mutedrole');
-		return (mutedRole && !member.roles.has(mutedRole)) || Date.now() > mute.expires;
+
+		let guildMember: GuildMember;
+		try { guildMember = await guild.fetchMember(member); }
+		catch {}
+
+		return (mutedRole && (guildMember && !guildMember.roles.has(mutedRole))) || Date.now() > mute.expires;
 	}
 
 	/**
 	 * Returns the remaining duration for a member's mute
 	 */
-	public async getRemaining(member: GuildMember): Promise<int>
+	public async getRemaining(guild: Guild, member: string): Promise<int>
 	{
-		if (!await this.isMuted(member)) return null;
-		const mute: MuteObject = await this.getMute(member);
+		if (!await this.isMuted(guild, member)) return null;
+		const mute: MuteObject = await this.getMute(guild, member);
 		return mute.expires - Date.now();
 	}
 
@@ -165,12 +173,16 @@ export class MuteManager
 					try { member = await guild.fetchMember(member); }
 					catch
 					{
-						this._logger.error(`Error fetching member to check mute: ${member}`);
+						if (await this.isExpired(guild, member))
+						{
+							this._logger.log(`Removing expired mute for invalid member: ${member} in '${guild.name}'`);
+							await this.remove(guild, member);
+						}
 						continue;
 					}
 				}
-				if (!await this.isExpired(member)) continue;
-				if (await this.isEvasionFlagged(member)) continue;
+				if (!await this.isExpired(guild, member.id)) continue;
+				if (await this.isEvasionFlagged(guild, member.id)) continue;
 
 				if (member.roles.has(mutedRole))
 				{
@@ -184,8 +196,8 @@ export class MuteManager
 
 				this._logger.log(`Removed expired mute: '${member.user.tag}' in '${guild.name}'`);
 
-				await this.remove(member);
-				member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`);
+				await this.remove(guild, member.id);
+				member.send(`Your mute on ${guild.name} has been lifted. You may now send messages.`).catch();
 			}
 		}
 	}

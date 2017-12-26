@@ -38,7 +38,7 @@ export class Events
 		if (member.roles.has(await guildStorage.settings.get('modrole'))) return;
 		const user: User = member.user;
 
-		this._client.mod.managers.mute.set(member);
+		this._client.mod.managers.mute.set(guild, member.id);
 		try { await user.send(`You've been muted in ${guild.name}`); } catch {}
 		this._logger.log(`Muted user: '${user.tag}' in '${guild.name}'`);
 
@@ -63,7 +63,7 @@ export class Events
 		if (!member.roles.has(await storage.settings.get('mutedrole'))) return;
 
 		const user: User = member.user;
-		this._client.mod.managers.mute.setEvasionFlag(member);
+		this._client.mod.managers.mute.setEvasionFlag(member.guild, member.id);
 		this._logger.log(`Potential mute evasion: '${user.tag}' in '${member.guild.name}'`);
 	}
 
@@ -76,14 +76,16 @@ export class Events
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(member.guild.id);
 		const muteManager: MuteManager = this._client.mod.managers.mute;
-		if (!await muteManager.isMuted(member)) return;
-		if (!await muteManager.isEvasionFlagged(member)) return;
+		const guild: Guild = member.guild;
+
+		if (!await muteManager.isMuted(guild, member.id)) return;
+		if (!await muteManager.isEvasionFlagged(guild, member.id)) return;
 
 		const mutedRole: string = await storage.settings.get('mutedrole');
 		(<any> member)._roles.push(mutedRole);
 		await member.setRoles((<any> member)._roles);
 		this._logger.log(`Reassigned evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
-		muteManager.clearEvasionFlag(member);
+		muteManager.clearEvasionFlag(guild, member.id);
 	}
 
 	/**
@@ -139,8 +141,7 @@ export class Events
 			await storage.set('activeBans', activeBans);
 		}
 
-		// Try to remove an active appeal for the user if there
-		// was one in the guild
+		// Try to remove an active appeal for the user if there was one in the guild
 		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
 		if (activeAppeals[user.id])
 		{

@@ -108,7 +108,7 @@ export class Actions
 	public async setMuteDuration(member: GuildMember, guild: Guild, duration: int): Promise<void>
 	{
 		const user: User = member.user;
-		await this._client.mod.managers.mute.set(member, duration);
+		await this._client.mod.managers.mute.set(guild, user.id, duration);
 		this._logger.log(`Updated mute: '${user.tag}' in '${guild.name}'`);
 	}
 

@@ -1,5 +1,5 @@
 import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
-import { User, GuildMember } from 'discord.js';
+import { User, GuildMember, Guild } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 import { modOnly } from '../../../util/Util';
 
@@ -36,7 +36,7 @@ export default class extends Command<ModClient>
 		try
 		{
 			await this.client.mod.actions.unmute(member, message.guild);
-			await this.client.mod.managers.mute.remove(member);
+			await this.client.mod.managers.mute.remove(member.guild, member.id);
 			user.send(`You have been unmuted on ${message.guild.name}. You may now send messages.`);
 			return unmuting.edit(`Unmuted ${user.tag}`);
 		}
