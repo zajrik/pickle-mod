@@ -11,19 +11,23 @@ export class Actions
 	private readonly _logger: Logger;
 	private readonly _client: ModClient;
 	private _actionLocks: { [guild: string]: { [user: string]: boolean } };
+	private _timeouts: { [guild: string]: { [user: string]: NodeJS.Timer } };
 
 	public constructor(client: ModClient)
 	{
 		this._client = client;
 		this._actionLocks = {};
+		this._timeouts = {};
 	}
 
 	/**
-	 * Set an action lock for a user in a guild
+	 * Set an action lock for a user in a guild, clearing automatically after 30 seconds.
 	 */
 	public setLock(guild: Guild, user: User): void
 	{
 		Util.assignNestedValue(this._actionLocks, [guild.id, user.id], true);
+		Util.assignNestedValue(this._timeouts, [guild.id, user.id],
+			setTimeout(() => this.removeLock(guild, user), 30e3));
 	}
 
 	/**
@@ -32,6 +36,8 @@ export class Actions
 	public removeLock(guild: Guild, user: User): void
 	{
 		Util.removeNestedValue(this._actionLocks, [guild.id, user.id]);
+		clearTimeout(Util.getNestedValue(this._timeouts, [guild.id, user.id]));
+		Util.removeNestedValue(this._timeouts, [guild.id, user.id]);
 	}
 
 	/**

@@ -47,7 +47,7 @@ export default class extends Command<ModClient>
 			{
 				await user.send(`**You've received a warning in ${message.guild.name}.**\n\n**Reason:** ${reason}`);
 			}
-			catch (err)
+			catch
 			{
 				message.channel.send(
 					`Logged case but failed to send warning DM to ${user.tag}.`);
