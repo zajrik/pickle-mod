@@ -40,7 +40,7 @@ export default class extends Command<ModClient>
 		const messageEmbed: MessageEmbed = caseMessage.embeds[0];
 		if (messageEmbed.author.name !== message.author.tag
 			&& messageEmbed.author.name !== this.client.user.tag
-			&& !message.member.hasPermission('MANAGE_GUILD'))
+			&& !message.member.permissions.has('MANAGE_GUILD'))
 			return message.channel.send('That is not your case to edit.');
 
 		const caseTypeRegex: RegExp = /\*\*Action:\*\* (.+)/;

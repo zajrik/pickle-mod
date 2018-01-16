@@ -16,7 +16,7 @@ export default class extends Command<Client>
 	public async action(message: Message, args: string[]): Promise<void>
 	{
 		if (message.channel.type !== 'dm'
-			&& !(<TextChannel> message.channel).permissionsFor(message.member).hasPermission('MANAGE_GUILD')
+			&& !(<TextChannel> message.channel).permissionsFor(message.member).has('MANAGE_GUILD')
 			&& !this.client.owner.includes(message.author.id)) return;
 
 		const prefix: string = message.guild ? await this.client.getPrefix(message.guild) : '<prefix>';

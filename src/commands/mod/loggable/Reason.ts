@@ -69,7 +69,7 @@ export default class extends Command<ModClient>
 			const messageEmbed: MessageEmbed = caseMessage.embeds[0];
 			if (messageEmbed.author.name !== message.author.tag
 				&& messageEmbed.author.name !== this.client.user.tag
-				&& !message.member.hasPermission('MANAGE_GUILD'))
+				&& !message.member.permissions.has('MANAGE_GUILD'))
 				errors.set(i, 'That is not your case to edit.');
 
 			cases.set(i, caseMessage);
