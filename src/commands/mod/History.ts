@@ -31,8 +31,6 @@ export default class extends Command<ModClient>
 			.setAuthor(user.tag, user.avatarURL)
 			.setFooter(offenses.toString());
 
-		if (user.id === message.author.id) return message.author.send({ embed });
-
 		if (reset === 'reset')
 		{
 			if (!message.member.permissions.has('MANAGE_GUILD'))
