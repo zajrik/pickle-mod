@@ -10,6 +10,7 @@ export default class extends Command<ModClient>
 {
 	@logger('Command:Kick')
 	private readonly _logger: Logger;
+	private readonly _timeouts: { [message: string]: NodeJS.Timer };
 
 	public constructor()
 	{
@@ -20,6 +21,8 @@ export default class extends Command<ModClient>
 			group: 'mod',
 			guildOnly: true
 		});
+
+		this._timeouts = {};
 	}
 
 	@modOnly
@@ -41,16 +44,23 @@ export default class extends Command<ModClient>
 			if ((member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 				return message.channel.send('You may not use this command on that user.');
 
+			if (!member.kickable) return message.channel.send('That user is not kickable.');
+
 			const kicking: Message = <Message> await message.channel.send(`Kicking ${user.tag}...`);
 
-			try
-			{
-				await user.send(`**You have been kicked from ${message.guild.name}**\n\n**Reason:** ${reason}`);
-			}
-			catch (err)
-			{
-				this._logger.error(`Failed to send kick DM to ${user.tag}`);
-			}
+			// Try to DM the kicked user, but move on after 5 seconds if it fails to resolve
+			await new Promise(async res => {
+				this._timeouts[message.id] =
+					setTimeout(() => res(message.channel.send(`Gave up trying to send kick DM to ${user.tag}`)), 5e3);
+
+				try
+				{
+					await user.send(`**You have been kicked from ${message.guild.name}.**\n\n**Reason:** ${reason}`);
+				}
+				catch { this._logger.error(`Failed to send kick DM to ${user.tag}`); }
+				clearTimeout(this._timeouts[message.id]);
+				res(delete this._timeouts[message.id]);
+			});
 
 			await this.client.mod.actions.kick(member, message.guild, reason);
 			await this.client.mod.logs.logCase(user, message.guild, 'Kick', reason, message.author);
