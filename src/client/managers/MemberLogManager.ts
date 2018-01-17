@@ -36,7 +36,7 @@ export class MemberLogManager
 
 		const rateLimiter: RateLimitManager = this._client.rateLimitManager;
 		const descriptors: string[] = [member.guild.id, member.id, joined.toString()];
-		if (!rateLimiter.get('1/5m', 'memberlog', ...descriptors).call()) return;
+		if (!rateLimiter.call('1/5m', 'memberlog', ...descriptors)) return;
 
 		const embed: RichEmbed = new RichEmbed()
 			.setColor(joined ? 8450847 : 16039746)
