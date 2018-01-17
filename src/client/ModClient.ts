@@ -1,4 +1,4 @@
-import { Client, ListenerUtil, LogLevel } from 'yamdbf';
+import { Client, ListenerUtil, LogLevel, RateLimitManager } from 'yamdbf';
 import { TextChannel, RichEmbed, Message, Guild } from 'discord.js';
 import { dmManager } from 'yamdbf-dm-manager';
 import { commandUsage } from 'yamdbf-command-usage';
@@ -12,6 +12,7 @@ export class ModClient extends Client
 {
 	public config: any;
 	public mod: ModLoader;
+	public rateLimitManager: RateLimitManager;
 
 	public constructor()
 	{
@@ -33,6 +34,7 @@ export class ModClient extends Client
 		});
 
 		this.config = config;
+		this.rateLimitManager = new RateLimitManager();
 	}
 
 	@once('pause')
