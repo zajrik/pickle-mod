@@ -1,0 +1,17 @@
+{
+	"mod": {
+		"en_us": "Contains commands for server moderation"
+	},
+	"system": {
+		"en_us": "Contains system related commands"
+	},
+	"prune": {
+		"en_us": "Contains commands for deleting messages"
+	},
+	"tag": {
+		"en_us": "Contains commands for managing and using tags"
+	},
+	"commandusage": {
+		"en_us": "Command usage statistics"
+	}
+}
