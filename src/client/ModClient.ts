@@ -12,7 +12,6 @@ export class ModClient extends Client
 {
 	public config: any;
 	public mod: ModLoader;
-	public rateLimitManager: RateLimitManager;
 
 	public constructor()
 	{
@@ -34,7 +33,6 @@ export class ModClient extends Client
 		});
 
 		this.config = config;
-		this.rateLimitManager = new RateLimitManager();
 	}
 
 	@once('pause')
