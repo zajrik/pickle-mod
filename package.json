@@ -27,9 +27,9 @@
   "dependencies": {
     "sequelize": "^4.7.5",
     "sqlite3": "^3.1.9",
-    "yamdbf": "github:zajrik/yamdbf",
+    "yamdbf": "zajrik/yamdbf#indev",
     "yamdbf-command-usage": "github:zajrik/yamdbf-command-usage",
-    "yamdbf-dm-manager": "github:zajrik/yamdbf-dm-manager"
+    "yamdbf-dm-manager": "^1.0.1"
   },
   "devDependencies": {
     "@types/node": "^6.0.88",
@@ -39,6 +39,6 @@
     "gulp-tslint": "^8.1.2",
     "gulp-typescript": "^3.2.2",
     "tslint": "^5.6.0",
-    "typescript": "^2.5.1"
+    "typescript": "^2.7.2"
   }
 }

@@ -39,9 +39,10 @@ export default class extends Command<ModClient>
 		if (!reason) return message.channel.send('You must provide a reason for this rejection.')
 			.then((res: Message) => res.delete(5e3));
 
-		const [result, ask, confirmation]: [PromptResult, Message, Message] = await prompt(message,
-			`Are you sure you want to reject appeal \`${id}\` with this reason? (__y__es | __n__o)`,
-			/^(?:yes|y)$/i, /^(?:no|n)$/i);
+		const [result, ask, confirmation]: [PromptResult, Message, Message] = <[PromptResult, Message, Message]>
+			await prompt(message,
+				`Are you sure you want to reject appeal \`${id}\` with this reason? (__y__es | __n__o)`,
+				/^(?:yes|y)$/i, /^(?:no|n)$/i);
 
 		if (result === PromptResult.TIMEOUT)
 			return message.channel.send('Command timed out, aborting reject.')

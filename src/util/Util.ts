@@ -38,7 +38,7 @@ export async function prompt(
 	promptStr: string,
 	success: RegExp,
 	failure: RegExp,
-	options?: MessageOptions): Promise<[PromptResult, Message, Message]>
+	options?: MessageOptions): Promise<[PromptResult, Message, Message] | [PromptResult]>
 {
 	const ask: Message = <Message> await message.channel.send(promptStr, options);
 	const confirmation: Message = (await message.channel.awaitMessages(a =>	a.author.id === message.author.id
