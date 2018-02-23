@@ -2031,10 +2031,6 @@ posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
 
-postinstall-build@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/postinstall-build/-/postinstall-build-5.0.1.tgz#b917a9079b26178d9a24af5a5cd8cb4a991d11b9"
-
 preserve@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
@@ -2818,23 +2814,20 @@ ws@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
 
-"yamdbf-command-usage@github:zajrik/yamdbf-command-usage":
-  version "0.1.0"
-  resolved "https://codeload.github.com/zajrik/yamdbf-command-usage/tar.gz/927a4b32894d3ff9080b56b8f5ef5d23637aa6cc"
-  dependencies:
-    postinstall-build "^5.0.1"
+yamdbf-command-usage@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/yamdbf-command-usage/-/yamdbf-command-usage-1.0.0.tgz#47c717ca9e3e07e50c2ae2f1f24806d2b47480bd"
 
 yamdbf-dm-manager@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/yamdbf-dm-manager/-/yamdbf-dm-manager-1.0.1.tgz#4e47021d388d2056e1bc084b6d7fb3daf62f3826"
 
 yamdbf@zajrik/yamdbf#indev:
-  version "3.0.1"
-  resolved "https://codeload.github.com/zajrik/yamdbf/tar.gz/ab2c231689bbc0279d273b4318d979d079e51e4c"
+  version "4.0.0"
+  resolved "https://codeload.github.com/zajrik/yamdbf/tar.gz/5fc40dafd14248f1d21f330aedd89c36cd472cf5"
   dependencies:
     discord.js "^11.2.1"
     glob "7.1.2"
     node-json-db "0.7.3"
-    postinstall-build "^5.0.1"
     reflect-metadata "^0.1.10"
     source-map-support "^0.5.0"
