@@ -1,5 +1,5 @@
 import { Collection, GuildMember, Message, Role, User, Guild } from 'discord.js';
-import { GuildStorage, Logger, logger, ListenerUtil, Lang, ResourceLoader } from 'yamdbf';
+import { GuildStorage, Logger, logger, ListenerUtil, Lang, ResourceLoader } from '@yamdbf/core';
 import { ModClient } from '../../client/ModClient';
 
 const { on, registerListeners } = ListenerUtil;
@@ -45,7 +45,7 @@ export class MentionSpamManager
 			|| message.author.bot
 			|| message.guild.ownerID === message.author.id) return;
 
-		const member: GuildMember = (message.member || await message.guild.fetchMember(message.author.id));
+		const member: GuildMember = (message.member || await message.guild.members.fetch(message.author.id));
 		if (!member) return;
 		if (member.permissions.has('ADMINISTRATOR')
 			|| member.roles.has(await storage.settings.get('modrole'))

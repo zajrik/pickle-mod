@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators, Time } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Time } from '@yamdbf/core';
 import { GuildMember, MessageEmbed, Guild } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 import { MuteManager } from '../../../client/managers/MuteManager';
@@ -50,7 +50,7 @@ export default class extends Command<ModClient>
 
 		let member: GuildMember;
 		const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
-		try { member = await message.guild.fetchMember(messageEmbed.description.match(memberIDRegex)[1]); }
+		try { member = await message.guild.members.fetch(messageEmbed.description.match(memberIDRegex)[1]); }
 		catch { return message.channel.send(`Failed to fetch the muted member.`); }
 
 		const guild: Guild = member.guild;
@@ -59,7 +59,7 @@ export default class extends Command<ModClient>
 			return message.channel.send(`That member is no longer muted.`);
 
 		if (await muteManager.isExpired(guild, member.id))
-			return message.channel.sendMessage('That mute has expired.');
+			return message.channel.send('That mute has expired.');
 
 		if (!await muteManager.isMuted(guild, member.id))
 			return message.channel.send(

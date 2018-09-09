@@ -1,5 +1,5 @@
-import { Client, Command, version, Message, Time } from 'yamdbf';
-import { RichEmbed, Guild } from 'discord.js';
+import { Client, Command, version, Message, Time } from '@yamdbf/core';
+import { MessageEmbed, Guild } from 'discord.js';
 import * as Discord from 'discord.js';
 
 export default class extends Command<Client>
@@ -16,9 +16,9 @@ export default class extends Command<Client>
 
 	public action(message: Message, args: string[]): void
 	{
-		const embed: RichEmbed = new RichEmbed()
+		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(11854048)
-			.setAuthor(`${this.client.user.username} Info`, this.client.user.avatarURL)
+			.setAuthor(`${this.client.user.username} Info`, this.client.user.avatarURL())
 			.addField('Mem Usage', `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`, true)
 			.addField('Uptime', Time.difference(this.client.uptime * 2, this.client.uptime).toString(), true)
 			.addField('\u200b', '\u200b', true)
@@ -37,7 +37,7 @@ export default class extends Command<Client>
 				+ `on setting up your server for moderation! The default prefix for commands is \`-\`. `
 				+ `You can change this with the \`setprefix\` command.\n\nIf you ever forget the command prefix, `
 				+ `just use \`@${this.client.user.tag} prefix\`.`)
-			.setFooter('Pickle', this.client.user.avatarURL)
+			.setFooter('Pickle', this.client.user.avatarURL())
 			.setTimestamp();
 
 		message.channel.send({ embed });

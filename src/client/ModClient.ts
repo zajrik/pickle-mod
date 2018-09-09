@@ -1,10 +1,9 @@
-import { Client, ListenerUtil, LogLevel, RateLimitManager } from 'yamdbf';
-import { TextChannel, RichEmbed, Message, Guild } from 'discord.js';
-import { dmManager } from 'yamdbf-dm-manager';
-import { commandUsage } from 'yamdbf-command-usage';
+import { Client, ListenerUtil, LogLevel } from '@yamdbf/core';
+import { TextChannel, MessageEmbed, Guild } from 'discord.js';
+import { dmManager } from '@yamdbf/dm-manager';
+import { commandUsage } from '@yamdbf/command-usage';
 import { ModLoader } from './ModLoader';
 const config: any = require('../config.json');
-const pkg: any = require('../../package.json');
 
 const { on, once } = ListenerUtil;
 
@@ -27,7 +26,7 @@ export class ModClient extends Client
 			pause: true,
 			logLevel: LogLevel.ERROR,
 			plugins: [
-				dmManager(config.DMManager),
+				dmManager(config.DMManagerGuild, config.DMManagerChannel),
 				commandUsage(config.commandLog)
 			]
 		});
@@ -61,9 +60,9 @@ export class ModClient extends Client
 	private _logGuild(guild: Guild, joined: boolean = true): void
 	{
 		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.guilds);
-		const embed: RichEmbed = new RichEmbed()
+		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(joined ? 8450847 : 13091073)
-			.setAuthor(`${guild.name} (${guild.id})`, guild.iconURL)
+			.setAuthor(`${guild.name} (${guild.id})`, guild.iconURL())
 			.setFooter(joined ? 'Joined guild' : 'Left guild')
 			.setTimestamp();
 

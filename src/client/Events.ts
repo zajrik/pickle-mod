@@ -1,4 +1,4 @@
-import { ClientStorage, GuildStorage, Message, ListenerUtil, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
+import { ClientStorage, GuildStorage, Message, ListenerUtil, Logger, logger, Lang, ResourceLoader } from '@yamdbf/core';
 import { TextChannel, Guild, GuildMember, User, Invite } from 'discord.js';
 import { MuteManager } from './managers/MuteManager';
 import { ModClient } from '../client/ModClient';
@@ -85,7 +85,7 @@ export class Events
 		try
 		{
 			(<any> member)._roles.push(mutedRole);
-			await member.setRoles((<any> member)._roles);
+			await member.roles.set((<any> member)._roles);
 		}
 		catch
 		{
@@ -159,10 +159,10 @@ export class Events
 
 			try
 			{
-				const appeal: Message = <Message> await appealsChannel.fetchMessage(activeAppeals[user.id]);
+				const appeal: Message = <Message> await appealsChannel.messages.fetch(activeAppeals[user.id]);
 				await storage.remove(`activeAppeals.${user.id}`);
 				appeal.delete();
-				const invite: Invite = await guild.defaultChannel.createInvite({ maxAge: 86400, maxUses: 1 });
+				const invite: Invite = await guild.channels.first().createInvite({ maxAge: 86400, maxUses: 1 });
 				await user.send(res('MSG_DM_APPROVED_APPEAL', { guildName: guild.name, invite: invite.url }));
 			}
 			catch (err)

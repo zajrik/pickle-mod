@@ -1,4 +1,4 @@
-import { Client, Command, GuildStorage, Message } from 'yamdbf';
+import { Client, Command, GuildStorage, Message } from '@yamdbf/core';
 
 export default class extends Command<Client>
 {

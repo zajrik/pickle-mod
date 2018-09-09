@@ -1,5 +1,5 @@
 import { GuildMember, Guild, User } from 'discord.js';
-import { GuildStorage, Logger, logger, Util } from 'yamdbf';
+import { GuildStorage, Logger, logger, Util } from '@yamdbf/core';
 import { ModClient } from '../client/ModClient';
 
 /**
@@ -103,7 +103,7 @@ export class Actions
 	public async mute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
-		await member.addRoles([guild.roles.get(await storage.settings.get('mutedrole'))]);
+		await member.roles.add([guild.roles.get(await storage.settings.get('mutedrole'))]);
 		await this.count(member.user, guild, 'mute');
 		return member;
 	}
@@ -124,7 +124,7 @@ export class Actions
 	public async unmute(member: GuildMember, guild: Guild): Promise<GuildMember>
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
-		return await member.removeRole(guild.roles.get(await storage.settings.get('mutedrole')));
+		return await member.roles.remove(guild.roles.get(await storage.settings.get('mutedrole')));
 	}
 
 	/**
@@ -149,7 +149,7 @@ export class Actions
 		let toReturn: string | User | GuildMember;
 		try
 		{
-			toReturn = await guild.ban(user, { reason: reason, days: 7 });
+			toReturn = await guild.members.ban(user, { reason, days: 7 });
 			await this.count(user, guild, 'ban');
 		}
 		catch { return; }
@@ -161,7 +161,7 @@ export class Actions
 	 */
 	public async unban(id: string, guild: Guild): Promise<User>
 	{
-		return await guild.unban(id);
+		return await guild.members.unban(id);
 	}
 
 	/**
@@ -172,10 +172,10 @@ export class Actions
 		let toReturn: User;
 		try
 		{
-			await guild.ban(user, { reason: `Softban: ${reason}`, days: 7 });
+			await guild.members.ban(user, { reason: `Softban: ${reason}`, days: 7 });
 			await this.count(user, guild, 'kick');
 			await new Promise((r: any) => setTimeout(r, 5e3));
-			toReturn = await guild.unban(user.id);
+			toReturn = await guild.members.unban(user.id);
 		}
 		catch { return; }
 		return toReturn;

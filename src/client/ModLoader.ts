@@ -1,4 +1,4 @@
-import { GuildStorage, Message } from 'yamdbf';
+import { GuildStorage, Message } from '@yamdbf/core';
 import { GuildMember, Guild } from 'discord.js';
 import { MentionSpamManager } from './managers/MentionSpamManager';
 import { MemberLogManager } from './managers/MemberLogManager';
@@ -98,7 +98,7 @@ export class ModLoader
 	public async canCallModCommand(message: Message): Promise<boolean>
 	{
 		if (!message.guild) return false;
-		if (!message.member) message.member = await message.guild.fetchMember(message.author);
+		if (!message.member) message.member = await message.guild.members.fetch(message.author);
 		if (!await this.hasLoggingChannel(message.guild)) return false;
 		if (await message.guild.storage.settings.exists('modlogs') &&
 			!message.guild.channels.get(await message.guild.storage.settings.get('modlogs'))

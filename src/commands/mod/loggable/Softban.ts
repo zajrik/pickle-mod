@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger, Lang, ResourceLoader } from '@yamdbf/core';
 import { User, GuildMember, Collection } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 import { modOnly } from '../../../util/Util';
@@ -38,14 +38,15 @@ export default class extends Command<ModClient>
 				return message.channel.send(`I don't think you want to softban yourself.`);
 
 			let member: GuildMember;
-			try { member = await message.guild.fetchMember(user); }
+			try { member = await message.guild.members.fetch(user); }
 			catch (err) {}
 
 			const modRole: string = await message.guild.storage.settings.get('modrole');
 			if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 				return message.channel.send('You may not use this command on that user.');
 
-			const bans: Collection<string, User> = await message.guild.fetchBans();
+			type Ban = { user: User, reason: string };
+			const bans: Collection<string, Ban> = await message.guild.fetchBans();
 			if (bans.has(user.id)) return message.channel.send('That user is already banned in this server.');
 
 			const kicking: Message = <Message> await message.channel

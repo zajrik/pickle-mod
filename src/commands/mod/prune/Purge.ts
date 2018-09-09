@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from '@yamdbf/core';
 import { Collection } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 import { modOnly } from '../../../util/Util';
@@ -29,7 +29,7 @@ export default class extends Command<ModClient>
 			return message.channel.send('You must enter a number of messages to purge.');
 
 		let messages: Collection<string, Message>;
-		messages = (await message.channel.fetchMessages(
+		messages = (await message.channel.messages.fetch(
 			{ limit: Math.min(quantity, 100), before: message.id }));
 
 		message.delete();

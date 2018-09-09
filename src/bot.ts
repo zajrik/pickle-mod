@@ -1,5 +1,5 @@
 import { ModClient } from './client/ModClient';
-import { Logger } from 'yamdbf';
+import { Logger } from '@yamdbf/core';
 
 const client: ModClient = new ModClient();
 client.start();

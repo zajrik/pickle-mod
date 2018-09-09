@@ -1,5 +1,5 @@
-import { Command, Message, Middleware, CommandDecorators, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
-import { User, GuildMember, RichEmbed, Collection } from 'discord.js';
+import { Command, Message, Middleware, CommandDecorators, Logger, logger, Lang, ResourceLoader } from '@yamdbf/core';
+import { User, GuildMember, MessageEmbed, Collection } from 'discord.js';
 import { prompt, PromptResult } from '../../../util/Util';
 import { modOnly } from '../../../util/Util';
 import { ModClient } from '../../../client/ModClient';
@@ -40,21 +40,22 @@ export default class extends Command<ModClient>
 				return message.channel.send(`I don't think you want to ban yourself.`);
 
 			let member: GuildMember;
-			try { member = await message.guild.fetchMember(user); }
+			try { member = await message.guild.members.fetch(user); }
 			catch {}
 
 			const modRole: string = await message.guild.storage.settings.get('modrole');
 			if ((member && member.roles.has(modRole)) || user.id === message.guild.ownerID || user.bot)
 				return message.channel.send('You may not use this command on that user.');
 
-			const bans: Collection<string, User> = await message.guild.fetchBans();
+			type Ban = { user: User, reason: string };
+			const bans: Collection<string, Ban> = await message.guild.fetchBans();
 			if (bans.has(user.id)) return message.channel.send('That user is already banned in this server.');
 
 			const offenses: any = await this.client.mod.actions.checkUserHistory(message.guild, user);
-			const embed: RichEmbed = new RichEmbed()
+			const embed: MessageEmbed = new MessageEmbed()
 				.setColor(offenses.color)
 				.setDescription(`**Reason:** ${reason}`)
-				.setAuthor(user.tag, user.avatarURL)
+				.setAuthor(user.tag, user.avatarURL())
 				.setFooter(offenses.toString());
 
 			const [result]: [PromptResult] = <[PromptResult]> await prompt(message,

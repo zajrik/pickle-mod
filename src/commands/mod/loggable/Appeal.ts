@@ -1,5 +1,5 @@
-import { Command, ClientStorage, GuildStorage } from 'yamdbf';
-import { Message, TextChannel, Guild, RichEmbed } from 'discord.js';
+import { Command, ClientStorage, GuildStorage } from '@yamdbf/core';
+import { Message, TextChannel, Guild, MessageEmbed } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 
 export default class extends Command<ModClient>
@@ -39,9 +39,9 @@ export default class extends Command<ModClient>
 			'You must limit your appeal message to 1,000 characters or less.');
 
 		const guild: Guild = this.client.guilds.get(ban.guild);
-		const embed: RichEmbed = new RichEmbed()
+		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(65454)
-			.setAuthor(ban.raw, message.author.avatarURL)
+			.setAuthor(ban.raw, message.author.avatarURL())
 			.addField('Appeal message', reason)
 			.addField('Actions',
 				`To approve this appeal, use \`${await this.client.getPrefix(guild)}approve ${ban.user}\`\n`

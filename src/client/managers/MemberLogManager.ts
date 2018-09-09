@@ -1,5 +1,5 @@
-import { GuildMember, Message, TextChannel, RichEmbed } from 'discord.js';
-import { Time, ListenerUtil, RateLimitManager } from 'yamdbf';
+import { GuildMember, Message, TextChannel, MessageEmbed } from 'discord.js';
+import { Time, ListenerUtil, RateLimitManager } from '@yamdbf/core';
 import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
 
@@ -29,18 +29,18 @@ export class MemberLogManager
 	@on('guildMemberRemove', false)
 	private logMember(member: GuildMember, joined: boolean = true): void
 	{
-		if (!member.guild.channels.exists('name', 'member-log')) return;
+		if (!member.guild.channels.some(c => c.name === 'member-log')) return;
 
-		const memberLog: TextChannel = <TextChannel> member.guild.channels.find('name', 'member-log');
+		const memberLog: TextChannel = <TextChannel> member.guild.channels.find(c => c.name === 'member-log');
 		if (!memberLog.permissionsFor(this._client.user).has('SEND_MESSAGES')) return;
 
 		const rateLimiter: RateLimitManager = this._client.rateLimitManager;
 		const descriptors: string[] = [member.guild.id, member.id, joined.toString()];
 		if (!rateLimiter.call('1/5m', 'memberlog', ...descriptors)) return;
 
-		const embed: RichEmbed = new RichEmbed()
+		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(joined ? 8450847 : 16039746)
-			.setAuthor(`${member.user.tag} (${member.id})`, member.user.avatarURL)
+			.setAuthor(`${member.user.tag} (${member.id})`, member.user.avatarURL())
 			.setFooter(joined ? 'User joined' : 'User left' , '')
 			.setTimestamp();
 

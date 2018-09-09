@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from '@yamdbf/core';
 import { GuildMember } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 import { modOnly } from '../../../util/Util';
@@ -30,7 +30,7 @@ export default class extends Command<ModClient>
 
 		if (!member) return message.channel.send('You must mention a user to prune');
 
-		const messages: Message[] = (await message.channel.fetchMessages(
+		const messages: Message[] = (await message.channel.messages.fetch(
 			{ limit: 100, before: message.id }))
 			.filter((a: Message) => a.author.id === member.id)
 			.array();

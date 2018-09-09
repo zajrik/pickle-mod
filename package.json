@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/zajrik/pickle-mod#readme",
   "dependencies": {
+    "@yamdbf/command-usage": "yamdbf/command-usage#indev",
+    "@yamdbf/core": "yamdbf/core#indev",
+    "@yamdbf/dm-manager": "yamdbf/dm-manager#indev",
     "sequelize": "^4.7.5",
-    "sqlite3": "^3.1.9",
-    "yamdbf": "zajrik/yamdbf#indev",
-    "yamdbf-command-usage": "^1.0.0",
-    "yamdbf-dm-manager": "^1.0.1"
+    "sqlite3": "^3.1.9"
   },
   "devDependencies": {
     "@types/node": "^6.0.88",
@@ -39,6 +39,6 @@
     "gulp-tslint": "^8.1.2",
     "gulp-typescript": "^3.2.2",
     "tslint": "^5.6.0",
-    "typescript": "^2.7.2"
+    "typescript": "^3.0.3"
   }
 }

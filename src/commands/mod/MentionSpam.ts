@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators, Time, Logger, logger, GuildSettings } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators, Time, Logger, logger, GuildSettings } from '@yamdbf/core';
 import { TextChannel } from 'discord.js';
 import { ModClient } from '../../client/ModClient';
 import { LockdownManager } from '../../client/managers/LockdownManager';

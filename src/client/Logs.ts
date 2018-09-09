@@ -1,5 +1,5 @@
-import { TextChannel, Guild, Collection, User, RichEmbed, MessageEmbed, MessageCollector, GuildMember } from 'discord.js';
-import { GuildStorage, Message, Util } from 'yamdbf';
+import { TextChannel, Guild, Collection, User, MessageEmbed, ChannelLogsQueryOptions } from 'discord.js';
+import { GuildStorage, Message, Util } from '@yamdbf/core';
 import { CaseTypeColors } from '../util/Util';
 import { ModClient } from '../client/ModClient';
 
@@ -53,9 +53,9 @@ export class Logs
 		let caseNum: number = await storage.settings.get('cases') || 0;
 		await storage.settings.set('cases', ++caseNum);
 
-		const embed: RichEmbed = new RichEmbed()
+		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(CaseTypeColors[type])
-			.setAuthor(issuer.tag, issuer.avatarURL)
+			.setAuthor(issuer.tag, issuer.avatarURL())
 			.setDescription(`**Member:** ${user.tag} (${user.id})\n`
 				+ `**Action:** ${type}\n`
 				+ `${duration ? `**Length:** ${duration}\n` : ''}`
@@ -72,9 +72,9 @@ export class Logs
 	 */
 	public async findCase(guild: Guild, loggedCase: int): Promise<Message>
 	{
-		const messages: Collection<string, Message> = await (<TextChannel> guild.channels
-			.get(await this._client.storage.guilds.get(guild.id).settings.get('modlogs')))
-			.fetchMessages({ limit: 100 });
+		const logsChannel: string = await this._client.storage.guilds.get(guild.id).settings.get('modlogs');
+		const messages: Collection<string, Message> =
+			await (guild.channels.get(logsChannel) as TextChannel).messages.fetch({ limit: 100 });
 
 		const foundCase: Message = messages.find((msg: Message) =>
 			msg.embeds.length > 0 ? msg.embeds[0].footer.text === `Case ${loggedCase}` : false);
@@ -96,7 +96,7 @@ export class Logs
 		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
 		if (messageEmbed.author.name !== issuer.tag
 			&& messageEmbed.author.name !== this._client.user.tag
-			&& !(await guild.fetchMember(issuer)).permissions.has('MANAGE_GUILD'))
+			&& !(await guild.members.fetch(issuer)).permissions.has('MANAGE_GUILD'))
 			return null;
 
 		const durationRegex: RegExp = /\*\*Length:\*\* (.+)*/;
@@ -104,9 +104,9 @@ export class Logs
 			messageEmbed.description = messageEmbed.description
 				.replace(/(\*\*Action:\*\* Mute)/, `$1\n${`**Length:** ${duration}`}`);
 
-		const embed: RichEmbed = new RichEmbed()
+		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(messageEmbed.color)
-			.setAuthor(issuer.tag, issuer.avatarURL);
+			.setAuthor(issuer.tag, issuer.avatarURL());
 
 		if (reason) messageEmbed.description = messageEmbed.description
 			.replace(/\*\*Reason:\*\* [\s\S]+/, `**Reason:** ${reason}`);
@@ -118,7 +118,7 @@ export class Logs
 			.setFooter(messageEmbed.footer.text);
 
 		if (duration) embed.setTimestamp(new Date());
-		else embed.setTimestamp(new Date(messageEmbed.createdTimestamp));
+		else embed.setTimestamp(new Date(messageEmbed.createdAt));
 
 		return caseMessage.edit('', { embed });
 	}
@@ -141,11 +141,14 @@ export class Logs
 		let cases: Message[] = [];
 		while (true)
 		{
-			let fetched: Message[] = (await logs.fetchMessages({
+			const opts: ChannelLogsQueryOptions = {
 				limit: 100,
 				after: cases.length > 0 ? cases[cases.length - 1].id : start.id
-			})).array().reverse();
+			};
+
+			const fetched: Message[] = (await logs.messages.fetch(opts)).array().reverse();
 			cases.push(...fetched);
+
 			if (fetched.length < 100) break;
 		}
 
@@ -157,15 +160,15 @@ export class Logs
 			if (loggedCase.embeds.length === 0
 				|| (loggedCase.embeds[0] && !caseRegex.test(loggedCase.embeds[0].footer.text))) continue;
 
-			let messageEmbed: MessageEmbed = loggedCase.embeds[0];
-			const embed: RichEmbed = new RichEmbed()
-				.setColor(messageEmbed.color)
-				.setAuthor(messageEmbed.author.name, messageEmbed.author.iconURL)
-				.setDescription(messageEmbed.description)
+			const original: MessageEmbed = loggedCase.embeds[0];
+			const newEmbed: MessageEmbed = new MessageEmbed()
+				.setColor(original.color)
+				.setAuthor(original.author.name, original.author.iconURL)
+				.setDescription(original.description)
 				.setFooter(`Case ${++currentCase}`)
-				.setTimestamp(new Date(messageEmbed.createdTimestamp));
+				.setTimestamp(new Date(original.createdAt));
 
-			await loggedCase.edit('', { embed });
+			await loggedCase.edit('', { embed: newEmbed });
 		}
 		await start.guild.storage.settings.set('cases', currentCase);
 

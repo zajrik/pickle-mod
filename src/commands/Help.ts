@@ -1,5 +1,5 @@
-import { Collection, RichEmbed } from 'discord.js';
-import { Client, Command, GuildStorage, Message } from 'yamdbf';
+import { Collection, MessageEmbed } from 'discord.js';
+import { Client, Command, GuildStorage, Message } from '@yamdbf/core';
 
 export default class extends Command<Client>
 {
@@ -23,11 +23,11 @@ export default class extends Command<Client>
 			new Collection<string, Command<any>>(this.client.commands.entries());
 		let command: Command<any>;
 		let output: string = '';
-		let embed: RichEmbed = new RichEmbed();
+		let embed: MessageEmbed = new MessageEmbed();
 
 		if (!commandName)
 		{
-			embed.setAuthor('Moderation commands', this.client.user.avatarURL)
+			embed.setAuthor('Moderation commands', this.client.user.avatarURL())
 				.addField(`${prefix}warn <member> <...reason>`, 'Give a formal warning to a user')
 				.addField(`${prefix}mute <member> <duration> <...reason>`,
 					`Mute a user for a specified duration\n`
@@ -56,8 +56,7 @@ export default class extends Command<Client>
 			}
 
 			embed.addField('Other commands', usableCommands.map((c: Command<any>) => c.name).join(', '))
-				.addField('\u200b', `Use \`help <command>\` ${this.client.selfbot ? '' : `or \`${
-					mentionName} help <command>\` `}for more information.\n\n`);
+				.addField('\u200b', `Use \`help <command>\` or \`${mentionName} help <command>\` for more information.\n\n`);
 		}
 		else
 		{

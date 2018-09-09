@@ -1,4 +1,4 @@
-import { GuildStorage, KeyedStorage, Providers, Logger, logger, Lang } from 'yamdbf';
+import { GuildStorage, KeyedStorage, Providers, Logger, logger, Lang } from '@yamdbf/core';
 import { GuildMember, Guild, Collection } from 'discord.js';
 import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
@@ -118,7 +118,7 @@ export class MuteManager
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
 		let guildMember: GuildMember;
-		try { guildMember = await guild.fetchMember(member); }
+		try { guildMember = await guild.members.fetch(member); }
 		catch { return false; }
 
 		if (!await storage.settings.exists('mutedrole')) return false;
@@ -146,7 +146,7 @@ export class MuteManager
 		const mutedRole: string = await storage.settings.get('mutedrole');
 
 		let guildMember: GuildMember;
-		try { guildMember = await guild.fetchMember(member); }
+		try { guildMember = await guild.members.fetch(member); }
 		catch {}
 
 		return (mutedRole && (guildMember && !guildMember.roles.has(mutedRole))) || Date.now() > mute.expires;
@@ -172,7 +172,7 @@ export class MuteManager
 		for (const id of ids)
 		{
 			let member: GuildMember | string;
-			try { member = await guild.fetchMember(id); }
+			try { member = await guild.members.fetch(id); }
 			catch { member = id; }
 			mutedMembers.set(id, member);
 		}
@@ -191,7 +191,7 @@ export class MuteManager
 			{
 				if (typeof member === 'string')
 				{
-					try { member = await guild.fetchMember(member); }
+					try { member = await guild.members.fetch(member); }
 					catch
 					{
 						if (await this.isExpired(guild, member))
@@ -211,7 +211,7 @@ export class MuteManager
 						try
 						{
 							(<any> member)._roles.push(mutedRole);
-							await member.setRoles((<any> member)._roles);
+							await member.roles.set((<any> member)._roles);
 							this._logger.log(`Reassigned evaded mute: '${member.user.tag}' in '${member.guild.name}'`);
 							await this.clearEvasionFlag(guild, member.id);
 						}
@@ -242,7 +242,7 @@ export class MuteManager
 
 				if (member.roles.has(mutedRole))
 				{
-					try { await member.removeRole(guild.roles.get(mutedRole)); }
+					try { await member.roles.remove(guild.roles.get(mutedRole)); }
 					catch
 					{
 						if (await this.getAttempts(guild, member.id) < 1) this._logger.error(

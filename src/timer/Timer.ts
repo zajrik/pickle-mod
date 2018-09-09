@@ -1,4 +1,4 @@
-import { Client, KeyedStorage, Providers, Logger } from 'yamdbf';
+import { Client, KeyedStorage, Providers, Logger } from '@yamdbf/core';
 const { SQLiteProvider } = Providers;
 
 /**

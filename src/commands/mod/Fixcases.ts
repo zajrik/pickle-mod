@@ -1,4 +1,4 @@
-import { Command, Message, GuildStorage, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, GuildStorage, Middleware, CommandDecorators } from '@yamdbf/core';
 import { TextChannel } from 'discord.js';
 import { ModClient } from '../../client/ModClient';
 import { modOnly } from '../../util/Util';
@@ -34,11 +34,11 @@ export default class extends Command<ModClient>
 		let startCase: Message;
 		try
 		{
-			startCase = await logsChannel.fetchMessage(id);
+			startCase = await logsChannel.messages.fetch(id);
 		}
 		catch (err)
 		{
-			return message.channel.sendMessage('Failed to fetch the provided case.');
+			return message.channel.send('Failed to fetch the provided case.');
 		}
 		if (!startCase.embeds[0] || !caseRegex.test(startCase.embeds[0].footer.text))
 			return message.channel.send(`Message with that ID was not a valid case.`);

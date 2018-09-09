@@ -1,4 +1,4 @@
-import { KeyedStorage, Providers } from 'yamdbf';
+import { KeyedStorage, Providers } from '@yamdbf/core';
 import { User, Guild } from 'discord.js';
 const { JSONProvider } = Providers;
 

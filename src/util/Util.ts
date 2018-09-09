@@ -1,5 +1,5 @@
 import { Message, MessageOptions } from 'discord.js';
-import { Command } from 'yamdbf';
+import { Command } from '@yamdbf/core';
 import { ModClient } from '../client/ModClient';
 
 /**

@@ -1,5 +1,5 @@
-import { RichEmbed, TextChannel } from 'discord.js';
-import { Client, Command, Message } from 'yamdbf';
+import { MessageEmbed, TextChannel } from 'discord.js';
+import { Client, Command, Message } from '@yamdbf/core';
 
 export default class extends Command<Client>
 {
@@ -21,9 +21,9 @@ export default class extends Command<Client>
 
 		const prefix: string = message.guild ? await this.client.getPrefix(message.guild) : '<prefix>';
 
-		const embed: RichEmbed = new RichEmbed()
+		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(11854048)
-			.setAuthor(`${this.client.user.username} Setup Guide`, this.client.user.avatarURL)
+			.setAuthor(`${this.client.user.username} Setup Guide`, this.client.user.avatarURL())
 			.setDescription(`In order to be able to use moderation commands on your server there `
 				+ `are some steps you'll need to take. In all cases, if a valid value is not found `
 				+ `for any of the config commands, you will be notified and can try again.`)

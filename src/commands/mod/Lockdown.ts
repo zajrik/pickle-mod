@@ -1,5 +1,5 @@
-import { Command, Message, Middleware, CommandDecorators, Time, Logger, logger } from 'yamdbf';
-import { TextChannel } from 'discord.js';
+import { Command, Message, Middleware, CommandDecorators, Time, Logger, logger } from '@yamdbf/core';
+import { TextChannel, Permissions } from 'discord.js';
 import { ModClient } from '../../client/ModClient';
 import { LockdownManager } from '../../client/managers/LockdownManager';
 import { modOnly } from '../../util/Util';
@@ -29,7 +29,7 @@ export default class extends Command<ModClient>
 	@using(expect({ '<duration|clear>': 'String' }))
 	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{
-		if (!(await message.guild.fetchMember(this.client.user)).permissions.has('MANAGE_ROLES_OR_PERMISSIONS'))
+		if (!(await message.guild.members.fetch(this.client.user)).permissions.has(Permissions.FLAGS.MANAGE_ROLES))
 			return message.channel.send(`I need to have \`Manage Roles\` permissions to do that on this server.`);
 
 		const lockdownManager: LockdownManager = this.client.mod.managers.lockdown;

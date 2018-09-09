@@ -1,5 +1,5 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
-import { TextChannel, Role, RichEmbed } from 'discord.js';
+import { Command, Message, Middleware, CommandDecorators } from '@yamdbf/core';
+import { TextChannel, Role, MessageEmbed } from 'discord.js';
 import { ModClient } from '../../client/ModClient';
 import { prompt, PromptResult } from '../../util/Util';
 import { ModLoader } from '../../client/ModLoader';
@@ -82,9 +82,9 @@ export default class extends Command<ModClient>
 				return message.channel.send(`Set appeals channel to ${value}`);
 
 			case 'status':
-				const embed: RichEmbed = new RichEmbed()
+				const embed: MessageEmbed = new MessageEmbed()
 					.setColor(0xEFEAEA)
-					.setAuthor('Server config status', this.client.user.avatarURL)
+					.setAuthor('Server config status', this.client.user.avatarURL())
 					.setDescription(`${check(modRoleSet)} **Mod role\n${check(logs)} Logs channel\n`
 						+ `${check(appeals)} Appeals channel\n${check(mute)} Mute role**`);
 				return message.channel.send({ embed });

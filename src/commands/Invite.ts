@@ -1,4 +1,4 @@
-import { Client, Command } from 'yamdbf';
+import { Client, Command } from '@yamdbf/core';
 import { Message } from 'discord.js';
 
 export default class extends Command<Client>

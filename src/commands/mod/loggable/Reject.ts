@@ -1,4 +1,4 @@
-import { Command, ClientStorage, Message, Logger, logger } from 'yamdbf';
+import { Command, ClientStorage, Message, Logger, logger } from '@yamdbf/core';
 import { User } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 import { prompt, PromptResult, modOnly } from '../../../util/Util';
@@ -28,16 +28,16 @@ export default class extends Command<ModClient>
 
 		const id: string = <string> args.shift();
 		if (!id) return message.channel.send('You must provide an appeal ID to reject.')
-			.then((res: Message) => res.delete(5e3));
+			.then((res: Message) => res.delete({ timeout: 5e3 }));
 
 		const storage: ClientStorage = this.client.storage;
 		const appeal: string = (await storage.get('activeAppeals'))[id];
 		if (!appeal) return message.channel.send('Could not find an appeal with that ID.')
-			.then((res: Message) => res.delete(5e3));
+			.then((res: Message) => res.delete({ timeout: 5e3 }));
 
 		const reason: string = args.join(' ');
 		if (!reason) return message.channel.send('You must provide a reason for this rejection.')
-			.then((res: Message) => res.delete(5e3));
+			.then((res: Message) => res.delete({ timeout: 5e3 }));
 
 		const [result, ask, confirmation]: [PromptResult, Message, Message] = <[PromptResult, Message, Message]>
 			await prompt(message,
@@ -46,18 +46,18 @@ export default class extends Command<ModClient>
 
 		if (result === PromptResult.TIMEOUT)
 			return message.channel.send('Command timed out, aborting reject.')
-				.then((res: Message) => res.delete(5e3))
+				.then((res: Message) => res.delete({ timeout: 5e3 }))
 				.then(() => ask.delete())
 				.then(() => message.delete());
 
 		if (result === PromptResult.FAILURE)
 			return message.channel.send('Okay, aborting reject.')
-				.then((res: Message) => res.delete(5e3))
+				.then((res: Message) => res.delete({ timeout: 5e3 }))
 				.then(() => ask.delete())
 				.then(() => confirmation.delete())
 				.then(() => message.delete());
 
-		const user: User = await this.client.fetchUser(id);
+		const user: User = await this.client.users.fetch(id);
 
 		const activeBans: ActiveBans = await storage.get('activeBans') || {};
 		const bans: BanObject[] = activeBans[user.id] || [];
@@ -72,14 +72,14 @@ export default class extends Command<ModClient>
 		const activeAppeals: ActiveAppeals = await storage.get('activeAppeals') || {};
 		if (activeAppeals[user.id])
 		{
-			message.channel.fetchMessage(activeAppeals[user.id])
+			message.channel.messages.fetch(activeAppeals[user.id])
 				.then((msg: Message) => msg.delete())
 				.catch(err => this._logger.error(err.stack));
 			await storage.remove(`activeAppeals.${user.id}`);
 		}
 
 		message.channel.send(`Rejected appeal \`${id}\``)
-			.then((res: Message) => res.delete(5000))
+			.then((res: Message) => res.delete({ timeout: 5e3 }))
 			.then(() => ask.delete())
 			.then(() => confirmation.delete())
 			.then(() => message.delete());

@@ -1,4 +1,4 @@
-import { Command, Message, Middleware, CommandDecorators } from 'yamdbf';
+import { Command, Message, Middleware, CommandDecorators } from '@yamdbf/core';
 import { User } from 'discord.js';
 import { ModClient } from '../../../client/ModClient';
 import { modOnly } from '../../../util/Util';

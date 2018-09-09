@@ -1,5 +1,5 @@
-import { Command, Message, Middleware } from 'yamdbf';
-import { User, RichEmbed } from 'discord.js';
+import { Command, Message, Middleware } from '@yamdbf/core';
+import { User, MessageEmbed } from 'discord.js';
 import { ModClient } from '../../client/ModClient';
 import { prompt, PromptResult } from '../../util/Util';
 
@@ -26,9 +26,9 @@ export default class extends Command<ModClient>
 	{
 		user = user ? user : message.author;
 		let offenses: any = await this.client.mod.actions.checkUserHistory(message.guild, user);
-		let embed: RichEmbed = new RichEmbed()
+		let embed: MessageEmbed = new MessageEmbed()
 			.setColor(offenses.color)
-			.setAuthor(user.tag, user.avatarURL)
+			.setAuthor(user.tag, user.avatarURL())
 			.setFooter(offenses.toString());
 
 		if (reset === 'reset')
@@ -45,9 +45,9 @@ export default class extends Command<ModClient>
 			await this.client.mod.managers.history.clear(user, message.guild);
 
 			offenses = await this.client.mod.actions.checkUserHistory(message.guild, user);
-			embed = new RichEmbed()
+			embed = new MessageEmbed()
 				.setColor(offenses.color)
-				.setAuthor(user.tag, user.avatarURL)
+				.setAuthor(user.tag, user.avatarURL())
 				.setFooter(offenses.toString());
 		}
 

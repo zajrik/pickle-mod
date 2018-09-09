@@ -1,7 +1,9 @@
-import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
-import { KeyedStorage, Providers, Logger, logger, Lang, ResourceLoader } from 'yamdbf';
+import { TextChannel, Collection, PermissionOverwrites, OverwriteData } from 'discord.js';
+import { KeyedStorage, Providers, Logger, logger, Lang, ResourceLoader } from '@yamdbf/core';
 import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
+
+const resolvePermissions = require('discord.js/src/structures/shared/resolvePermissions.js');
 
 const { JSONProvider } = Providers;
 const res: ResourceLoader = Lang.createResourceLoader('en_us');
@@ -37,9 +39,16 @@ export class LockdownManager
 	 */
 	public async set(channel: TextChannel, duration: int): Promise<void>
 	{
-		let oldPayload: PermissionOverwrites | LockdownObject | { allow: int, deny: int };
+		let oldPayload: PermissionOverwrites | Partial<LockdownObject>;
 		if (await this.isLockedDown(channel)) oldPayload = await this.getLockdown(channel);
-		else oldPayload = channel.permissionOverwrites.get(channel.guild.id) || { allow: 0, deny: 0 };
+		else
+		{
+			const overwrites: PermissionOverwrites = channel.permissionOverwrites.get(channel.guild.id);
+			oldPayload = {
+				allow: overwrites ? overwrites.allow.bitfield : 0,
+				deny: overwrites ? overwrites.deny.bitfield : 0
+			};
+		}
 
 		const lockdown: LockdownObject = {
 			channel: channel.id,
@@ -49,7 +58,7 @@ export class LockdownManager
 		};
 
 		await this._storage.set(channel.id, lockdown);
-		await channel.overwritePermissions(
+		await channel.updateOverwrite(
 			channel.guild.roles.get(channel.guild.id), { SEND_MESSAGES: false });
 	}
 
@@ -68,9 +77,17 @@ export class LockdownManager
 				deny: lockdown.deny
 			};
 
-			try { await (<any> this._client).rest.methods.setChannelOverwrite(channel, payload); }
-			catch
+			try
 			{
+				await (this._client as any)
+					.api
+					.channels(channel.id)
+					.permissions[channel.guild.id]
+					.put({ data: payload });
+			}
+			catch (err)
+			{
+				console.log(err);
 				this._logger.warn(`Failed to remove lockdown in '${guildName}#${channelName}'`);
 				try { await channel.guild.owner.send(res('MSG_DM_INVALID_LOCKDOWN', { guildName, channelName })); }
 				catch {}
