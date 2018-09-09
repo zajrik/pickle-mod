@@ -25,7 +25,7 @@ export default class extends Command<ModClient>
 	@using(expect('cases: String, ...reason: String'))
 	public async action(message: Message, [caseString, reason]: string[]): Promise<any>
 	{
-		const parseRange: RegExp = /(\d+)\-(\d+)/;
+		const parseRange: RegExp = /(\d+)\-(\d+|latest)/;
 		let firstID: int;
 		let secondID: int;
 
@@ -33,7 +33,11 @@ export default class extends Command<ModClient>
 		{
 			const parsedRange: RegExpMatchArray = caseString.match(parseRange);
 			firstID = parseInt(parsedRange[1]);
-			secondID = parseInt(parsedRange[2]);
+
+			if (/\d+\-latest/.test(caseString))
+				secondID = await message.guild.storage.settings.get('cases');
+			else
+				secondID = parseInt(parsedRange[2]);
 		}
 		else if (caseString === 'latest')
 		{
