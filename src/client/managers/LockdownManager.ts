@@ -85,9 +85,8 @@ export class LockdownManager
 					.permissions[channel.guild.id]
 					.put({ data: payload });
 			}
-			catch (err)
+			catch
 			{
-				console.log(err);
 				this._logger.warn(`Failed to remove lockdown in '${guildName}#${channelName}'`);
 				try { await channel.guild.owner.send(res('MSG_DM_INVALID_LOCKDOWN', { guildName, channelName })); }
 				catch {}
