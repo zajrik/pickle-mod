@@ -137,8 +137,8 @@ export class LockdownManager
 	public async getLockedChannels(): Promise<Collection<string, TextChannel>>
 	{
 		const ids: string[] = await this._storage.keys();
-		let lockedChannels: Collection<string, TextChannel> = new Collection<string, TextChannel>();
-		for (const id of ids) lockedChannels.set(id, <TextChannel> this._client.channels.get(id));
+		let lockedChannels: Collection<string, TextChannel> = new Collection();
+		for (const id of ids) lockedChannels.set(id, this._client.channels.get(id) as TextChannel);
 		return lockedChannels;
 	}
 
