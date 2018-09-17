@@ -59,7 +59,7 @@ export class ModClient extends Client
 	@on('guildDelete', false)
 	private _logGuild(guild: Guild, joined: boolean = true): void
 	{
-		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.guilds);
+		const logChannel: TextChannel = <TextChannel> this.channels.get(this.config.guildLog);
 		const embed: MessageEmbed = new MessageEmbed()
 			.setColor(joined ? 8450847 : 13091073)
 			.setAuthor(`${guild.name} (${guild.id})`, guild.iconURL())
