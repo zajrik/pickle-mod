@@ -5,9 +5,9 @@ This source is made available explicitly for purposes of transparency with regar
 to the use of the relatively drastic permissions a moderation bot requires to function.
 I will not help you adapt my code to your own purposes.
 
-For support you can go to the official support Discord server: https://discord.gg/CW48Pkp  
+For support you can go to the official support Discord server: https://discord.gg/CW48Pkp
 A permanent bot invite link can be found there along with a permanent post containing
-the setup guide
+the setup guide.
 
 >**Disclaimer:** The support server is explicitly for support for the usage of
 the instance my bot, `Pickle Mod#2744 (ID 264411398736445441)`, that I host, run,
