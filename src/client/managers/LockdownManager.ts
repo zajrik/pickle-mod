@@ -1,9 +1,7 @@
-import { TextChannel, Collection, PermissionOverwrites, OverwriteData } from 'discord.js';
+import { TextChannel, Collection, PermissionOverwrites } from 'discord.js';
 import { KeyedStorage, Providers, Logger, logger, Lang, ResourceLoader } from '@yamdbf/core';
 import { ModClient } from '../../client/ModClient';
 import { Timer } from '../../timer/Timer';
-
-const resolvePermissions = require('discord.js/src/structures/shared/resolvePermissions.js');
 
 const { JSONProvider } = Providers;
 const res: ResourceLoader = Lang.createResourceLoader('en_us');
