@@ -98,7 +98,6 @@ export class ModLoader
 	public async canCallModCommand(message: Message): Promise<boolean>
 	{
 		if (!message.guild) return false;
-		if (!message.member) message.member = await message.guild.members.fetch(message.author);
 		if (!await this.hasLoggingChannel(message.guild)) return false;
 		if (await message.guild.storage.settings.exists('modlogs') &&
 			!message.guild.channels.get(await message.guild.storage.settings.get('modlogs'))
