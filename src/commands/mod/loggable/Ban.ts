@@ -40,7 +40,7 @@ export default class extends Command<ModClient>
 				return message.channel.send(`I don't think you want to ban yourself.`);
 
 			let member: GuildMember;
-			try { member = await message.guild.members.fetch(user); }
+			try { member = message.guild.member(user) || await message.guild.members.fetch(user); }
 			catch {}
 
 			const modRole: string = await message.guild.storage.settings.get('modrole');

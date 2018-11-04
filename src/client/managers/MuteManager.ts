@@ -118,7 +118,7 @@ export class MuteManager
 	{
 		const storage: GuildStorage = this._client.storage.guilds.get(guild.id);
 		let guildMember: GuildMember;
-		try { guildMember = await guild.members.fetch(member); }
+		try { guildMember = guild.member(member) || await guild.members.fetch(member); }
 		catch { return false; }
 
 		if (!await storage.settings.exists('mutedrole')) return false;
@@ -146,7 +146,7 @@ export class MuteManager
 		const mutedRole: string = await storage.settings.get('mutedrole');
 
 		let guildMember: GuildMember;
-		try { guildMember = await guild.members.fetch(member); }
+		try { guildMember = guild.member(member) || await guild.members.fetch(member); }
 		catch {}
 
 		return (mutedRole && (guildMember && !guildMember.roles.has(mutedRole))) || Date.now() > mute.expires;
@@ -172,7 +172,7 @@ export class MuteManager
 		for (const id of ids)
 		{
 			let member: GuildMember | string;
-			try { member = await guild.members.fetch(id); }
+			try { member = guild.member(id) || await guild.members.fetch(id); }
 			catch { member = id; }
 			mutedMembers.set(id, member);
 		}
@@ -191,7 +191,7 @@ export class MuteManager
 			{
 				if (typeof member === 'string')
 				{
-					try { member = await guild.members.fetch(member); }
+					try { member = guild.member(member) || await guild.members.fetch(member); }
 					catch
 					{
 						if (await this.isExpired(guild, member))

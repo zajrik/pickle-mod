@@ -29,7 +29,7 @@ export default class extends Command<ModClient>
 	@using(expect({ '<duration|clear>': 'String' }))
 	public async action(message: Message, [durationOrClear, channel]: [string, TextChannel]): Promise<any>
 	{
-		if (!(await message.guild.members.fetch(this.client.user)).permissions.has(Permissions.FLAGS.MANAGE_ROLES))
+		if (!(message.guild.me || await message.guild.members.fetch(this.client.user)).permissions.has(Permissions.FLAGS.MANAGE_ROLES))
 			return message.channel.send(`I need to have \`Manage Roles\` permissions to do that on this server.`);
 
 		const lockdownManager: LockdownManager = this.client.mod.managers.lockdown;

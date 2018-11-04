@@ -96,7 +96,7 @@ export class Logs
 		let messageEmbed: MessageEmbed = caseMessage.embeds[0];
 		if (messageEmbed.author.name !== issuer.tag
 			&& messageEmbed.author.name !== this._client.user.tag
-			&& !(await guild.members.fetch(issuer)).permissions.has('MANAGE_GUILD'))
+			&& !(guild.member(issuer) || await guild.members.fetch(issuer)).permissions.has('MANAGE_GUILD'))
 			return null;
 
 		const durationRegex: RegExp = /\*\*Length:\*\* (.+)*/;

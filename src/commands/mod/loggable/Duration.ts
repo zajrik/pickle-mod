@@ -50,7 +50,9 @@ export default class extends Command<ModClient>
 
 		let member: GuildMember;
 		const memberIDRegex: RegExp = /\*\*Member:\*\* .+#\d{4} \((\d+)\)/;
-		try { member = await message.guild.members.fetch(messageEmbed.description.match(memberIDRegex)[1]); }
+		const memberIDMatch = messageEmbed.description.match(memberIDRegex);
+		if (!memberIDMatch) return message.channel.send('Invalid embed for this case.');
+		try { member = message.guild.member(memberIDMatch[1]) || await message.guild.members.fetch(memberIDMatch[1]); }
 		catch { return message.channel.send(`Failed to fetch the muted member.`); }
 
 		const guild: Guild = member.guild;
