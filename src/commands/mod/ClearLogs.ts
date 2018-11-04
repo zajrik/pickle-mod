@@ -21,7 +21,7 @@ export default class extends Command<ModClient>
 			|| (<TextChannel> message.channel).permissionsFor(message.member).has('MANAGE_GUILD')))
 			return message.channel.send('You must have `Manage Server` permissions to use this command.');
 
-		if (!(await message.guild.members.fetch(this.client.user)).permissions.has('MANAGE_CHANNELS'))
+		if (!(message.guild.me || await message.guild.members.fetch(this.client.user)).permissions.has('MANAGE_CHANNELS'))
 			return message.channel.send(`I need to have \`Manage Channels\` permissions to do that on this server.`);
 
 		if (message.channel.id === await message.guild.storage.settings.get('modlogs'))
